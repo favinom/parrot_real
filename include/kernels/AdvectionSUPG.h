@@ -28,7 +28,9 @@ public:
     
 protected:
     virtual Real computeQpResidual() override;
+    
     virtual Real computeQpJacobian() override;
+    
     const VariableGradient &_gradP;
     
     const MaterialProperty<RealTensorValue> &_K;
