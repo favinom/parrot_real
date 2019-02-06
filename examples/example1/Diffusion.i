@@ -1,9 +1,9 @@
 [Mesh]
-  file = Mesh_level1.e
+  file = Mesh_level3.e
   block_id = '2 4 5 6 7'
   boundary_id = '1 2'
   boundary_name = 'inflow outflow'
-  uniform_refine = 2
+  uniform_refine = 0
 []
 
 [Variables]
