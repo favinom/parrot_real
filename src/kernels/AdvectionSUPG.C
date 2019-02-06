@@ -40,7 +40,7 @@ _K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 Real
 AdvectionSUPG::negSpeedQp() const
 {
-    std::cout<<"pressure"<< _gradP[_qp] <<std::endl;
+   // std::cout<<"pressure"<< _gradP[_qp] <<std::endl;
     
     RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
     

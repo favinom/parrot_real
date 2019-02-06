@@ -98,7 +98,7 @@ execute_on ='timestep_begin'
 [./soln]
 type = SolutionUserObject
 mesh = OutputBenchmark1.e
-timestep = 1
+timestep = 2
 system_variables = pressure
 execute_on = 'timestep_begin'
 [../]
