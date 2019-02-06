@@ -1,6 +1,6 @@
 #include "HydraulicConductivityFracture.h"
 
-registerMooseObject("HARTApp", HydraulicConductivityFracture);
+registerMooseObject("parrot_realApp", HydraulicConductivityFracture);
 
 template <>
 InputParameters

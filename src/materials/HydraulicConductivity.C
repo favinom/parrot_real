@@ -1,6 +1,6 @@
 #include "HydraulicConductivity.h"
 
-registerMooseObject("HARTApp", HydraulicConductivity);
+registerMooseObject("parrot_realApp", HydraulicConductivity);
 
 template <>
 InputParameters

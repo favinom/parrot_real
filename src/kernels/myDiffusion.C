@@ -9,7 +9,7 @@
 
 #include "myDiffusion.h"
 
-registerMooseObject("MooseApp", MyDiffusion);
+registerMooseObject("parrot_realApp", MyDiffusion);
 
 template <>
 InputParameters
