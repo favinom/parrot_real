@@ -31,7 +31,7 @@ protected:
     
     virtual Real computeQpJacobian() override;
     
-    const Real _epsilon;
+    const bool _supg;
     
     RealVectorValue _velocity;
     
