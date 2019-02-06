@@ -34,6 +34,7 @@ protected:
         CALCULATE_RESIDUAL = 0,
         CALCULATE_JACOBIAN = 1
     };
+    const Real _epsilon;
     
     const enum class UpwindingType { none, full} _upwinding;
     

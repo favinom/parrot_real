@@ -20,6 +20,7 @@ validParams<AdvectionSUPG>()
     //    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
     params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                                "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
+    params.addRequiredParam<Real>("epsilon", "epsilon");
     params.addRequiredCoupledVar("p",
                                  "The gradient of this variable will be used as "
                                  "the velocity vector.");
@@ -28,6 +29,7 @@ validParams<AdvectionSUPG>()
 
 AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
+_epsilon(getParam<Real>("epsilon")),
 _gradP(coupledGradient("p")),
 _K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 
@@ -38,23 +40,24 @@ _K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 Real
 AdvectionSUPG::negSpeedQp() const
 {
-    RealVectorValue vel = - 1.0 * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
     
-    return - 1.0 * _K[_qp] * _grad_test[_i][_qp] * vel;
+    return - 1.0 * _grad_test[_i][_qp] * _velocity;
 }
 
 Real
 AdvectionSUPG::computeQpResidual()
 {
-    RealVectorValue vel = -1.0 * _gradP[_qp];
+    RealVectorValue _velocity = -1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
-    Real v_mod = std::sqrt(vel(0)*vel(0)+vel(1)*vel(1));
+    Real v_mod = _velocity.norm();
+    //std::sqrt(_velocity(0) * _velocity(0) + _velocity(1) * _velocity(1) + _velocity(2) * _velocity(2));
     
     Real h = _current_elem->hmax();
     
     Real coef = 1./(2.0 * v_mod) * h;
     
-    return negSpeedQp() * _u[_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_u[_qp];
+    return negSpeedQp() * _u[_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_u[_qp];
     
     //-1.0 *  _k * _vel[_qp] * _grad_u[_qp] * _test[_i][_qp]  + coef * vel * _grad_test[_i][_qp] * vel * _grad_u[_qp] ; no integration by parts
     
@@ -65,15 +68,17 @@ Real
 AdvectionSUPG::computeQpJacobian()
 {
 
-    RealVectorValue vel = -1.0 * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
-    Real v_mod = std::sqrt(vel(0)*vel(0)+vel(1)*vel(1));
+    Real v_mod = _velocity.norm();
+    
+    //Real v_mod = std::sqrt(_velocity(0) * _velocity(0) + _velocity(1) * _velocity(1) + _velocity(2) * _velocity(2));
     
     Real h = _current_elem->hmax();
     
     Real coef = 1./(2.0 * v_mod) * h;
     
-    return negSpeedQp() * _phi[_j][_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_phi[_j][_qp];;
+    return negSpeedQp() * _phi[_j][_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_phi[_j][_qp];;
 
     // -1.0 *  _k * _vel[_qp] * _grad_phi[_j][_qp] * _test[_i][_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_phi[_j][_qp];
     

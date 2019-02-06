@@ -31,6 +31,8 @@ protected:
     
     virtual Real computeQpJacobian() override;
     
+    const Real _epsilon;
+    
     const VariableGradient &_gradP;
     
     const MaterialProperty<RealTensorValue> &_K;

@@ -20,6 +20,7 @@ validParams<AdvectionUpwind>()
     params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                                "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
     MooseEnum upwinding_type("none full quick", "none");
+    params.addRequiredParam<Real>("epsilon", "epsilon");
     params.addParam<MooseEnum>("upwinding_type",
                                upwinding_type,
                                "Type of upwinding used.  None: Typically results in overshoots and "
@@ -30,6 +31,7 @@ validParams<AdvectionUpwind>()
 
 AdvectionUpwind::AdvectionUpwind(const InputParameters & parameters)
 : Kernel(parameters),
+_epsilon(getParam<Real>("epsilon")),
 _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
 _gradP(coupledGradient("p")),
 _K(getMaterialProperty<RealTensorValue>("conductivityTensor")),
@@ -44,7 +46,7 @@ _dtotal_mass_out(0)
 Real
 AdvectionUpwind::computeQpResidual()
 {
-    RealVectorValue _velocity = - _K[_qp] * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     return (- 1.0 * _grad_test[_i][_qp] * _velocity) * _u[_qp];
 }
@@ -53,7 +55,7 @@ Real
 AdvectionUpwind::computeQpJacobian()
 {
     
-    RealVectorValue _velocity = - _K[_qp] * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     return (- 1.0 * _grad_test[_i][_qp] * _velocity) * _phi[_j][_qp];
 }
@@ -91,7 +93,7 @@ void
 AdvectionUpwind::fullUpwind(JacRes res_or_jac)
 {
 
-    RealVectorValue _velocity = - 1.0 * _K[_qp] * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     const unsigned int num_nodes = _test.size();
 
