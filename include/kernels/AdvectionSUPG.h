@@ -33,7 +33,9 @@ protected:
     
     const Real _epsilon;
     
-    const VariableGradient &_gradP;
+    RealVectorValue _velocity;
+    
+   // const VariableGradient &_gradP;
     
     const MaterialProperty<RealTensorValue> &_K;
     

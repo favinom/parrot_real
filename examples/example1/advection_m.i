@@ -48,11 +48,17 @@ variable = CM
 
 [Executioner]
 type = Transient
-solve_type = 'newton'
-dt = 0.01
-num_steps=100
-l_tol = 1E-14
+dt = 1.0e9
+start_time = 0.0
+end_time = 1.e9
+###  nota che il PJFNK fa un secondo step che fa e piu lento
+#    solve_type = 'PJFNK'
+solve_type = 'NEWTON'
+line_search = 'none'
+petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
+petsc_options_value='   preonly   lu       NONZERO               mumps                '
 []
+
 
 [Preconditioning]
 [./SMP]

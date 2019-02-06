@@ -21,16 +21,18 @@ validParams<AdvectionSUPG>()
     params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                                "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
     params.addRequiredParam<Real>("epsilon", "epsilon");
-    params.addRequiredCoupledVar("p",
-                                 "The gradient of this variable will be used as "
-                                 "the velocity vector.");
+//    params.addRequiredCoupledVar("p",
+//                                 "The gradient of this variable will be used as "
+//                                 "the velocity vector.");
+    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
     return params;
 }
 
 AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
 _epsilon(getParam<Real>("epsilon")),
-_gradP(coupledGradient("p")),
+_velocity(getParam<RealVectorValue>("velocity")),
+//_gradP(coupledGradient("p")),
 _K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 
 
@@ -42,7 +44,7 @@ AdvectionSUPG::negSpeedQp() const
 {
    // std::cout<<"pressure"<< _gradP[_qp] <<std::endl;
     
-    RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
+    //RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
     
     return - 1.0 * _grad_test[_i][_qp] * _velocity;
 }
@@ -50,7 +52,7 @@ AdvectionSUPG::negSpeedQp() const
 Real
 AdvectionSUPG::computeQpResidual()
 {
-    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
+    //RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     Real v_mod = _velocity.norm();
     //std::sqrt(_velocity(0) * _velocity(0) + _velocity(1) * _velocity(1) + _velocity(2) * _velocity(2));
@@ -70,10 +72,9 @@ Real
 AdvectionSUPG::computeQpJacobian()
 {
 
-    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
+    //RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     Real v_mod = _velocity.norm();
-    
     //Real v_mod = std::sqrt(_velocity(0) * _velocity(0) + _velocity(1) * _velocity(1) + _velocity(2) * _velocity(2));
     
     Real h = _current_elem->hmax();
