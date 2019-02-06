@@ -23,7 +23,7 @@ validParams<AdvectionSUPG>()
 //    params.addRequiredCoupledVar("p",
 //                                 "The gradient of this variable will be used as "
 //                                 "the velocity vector.");
-    params.addRequiredParam<bool>("supg","false","SUPG");
+    params.addRequiredParam<bool>("supg","SUPG");
     params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
     return params;
 }
@@ -62,7 +62,7 @@ AdvectionSUPG::computeQpResidual()
         
         Real coef = 1./(2.0 * v_mod) * h;
         
-        return negSpeedQp() * _u[_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_u[_qp];
+        return (negSpeedQp() * _u[_qp]) + coef * (_velocity * _grad_test[_i][_qp]) * (_velocity * _grad_u[_qp]);
         
     }
     else{
@@ -88,7 +88,7 @@ AdvectionSUPG::computeQpJacobian()
         
         Real coef = 1./(2.0 * v_mod) * h;
         
-        return negSpeedQp() * _phi[_j][_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_phi[_j][_qp];
+        return (negSpeedQp() * _phi[_j][_qp]) + coef * (_velocity * _grad_test[_i][_qp]) * (_velocity * _grad_phi[_j][_qp]);
     }
     else{
         

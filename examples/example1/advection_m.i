@@ -16,12 +16,12 @@ boundary_name = 'inflow outflow'
 []
 
 [Kernels]
-[./convection]
-type = AdvectionSUPG # ConservativeAdvection #
+
+[./conservativeAdvectionMaria]
+type = AdvectionSUPG
 velocity = '-1 0 0'
 variable = CM
-p = P_vel
-epsilon=1.0
+supg = true
 [../]
 
 [./time]
@@ -116,6 +116,7 @@ value = '10*(x<0.9)*(x>0.7)*(y>0.7)*(y<0.9)'
 
 [Outputs]
 exodus = true
+print_perf_log = true
 []
 
 
