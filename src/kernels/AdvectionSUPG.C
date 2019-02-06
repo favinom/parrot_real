@@ -40,6 +40,8 @@ _K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 Real
 AdvectionSUPG::negSpeedQp() const
 {
+    std::cout<<"pressure"<< _gradP[_qp] <<std::endl;
+    
     RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
     
     return - 1.0 * _grad_test[_i][_qp] * _velocity;
@@ -48,7 +50,7 @@ AdvectionSUPG::negSpeedQp() const
 Real
 AdvectionSUPG::computeQpResidual()
 {
-    RealVectorValue _velocity = -1.0 * _epsilon * _K[_qp] * _gradP[_qp];
+    RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
     Real v_mod = _velocity.norm();
     //std::sqrt(_velocity(0) * _velocity(0) + _velocity(1) * _velocity(1) + _velocity(2) * _velocity(2));
@@ -78,7 +80,7 @@ AdvectionSUPG::computeQpJacobian()
     
     Real coef = 1./(2.0 * v_mod) * h;
     
-    return negSpeedQp() * _phi[_j][_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_phi[_j][_qp];;
+    return negSpeedQp() * _phi[_j][_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_phi[_j][_qp];
 
     // -1.0 *  _k * _vel[_qp] * _grad_phi[_j][_qp] * _test[_i][_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_phi[_j][_qp];
     
