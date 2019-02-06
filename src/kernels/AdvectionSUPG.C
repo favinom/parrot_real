@@ -20,7 +20,6 @@ validParams<AdvectionSUPG>()
     //    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
     params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                                "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-    params.addRequiredParam<Real>("coef", "coef");
     params.addRequiredCoupledVar("p",
                                  "The gradient of this variable will be used as "
                                  "the velocity vector.");
@@ -29,8 +28,8 @@ validParams<AdvectionSUPG>()
 
 AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
-_vel(coupledGradient("p")),
-_k(getParam<Real>("coef"))
+_gradP(coupledGradient("p")),
+_K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
 
 
 {
@@ -39,15 +38,15 @@ _k(getParam<Real>("coef"))
 Real
 AdvectionSUPG::negSpeedQp() const
 {
-    RealVectorValue vel = - 1.0 * _vel[_qp];
+    RealVectorValue vel = - 1.0 * _gradP[_qp];
     
-    return - 1.0 * _k * _grad_test[_i][_qp] * vel;
+    return - 1.0 * _K[_qp] * _grad_test[_i][_qp] * vel;
 }
 
 Real
 AdvectionSUPG::computeQpResidual()
 {
-    RealVectorValue vel = -1.0 * _vel[_qp];
+    RealVectorValue vel = -1.0 * _gradP[_qp];
     
     Real v_mod = std::sqrt(vel(0)*vel(0)+vel(1)*vel(1));
     
@@ -66,7 +65,7 @@ Real
 AdvectionSUPG::computeQpJacobian()
 {
 
-    RealVectorValue vel = -1.0 * _vel[_qp];
+    RealVectorValue vel = -1.0 * _gradP[_qp];
     
     Real v_mod = std::sqrt(vel(0)*vel(0)+vel(1)*vel(1));
     

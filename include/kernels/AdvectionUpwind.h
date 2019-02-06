@@ -27,7 +27,7 @@ protected:
     virtual void computeResidual() override;
     virtual void computeJacobian() override;
     
-    RealVectorValue _velocity;
+
     
     enum class JacRes
     {
@@ -36,6 +36,10 @@ protected:
     };
     
     const enum class UpwindingType { none, full} _upwinding;
+    
+    const VariableGradient &_gradP;
+    
+    const MaterialProperty<RealTensorValue> & _K;
     
     const VariableValue & _u_nodal;
     
