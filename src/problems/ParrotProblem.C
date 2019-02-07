@@ -20,6 +20,7 @@ validParams<ParrotProblem>()
 }
 
 ParrotProblem::ParrotProblem(const InputParameters & parameters) :
-FEProblem(parameters),
-_const_jacobian(true)
-{}
+FEProblem(parameters)
+{
+    _const_jacobian=true;
+}

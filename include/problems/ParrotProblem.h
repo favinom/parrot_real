@@ -22,9 +22,6 @@ class ParrotProblem : public FEProblem
 {
 public:
     ParrotProblem(const InputParameters & parameters);
-
-    bool _const_jacobian;
-
 };
 
 
