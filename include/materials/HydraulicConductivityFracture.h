@@ -35,6 +35,7 @@ protected:
     MaterialProperty<RealTensorValue> &_K;
     const VariableGradient &_gradP;
     MaterialProperty<RealVectorValue> &_U;
+    // MaterialProperty<Real> &_Hsupg;
     
 };
 

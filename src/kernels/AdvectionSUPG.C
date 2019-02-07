@@ -20,6 +20,7 @@ validParams<AdvectionSUPG>()
     // params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
     //                            "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
     params.addRequiredParam<Real>("coef","stab coef");
+    params.addRequiredParam<bool>("use_h","use h size");
     // params.addRequiredCoupledVar("p",
     //                              "The gradient of this variable will be used as "
     //                              "the velocity vector.");
@@ -31,7 +32,9 @@ AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
 _coef(getParam<Real>("coef")),
 // _gradP(coupledGradient("p")),
-_U(getMaterialProperty<RealVectorValue>("VelocityVector"))
+_U(getMaterialProperty<RealVectorValue>("VelocityVector")),
+_use_h(getParam<bool>("use_h"))
+// _Hsupg(getMaterialProperty<RealValue>("Hsupg"))
 
 
 {
@@ -46,9 +49,22 @@ AdvectionSUPG::computeQpResidual()
     
     Real v_mod = _U[_qp].norm();
 
-    Real h = _current_elem->hmax();
 
-    Real stab = _coef * v_mod * h;
+
+    Real stab =0.0;
+
+    if (_use_h)  {
+
+        Real h = _current_elem->hmax();
+        stab = _coef * v_mod * h;
+    }
+    else {
+
+         stab = _coef * v_mod;
+
+    }
+
+    //* v_mod * h;
 
     return stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_u[_qp];
 }
@@ -62,9 +78,19 @@ AdvectionSUPG::computeJacobian()
     
     Real v_mod = _U[_qp] .norm();
 
-    Real h = _current_elem->hmax();
 
-    Real stab = _coef * v_mod * h;
+    Real stab =0.0;
+
+    if (_use_h)  {
+
+        Real h = _current_elem->hmax();
+        stab = _coef * v_mod * h;
+    }
+    else {
+
+         stab = _coef * v_mod;
+
+    }
 
 
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());

@@ -1,4 +1,8 @@
 #include "HydraulicConductivityFracture.h"
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseMesh.h"
+
 
 registerMooseObject("parrot_realApp", HydraulicConductivityFracture);
 
@@ -21,8 +25,9 @@ Material(parameters),
 _cond(getParam<std::vector<Real>>("conductivity")),
 _theta(getParam<std::vector<Real>>("theta")),
 _K(declareProperty<RealTensorValue>("conductivityTensor")),
-_gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"):_grad_zero),
+_gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
 _U(declareProperty<RealVectorValue>("VelocityVector"))
+// _Hsupg(declareProperty<Real>("Hsupg"))
 {}
 
 void
@@ -83,4 +88,8 @@ HydraulicConductivityFracture::computeQpProperties()
     _K[_qp]=V*_K[_qp]*V.transpose();
 
     _U[_qp] = -1.0 * _K[_qp] * _gradP[_qp];
+
+    // Real v_mod = _U[_qp] .norm();
+
+    // _Hsupg[_qp] = _current_elem->hmax() * v_mod;
 }

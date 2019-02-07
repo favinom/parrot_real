@@ -31,11 +31,14 @@ protected:
     
     virtual void computeJacobian() override;
 
-   Real _coef;
+    Real _coef;
     
     // const VariableGradient &_gradP;
     
     const MaterialProperty<RealVectorValue> &_U;
+
+    bool _use_h;
+    // const MaterialProperty<Real> &_Hsupg;
 
 
 };

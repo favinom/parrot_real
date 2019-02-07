@@ -25,6 +25,7 @@ variable = CM
 type = AdvectionSUPG # ConservativeAdvection #
 variable = CM
 coef=0.5
+use_h=true
 [../]
 
 [./time]
@@ -110,6 +111,16 @@ system_variables = pressure
 execute_on = 'initial'
 [../]
 []
+
+[Postprocessors]
+
+[./flux_left]
+type = SideFlux
+variable = CM
+boundary = outflow
+[../]
+
+ [] 
 
 [Functions]
 [./ic_func]
