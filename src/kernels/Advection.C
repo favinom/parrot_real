@@ -32,7 +32,7 @@ Advection::computeQpResidual()
 {
 
     
-    return _u[_qp]*(_U[_qp] * _grad_test[_i][_qp]);
+    return -1.0 * _u[_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
 }
 
 
@@ -40,7 +40,7 @@ Real
 Advection::computeQpJacobian()
 {
     
-    return _phi[_j][_qp]*(_U[_qp] * _grad_test[_i][_qp]);
+    return -1.0 * _phi[_j][_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
 }
 
 
