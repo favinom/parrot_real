@@ -91,7 +91,7 @@ petsc_options_value='   preonly   lu       NONZERO               mumps          
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
 
-dt = 1e-5
+dt = 1e7
 num_steps=20
 
 [./Quadrature]

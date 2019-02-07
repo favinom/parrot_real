@@ -102,7 +102,7 @@ AdvectionSUPG::computeJacobian()
     for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
             for (_qp = 0; _qp < _qrule->n_points(); _qp++){
-                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * stab * _U[_qp]  * _grad_test[_i][_qp] * _U[_qp]  * _grad_u[_qp];
+                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_phi[_j][_qp];
                 //std::cout<<"qpoints = "<<_qrule->n_points()<<std::endl;
             }
     
