@@ -16,6 +16,7 @@ boundary_name = 'inflow outflow'
 []
 
 [Kernels]
+
 [./convection]
 type = Advection # ConservativeAdvection #
 variable = CM
@@ -26,7 +27,7 @@ type = AdvectionSUPG # ConservativeAdvection #
 variable = CM
 coef=0.5
 use_h=true
-[../]
+[]
 
 [./time]
 type = TimeDerivative
@@ -131,7 +132,7 @@ value = '10*(x<0.9)*(x>0.7)*(y>0.7)*(y<0.9)'
 
 [Outputs]
 exodus = true
-print_perf_log=true
+print_perf_log = true
 []
 
 
