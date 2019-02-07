@@ -57,7 +57,7 @@ petsc_options_value='   preonly   lu       NONZERO               mumps'
 # petsc_options_value = 'hypre boomeramg'
 
 dt = 0.01
-num_steps=1
+num_steps=2
 
 [./Quadrature]
 order=SIXTH
@@ -85,7 +85,7 @@ value='0.01'
 
 
 [Problem]
-type = FEProblem
+type = ParrotProblem
 solve = true
 kernel_coverage_check = false
 []
