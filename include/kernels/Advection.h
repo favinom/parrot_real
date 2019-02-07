@@ -29,13 +29,10 @@ public:
 protected:
     virtual Real computeQpResidual() override;
     
-    virtual void computeJacobian() override;
-    
-    // const VariableGradient &_gradP;
+    virtual Real computeQpJacobian() override;
     
     const MaterialProperty<RealVectorValue> &_U;
     
-    Real negSpeedQp() const;
     
 
 };

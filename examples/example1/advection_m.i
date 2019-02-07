@@ -13,10 +13,8 @@ boundary_name = 'inflow outflow'
 [./P_aux]
  [../]
  []
- 
- 
+
 [AuxKernels]
-#active=''
 [./en]
  type = SolutionAux
  solution = soln
@@ -25,7 +23,6 @@ boundary_name = 'inflow outflow'
  execute_on ='initial'
  [../]
  []
-
  
 [Variables]
 [./CM] [../]
@@ -37,28 +34,20 @@ boundary_name = 'inflow outflow'
 [./conductivity5] type = HydraulicConductivity block = 5 conductivity = 1e-6 pressure=P_aux [../]
 [./conductivity6] type = HydraulicConductivity block = 6 conductivity = 1e-6 pressure=P_aux [../]
 [./conductivity7] type = HydraulicConductivity block = 7 conductivity = 1e-5 pressure=P_aux [../]
+
+[./porosity2] type = Porosity block = 2 phi = 0.2  [../]
+[./porosity4] type = Porosity block = 4 phi = 0.2  [../]
+[./porosity5] type = Porosity block = 5 phi = 0.2  [../]
+[./porosity6] type = Porosity block = 6 phi = 0.2  [../]
+[./porosity7] type = Porosity block = 7 phi = 0.25 [../]
+ 
 []
 
  
 [Kernels]
-
-[./convection]
-type = Advection # ConservativeAdvection #
-variable = CM
-[../]
-
-[./stab]
-type = AdvectionSUPG # ConservativeAdvection #
-variable = CM
-coef=0.5
-use_h=true
-[]
-
-[./time]
-type = TimeDerivative
-variable = CM
-[../]
-
+[./convection] type = Advection variable = CM [../]
+[./stab] type = AdvectionSUPG variable = CM coef=0.5 use_h=true []
+[./time2] type = PorosityTimeDerivative variable = CM lumping = true [../]
 []
 
  [BCs]
