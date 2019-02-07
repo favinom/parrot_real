@@ -17,86 +17,74 @@ InputParameters
 validParams<AdvectionSUPG>()
 {
     InputParameters params = validParams<Kernel>();
-    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
-    params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
-                               "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-//    params.addRequiredCoupledVar("p",
-//                                 "The gradient of this variable will be used as "
-//                                 "the velocity vector.");
-    params.addRequiredParam<bool>("supg","false","SUPG");
-    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
+    // params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
+    //                            "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
+    params.addRequiredParam<Real>("coef","stab coef");
+    // params.addRequiredCoupledVar("p",
+    //                              "The gradient of this variable will be used as "
+    //                              "the velocity vector.");
+
     return params;
 }
 
 AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
-_supg(getParam<bool>("supg")),
-_velocity(getParam<RealVectorValue>("velocity")),
-//_gradP(coupledGradient("p")),
-_K(getMaterialProperty<RealTensorValue>("conductivityTensor"))
+_coef(getParam<Real>("coef")),
+// _gradP(coupledGradient("p")),
+_U(getMaterialProperty<RealVectorValue>("VelocityVector"))
 
 
 {
 }
 
-Real
-AdvectionSUPG::negSpeedQp() const
-{
-   // std::cout<<"pressure"<< _gradP[_qp] <<std::endl;
-    
-    //RealVectorValue _velocity = - 1.0  * _epsilon * _K[_qp] * _gradP[_qp];
-    
-    return - 1.0 * _grad_test[_i][_qp] * _velocity;
-}
+
 
 Real
 AdvectionSUPG::computeQpResidual()
 {
-    //RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
     
-    if (_supg){
-        
-        Real v_mod = _velocity.norm();
-        
-        Real h = _current_elem->hmax();
-        
-        Real coef = 1./(2.0 * v_mod) * h;
-        
-        return negSpeedQp() * _u[_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_u[_qp];
-        
-    }
-    else{
-        
-        return negSpeedQp() * _u[_qp];
-    }
     
-    //-1.0 *  _k * _vel[_qp] * _grad_u[_qp] * _test[_i][_qp]  + coef * vel * _grad_test[_i][_qp] * vel * _grad_u[_qp] ; no integration by parts
-    
-    //negSpeedQp() * _u[_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_u[_qp] ; with integration by parts
+    Real v_mod = _U[_qp].norm();
+
+    Real h = _current_elem->hmax();
+
+    Real stab = _coef * v_mod * h;
+
+    return stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_u[_qp];
 }
 
-Real
-AdvectionSUPG::computeQpJacobian()
-{
 
-    //RealVectorValue _velocity = - 1.0 * _epsilon * _K[_qp] * _gradP[_qp];
- 
-    if (_supg){
-        Real v_mod = _velocity.norm();
-        
-        Real h = _current_elem->hmax();
-        
-        Real coef = 1./(2.0 * v_mod) * h;
-        
-        return negSpeedQp() * _phi[_j][_qp] + coef * _velocity * _grad_test[_i][_qp] * _velocity * _grad_phi[_j][_qp];
-    }
-    else{
-        
-        return negSpeedQp() * _phi[_j][_qp];
-    }
-    // -1.0 *  _k * _vel[_qp] * _grad_phi[_j][_qp] * _test[_i][_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_phi[_j][_qp];
+void
+AdvectionSUPG::computeJacobian()
+{
     
-    //negSpeedQp() * _phi[_j][_qp] + coef * vel * _grad_test[_i][_qp] * vel * _grad_phi[_j][_qp];
+   
+    
+    Real v_mod = _U[_qp] .norm();
+
+    Real h = _current_elem->hmax();
+
+    Real stab = _coef * v_mod * h;
+
+
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+    _local_ke.resize(ke.m(), ke.n());
+    _local_ke.zero();
+
+    
+    precalculateJacobian();
+    for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < _phi.size(); _j++)
+            for (_qp = 0; _qp < _qrule->n_points(); _qp++){
+                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * stab * _U[_qp]  * _grad_test[_i][_qp] * _U[_qp]  * _grad_u[_qp];
+                //std::cout<<"qpoints = "<<_qrule->n_points()<<std::endl;
+            }
+    
+
+
+    ke += _local_ke;
+    
+    
 }
 
 

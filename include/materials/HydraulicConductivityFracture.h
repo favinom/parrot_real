@@ -33,6 +33,8 @@ protected:
     std::vector<Real> _theta;
     
     MaterialProperty<RealTensorValue> &_K;
+    const VariableGradient &_gradP;
+    MaterialProperty<RealVectorValue> &_U;
     
 };
 

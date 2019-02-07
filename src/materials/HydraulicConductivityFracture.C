@@ -9,6 +9,9 @@ validParams<HydraulicConductivityFracture>()
     InputParameters params = validParams<Material>();
     params.addRequiredParam<std::vector<Real>>("conductivity","conductivity");
     params.addRequiredParam<std::vector<Real>>("theta","theta");
+    params.addCoupledVar("pressure",
+                                 "The gradient of this variable will be used as "
+                                 "the velocity vector.");
     return params;
 }
 
@@ -17,7 +20,9 @@ HydraulicConductivityFracture::HydraulicConductivityFracture
 Material(parameters),
 _cond(getParam<std::vector<Real>>("conductivity")),
 _theta(getParam<std::vector<Real>>("theta")),
-_K(declareProperty<RealTensorValue>("conductivityTensor"))
+_K(declareProperty<RealTensorValue>("conductivityTensor")),
+_gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"):_grad_zero),
+_U(declareProperty<RealVectorValue>("VelocityVector"))
 {}
 
 void
@@ -76,4 +81,6 @@ HydraulicConductivityFracture::computeQpProperties()
     RealTensorValue V=R1*R2*R3;
     
     _K[_qp]=V*_K[_qp]*V.transpose();
+
+    _U[_qp] = -1.0 * _K[_qp] * _gradP[_qp];
 }
