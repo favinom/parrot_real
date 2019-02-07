@@ -50,14 +50,9 @@ boundary_name = 'inflow outflow'
 [./time2] type = PorosityTimeDerivative variable = CM lumping = true [../]
 []
 
- [BCs]
-[./u_injection_left]
- type = DirichletBC
- boundary = inflow
- variable = CM
- value='0.01'
- [../]
- []
+[BCs]
+[./u_injection_left] type = DirichletBC boundary = inflow variable = CM value='0.01' [../]
+[]
  
 [Preconditioning]
 [./SMP]
