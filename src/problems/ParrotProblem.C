@@ -16,13 +16,10 @@ InputParameters
 validParams<ParrotProblem>()
 {
   InputParameters params = validParams<FEProblem>();
- 
   return params;
 }
 
-ParrotProblem::ParrotProblem(const InputParameters & parameters)
-  : FEProblem(parameters),
-    _const_jacobian(true)
-{
-    
-}
+ParrotProblem::ParrotProblem(const InputParameters & parameters) :
+FEProblem(parameters),
+_const_jacobian(true)
+{}

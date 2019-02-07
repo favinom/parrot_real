@@ -1,3 +1,6 @@
+[Problem]
+ type = ParrotProblem
+[]
 
 [Mesh]
 type = FileMesh
@@ -81,15 +84,6 @@ variable = CM
 value='0.01'
 [../]
 []
-
-
-
-[Problem]
-type = ParrotProblem
-solve = true
-kernel_coverage_check = false
-[]
-
 
 [AuxKernels]
 #active=''
