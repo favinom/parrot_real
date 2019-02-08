@@ -34,13 +34,11 @@ protected:
         CALCULATE_RESIDUAL = 0,
         CALCULATE_JACOBIAN = 1
     };
-    const Real _epsilon;
+
     
-    const enum class UpwindingType { none, full} _upwinding;
-    
-    const VariableGradient &_gradP;
-    
-    const MaterialProperty<RealTensorValue> & _K;
+    const enum class UpwindingType {none, full} _upwinding;
+        
+    const MaterialProperty<RealVectorValue> & _U;
     
     const VariableValue & _u_nodal;
     
