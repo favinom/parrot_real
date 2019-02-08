@@ -62,19 +62,20 @@ variable = CM [../]
 [./stab] 
 type = AdvectionSUPG 
 variable = CM 
-coef=0.5
+coef=0.25
 use_h=true
 [../]
 
 
-#[./stab] 
-#type = TimeAdvectionSUPG 
-#variable = CM 
-#coef=0.5 
-#use_h=true 
-#[../]
+[./timestab] 
+type = TimeAdvectionSUPG 
+variable = CM 
+coef=0.25 
+use_h=true 
+lumping = true
+[../]
 
-[./time2] 
+[./time] 
 type = PorosityTimeDerivative 
 variable = CM 
 lumping = true 
@@ -116,7 +117,7 @@ petsc_options_value='   preonly   lu       NONZERO               mumps          
 # petsc_options_value = 'hypre boomeramg'
 
 dt = 1e7
-num_steps=200
+num_steps=100
 
 [./Quadrature]
 order=SIXTH
