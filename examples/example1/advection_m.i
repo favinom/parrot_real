@@ -45,8 +45,9 @@ boundary_name = 'inflow outflow'
 
  
 [Kernels]
-[./convection] type = AdvectionUpwind upwinding_type=full  variable = CM [../]
-#[./stab] type = AdvectionSUPG variable = CM coef=1.3 use_h=true [../]
+[./convection] type = Advection variable = CM [../]
+[./stab] type = AdvectionSUPG variable = CM coef=5.3 use_h=true [../]
+[./time_stab] type = TimeAdvectionSUPG variable = CM coef=5.3 use_h=true [../]
 [./time2] type = PorosityTimeDerivative variable = CM lumping = true [../]
 #[./diff]  type = AnisotropicDiffusion variable = CM tensor_coeff='5.5e-7 0 0 0 5.5e-7 0 0 0 5.5e-7' [../]
 []
@@ -61,6 +62,33 @@ boundary_name = 'inflow outflow'
  full = true
  [../]
  []
+
+
+[./auxfiber_x]
+block = '3'
+type = FibersAux
+variable = fiber_x
+comp_i=0
+comp_j=0
+execute_on = timestep_end
+[../]
+
+[./auxfiber_y]
+block = '3'
+type = FibersAux
+variable = fiber_y
+component = 1
+execute_on = timestep_begin
+[../]
+
+[./auxfiber_z]
+block = '3'
+type = FibersAux
+variable = fiber_z
+component = 2
+execute_on = timestep_begin
+[../]
+[]
  
 [Executioner]
 

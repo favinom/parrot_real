@@ -10,10 +10,131 @@
 [./pressure] order=FIRST  family=LAGRANGE [../]
 []
  
+[AuxVariables]
+[./k_00]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_01]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_02]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_10]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_11]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_12]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_20]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_21]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[./k_22]
+order = CONSTANT
+family = MONOMIAL
+[../]
+[]
+
 [Kernels]
 [./myDiffusion] type = MyDiffusion variable = pressure  [../]
 []
 
+[AuxKernels]
+[./auxfiber_00]
+fracture=false
+type = CondactivityAux
+variable = k_00
+comp_i=0
+comp_j=0
+execute_on = timestep_end
+[../]
+
+[./auxfiber_01]
+fracture=false
+type = CondactivityAux
+variable = k_01
+comp_i=0
+comp_j=1
+execute_on = timestep_end
+[../]
+
+[./auxfiber_02]
+fracture=false
+type = CondactivityAux
+variable = k_02
+comp_i=0
+comp_j=2
+execute_on = timestep_end
+[../]
+
+[./auxfiber_10]
+fracture=false
+type = CondactivityAux
+variable = k_10
+comp_i=1
+comp_j=0
+execute_on = timestep_end
+[../]
+
+[./auxfiber_11]
+fracture=false
+type = CondactivityAux
+variable = k_11
+comp_i=1
+comp_j=1
+execute_on = timestep_end
+[../]
+
+[./auxfiber_12]
+fracture=false
+type = CondactivityAux
+variable = k_12
+comp_i=1
+comp_j=2
+execute_on = timestep_end
+[../]
+
+[./auxfiber_20]
+fracture=false
+type = CondactivityAux
+variable = k_20
+comp_i=2
+comp_j=0
+execute_on = timestep_end
+[../]
+
+[./auxfiber_21]
+fracture=false
+type = CondactivityAux
+variable = k_21
+comp_i=0
+comp_j=1
+execute_on = timestep_end
+[../]
+
+[./auxfiber_22]
+fracture=false
+type = CondactivityAux
+variable = k_22
+comp_i=2
+comp_j=2
+execute_on = timestep_end
+[../]
+[]
 
 
 [Materials]
@@ -65,7 +186,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base = OutputBenchmark1
+ file_base = OutputBenchmark1_aux
  exodus    = true
  print_perf_log=true
 []
