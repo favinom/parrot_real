@@ -30,5 +30,5 @@ SideFlux::SideFlux(const InputParameters & parameters)
 Real
 SideFlux::computeQpIntegral()
 {
-  return -1.0 * _K[_qp] * _grad_u[_qp] * _normals[_qp];
+  return 1.0 * _K[_qp] * _grad_u[_qp] * _normals[_qp];
 }

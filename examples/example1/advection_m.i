@@ -45,9 +45,10 @@ boundary_name = 'inflow outflow'
 
  
 [Kernels]
-[./convection] type = Advection variable = CM [../]
-[./stab] type = AdvectionSUPG variable = CM coef=0.5 use_h=true []
+[./convection] type = AdvectionUpwind upwinding_type=full  variable = CM [../]
+#[./stab] type = AdvectionSUPG variable = CM coef=1.3 use_h=true [../]
 [./time2] type = PorosityTimeDerivative variable = CM lumping = true [../]
+#[./diff]  type = AnisotropicDiffusion variable = CM tensor_coeff='5.5e-7 0 0 0 5.5e-7 0 0 0 5.5e-7' [../]
 []
 
 [BCs]
@@ -76,7 +77,7 @@ petsc_options_value='   preonly   lu       NONZERO               mumps          
 # petsc_options_value = 'hypre boomeramg'
 
 dt = 1e7
-num_steps=20
+num_steps=200
 
 [./Quadrature]
 order=SIXTH
@@ -90,6 +91,7 @@ order=SIXTH
  [Outputs]
  exodus = true
  print_perf_log = true
+ csv=true
  []
 
 
