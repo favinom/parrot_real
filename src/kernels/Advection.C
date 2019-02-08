@@ -44,5 +44,30 @@ Advection::computeQpJacobian()
 }
 
 
+void
+Advection::computeJacobian()
+{
+
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+    _local_ke.resize(ke.m(), ke.n());
+    _local_ke.zero();
+
+    
+    precalculateJacobian();
+
+    for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < _phi.size(); _j++)
+            for (_qp = 0; _qp < _qrule->n_points(); _qp++){
+                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+                //std::cout<<"qpoints = "<<_qrule->n_points()<<std::endl;
+            }
+    
+    //std::cout<< "Advection==>" << _local_ke <<std::endl<<std::endl;
+
+    ke += _local_ke;
+    
+    
+}
+
 
 

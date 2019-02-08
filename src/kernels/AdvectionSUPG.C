@@ -48,50 +48,58 @@ AdvectionSUPG::computeQpResidual()
     
     Real v_mod = _U[_qp].norm();
 
+    //std::cout<<"param_res"<< v_mod <<std::endl;
+
     Real stab =0.0;
 
     if (_use_h)  {
 
         Real h = _current_elem->hmax();
 
-        stab = _coef * v_mod * h;
+        stab = 1.0 * _coef * h * 1./v_mod;
 
     }
     else {
 
-         stab = _coef * v_mod;
+         stab = _coef;
 
     }
 
 
-    return stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_u[_qp];
+    return 1.0 * stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_u[_qp];
+}
+
+Real
+AdvectionSUPG::computeQpJacobian()
+{
+
+    Real v_mod = _U[_qp].norm();
+
+
+    Real stab =0.0;
+
+    if (_use_h)  {
+
+        Real h = _current_elem->hmax();
+
+        stab = 1.0 * _coef * h * 1./v_mod;
+
+        //std::cout<<"param_jac"<< v_mod <<std::endl;
+
+    }
+    else {
+
+         stab = _coef;
+
+    }
+    
+    return stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_phi[_j][_qp];
 }
 
 
 void
 AdvectionSUPG::computeJacobian()
 {
-    
-   
-    
-    Real v_mod = _U[_qp] .norm();
-
-
-    Real stab =0.0;
-
-    if (_use_h)  {
-
-        Real h = _current_elem->hmax();
-
-        stab = _coef * v_mod * h;
-    }
-
-    else {
-
-         stab = _coef * v_mod;
-
-    }
-
 
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
     _local_ke.resize(ke.m(), ke.n());
@@ -99,14 +107,15 @@ AdvectionSUPG::computeJacobian()
 
     
     precalculateJacobian();
+
     for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
             for (_qp = 0; _qp < _qrule->n_points(); _qp++){
-                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * stab * _U[_qp] * _grad_test[_i][_qp] * _U[_qp] * _grad_phi[_j][_qp];
+                _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
                 //std::cout<<"qpoints = "<<_qrule->n_points()<<std::endl;
             }
     
-
+    //std::cout<<"stabilized==>"<<_local_ke <<std::endl<<std::endl;
 
     ke += _local_ke;
     

@@ -62,9 +62,17 @@ variable = CM [../]
 [./stab] 
 type = AdvectionSUPG 
 variable = CM 
-coef=0.5 
-use_h=true 
+coef=0.5
+use_h=true
 [../]
+
+
+#[./stab] 
+#type = TimeAdvectionSUPG 
+#variable = CM 
+#coef=0.5 
+#use_h=true 
+#[../]
 
 [./time2] 
 type = PorosityTimeDerivative 
@@ -72,11 +80,11 @@ variable = CM
 lumping = true 
 [../]
 
-[./diff]  
-type = AnisotropicDiffusion 
-variable = CM 
-tensor_coeff='2.0e-8 0 0 0 2.0e-8 0 0 0 2.0e-8' 
-[../]
+#[./diff]  
+#type = AnisotropicDiffusion 
+#variable = CM 
+#tensor_coeff='2.e-8 0 0 0 2.0e-8 0 0 0 2.0e-8' 
+#[../]
 []
 
 [BCs]
