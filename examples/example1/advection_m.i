@@ -2,6 +2,15 @@
  type = ParrotProblem
 []
 
+[MeshModifiers]
+  [./rotate]
+    type = Transform
+    transform = TRANSLATE
+    vector_value = '50 50 50'
+  [../]
+[]
+
+
 [Mesh]
 type = FileMesh
 file = Mesh_level3.e
@@ -29,7 +38,7 @@ boundary_name = 'inflow outflow'
 []
  
 [Materials]
-[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-3 1e-3 20.0' theta = '0.0 30.9638 0.0' pressure=P_aux[../]
+[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 10' theta = '0.0 30.9638 0.0' pressure=P_aux[../]
 [./conductivity4] type = HydraulicConductivity block = 4 conductivity = 1e-6 pressure=P_aux [../]
 [./conductivity5] type = HydraulicConductivity block = 5 conductivity = 1e-6 pressure=P_aux [../]
 [./conductivity6] type = HydraulicConductivity block = 6 conductivity = 1e-6 pressure=P_aux [../]
@@ -45,11 +54,29 @@ boundary_name = 'inflow outflow'
 
  
 [Kernels]
-[./convection] type = Advection variable = CM [../]
-[./stab] type = AdvectionSUPG variable = CM coef=5.3 use_h=true [../]
-[./time_stab] type = TimeAdvectionSUPG variable = CM coef=5.3 use_h=true [../]
-[./time2] type = PorosityTimeDerivative variable = CM lumping = true [../]
-#[./diff]  type = AnisotropicDiffusion variable = CM tensor_coeff='5.5e-7 0 0 0 5.5e-7 0 0 0 5.5e-7' [../]
+[./convection] 
+type = Advection 
+# upwinding_type=full 
+variable = CM [../]
+
+[./stab] 
+type = AdvectionSUPG 
+variable = CM 
+coef=0.5 
+use_h=true 
+[../]
+
+[./time2] 
+type = PorosityTimeDerivative 
+variable = CM 
+lumping = true 
+[../]
+
+[./diff]  
+type = AnisotropicDiffusion 
+variable = CM 
+tensor_coeff='2.0e-8 0 0 0 2.0e-8 0 0 0 2.0e-8' 
+[../]
 []
 
 [BCs]
@@ -64,31 +91,7 @@ boundary_name = 'inflow outflow'
  []
 
 
-[./auxfiber_x]
-block = '3'
-type = FibersAux
-variable = fiber_x
-comp_i=0
-comp_j=0
-execute_on = timestep_end
-[../]
 
-[./auxfiber_y]
-block = '3'
-type = FibersAux
-variable = fiber_y
-component = 1
-execute_on = timestep_begin
-[../]
-
-[./auxfiber_z]
-block = '3'
-type = FibersAux
-variable = fiber_z
-component = 2
-execute_on = timestep_begin
-[../]
-[]
  
 [Executioner]
 
