@@ -13,7 +13,7 @@
 
 [Mesh]
 type = FileMesh
-file = Mesh_level3_hex_finer.e
+file = Mesh_level3.e
 boundary_id = '1 2'
 boundary_name = 'inflow outflow'
 []
@@ -38,11 +38,11 @@ boundary_name = 'inflow outflow'
 []
  
 [Materials]
-[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e4 1e4 10e5' theta = '0.0 30.9638 0.0' pressure=P_aux[../]
-[./conductivity4] type = HydraulicConductivity block = 4 conductivity = 1e-1 pressure=P_aux [../]
-[./conductivity5] type = HydraulicConductivity block = 5 conductivity = 1e-1 pressure=P_aux [../]
-[./conductivity6] type = HydraulicConductivity block = 6 conductivity = 1e-1 pressure=P_aux [../]
-[./conductivity7] type = HydraulicConductivity block = 7 conductivity = 1 pressure=P_aux [../]
+[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 10' theta = '0.0 30.9638 0.0' pressure=P_aux[../]
+[./conductivity4] type = HydraulicConductivity block = 4 conductivity = 1e-6 pressure=P_aux [../]
+[./conductivity5] type = HydraulicConductivity block = 5 conductivity = 1e-6 pressure=P_aux [../]
+[./conductivity6] type = HydraulicConductivity block = 6 conductivity = 1e-6 pressure=P_aux [../]
+[./conductivity7] type = HydraulicConductivity block = 7 conductivity = 1e-5 pressure=P_aux [../]
 
 [./porosity2] type = Porosity block = 2 phi = 0.2  [../]
 [./porosity4] type = Porosity block = 4 phi = 0.2  [../]
@@ -54,30 +54,31 @@ boundary_name = 'inflow outflow'
 
  
 [Kernels]
-active='convection stab Timestab time'
+active='upwind time'
 
-[./upwind] 
+[upwind] 
 type = AdvectionUpwind 
 upwinding_type=full 
-variable = CM [../]
+variable = CM 
+[../]
 
 
 [./convection] 
 type = Advection 
-variable = CM 
-[../]
+# upwinding_type=full 
+variable = CM [../]
 
 [./stab] 
 type = AdvectionSUPG 
 variable = CM 
-coef=0.3
+coef=3e6
 use_h=true
 [../]
 
 [./Timestab] 
 type = TimeAdvectionSUPG 
 variable = CM 
-coef=0.3
+coef=1e6
 use_h=true
 lumping=true
 [../]
@@ -124,7 +125,7 @@ petsc_options_value='   preonly   lu      NONZERO               mumps           
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
 
-dt = 1e2
+dt = 1e7
 num_steps=100
 
 [./Quadrature]
@@ -146,7 +147,7 @@ order=SIXTH
 [UserObjects]
 [./soln]
 type = SolutionUserObject
-mesh = OutputBenchmark1_hex_fine.e
+mesh = OutputBenchmark1.e
 timestep = 2
 system_variables = pressure
 execute_on = 'initial'
