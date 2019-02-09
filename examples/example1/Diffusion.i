@@ -1,5 +1,5 @@
 [Mesh]
-  file = Mesh_level3_hex_finer.e
+  file = Mesh_level3.e
   block_id = '2 4 5 6 7'
   boundary_id = '1 2'
   boundary_name = 'inflow outflow'
@@ -196,7 +196,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base = OutputBenchmark1_hex_fine
+ file_base = OutputBenchmark1
  exodus    = true
  print_perf_log=true
 []
