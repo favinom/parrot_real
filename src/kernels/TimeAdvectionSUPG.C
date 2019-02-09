@@ -49,7 +49,7 @@ TimeAdvectionSUPG::computeQpResidual()
 
             Real h = _current_elem->hmax();
 
-            stab = _coef * h * 1./v_mod;
+            stab = 1.0 * _coef * h * 1./(v_mod);
         }
          
 
@@ -79,7 +79,7 @@ TimeAdvectionSUPG::computeQpJacobian()
 
         Real h = _current_elem->hmax();
 
-        stab = 1.0 * _coef * h * 1./v_mod;
+        stab = 1.0 * _coef * h * 1./(v_mod);
 
         //std::cout<<"param_jac"<< v_mod <<std::endl;
 

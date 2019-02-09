@@ -1,5 +1,5 @@
 [Mesh]
-  file = Mesh_level3.e
+  file = Mesh_level3_hex_finer.e
   block_id = '2 4 5 6 7'
   boundary_id = '1 2'
   boundary_name = 'inflow outflow'
@@ -7,13 +7,6 @@
   #second_order=true
 []
 
-[MeshModifiers]
-  [./rotate]
-    type = Transform
-    transform = TRANSLATE
-    vector_value = '50 50 50'
-  [../]
-[]
 
 [Variables]
 [./pressure] order=FIRST  family=LAGRANGE [../]
@@ -203,7 +196,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base = OutputBenchmark1
+ file_base = OutputBenchmark1_hex_fine
  exodus    = true
  print_perf_log=true
 []
