@@ -54,7 +54,7 @@ execute_on ='initial'
 
 
 [Kernels]
-active='upwind time'
+active='convection stab time'
 
 [upwind] 
 type = AdvectionUpwind 

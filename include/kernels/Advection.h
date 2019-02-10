@@ -34,6 +34,8 @@ protected:
     virtual void computeJacobian() override;
     
     const MaterialProperty<RealVectorValue> &_U;
+
+    bool _int_by_parts;
     
     
 

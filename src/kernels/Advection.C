@@ -19,28 +19,34 @@ validParams<Advection>()
     InputParameters params = validParams<Kernel>();
     params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                                "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
+    params.addRequiredParam<bool>("int_by_parts", "true if you want to integrate by parts");
     return params;
 }
 
 Advection::Advection(const InputParameters & parameters)
 : Kernel(parameters),
-_U(getMaterialProperty<RealVectorValue>("VelocityVector"))
+_U(getMaterialProperty<RealVectorValue>("VelocityVector")),
+_int_by_parts(getParam<bool>("int_by_parts"))
 {}
 
 Real
 Advection::computeQpResidual()
 {
+    if(_int_by_parts) 
+        return -1.0 * _u[_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
+    else
+         return 1.0 * _grad_u[_qp] * ( _U[_qp] * _test[_i][_qp] );
 
-    
-    return -1.0 * _u[_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
 }
 
 
 Real
 Advection::computeQpJacobian()
 {
-    
-    return -1.0 * _phi[_j][_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
+    if(_int_by_parts) 
+        return -1.0 * _phi[_j][_qp] * ( _U[_qp] * _grad_test[_i][_qp] );
+    else
+        return 1.0 * _grad_phi[_j][_qp] * ( _U[_qp] * _test[_i][_qp] );
 }
 
 
