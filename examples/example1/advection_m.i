@@ -65,8 +65,9 @@ variable = CM
 
 [./convection] 
 type = Advection 
-# upwinding_type=full 
-variable = CM [../]
+variable = CM 
+int_by_parts=true
+[../]
 
 [./stab] 
 type = AdvectionSUPG 
