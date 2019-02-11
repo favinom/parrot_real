@@ -1,5 +1,6 @@
 
 #include "Parrot_preonly.h"
+#include "ksp_parrot_impl.h"
 #include "iostream"
 
 //static
@@ -87,6 +88,8 @@ PETSC_EXTERN PetscErrorCode KSPCreate_Parrot_PREONLY(KSP ksp)
 {
     std::cout<<"called Create\n";
   PetscErrorCode ierr;
+    
+    KSP_PARROT       *ksp_parrot;
 
   PetscFunctionBegin;
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_NONE,PC_LEFT,3);CHKERRQ(ierr);
@@ -97,7 +100,7 @@ PETSC_EXTERN PetscErrorCode KSPCreate_Parrot_PREONLY(KSP ksp)
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_UNPRECONDITIONED,PC_RIGHT,2);CHKERRQ(ierr);
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_NATURAL,PC_LEFT,2);CHKERRQ(ierr);
 
-  ksp->data                = NULL;
+  ksp->data                = ksp_parrot;
   ksp->ops->setup          = KSPSetUp_Parrot_PREONLY;
   ksp->ops->solve          = KSPSolve_Parrot_PREONLY;
   ksp->ops->destroy        = KSPDestroyDefault;

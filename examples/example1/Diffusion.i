@@ -1,3 +1,5 @@
+[Problem] type = ParrotProblem []
+
 [Mesh]
   file = Mesh_level3.e
   block_id = '2 4 5 6 7'
@@ -178,8 +180,8 @@ execute_on = timestep_end
  type=Steady
  solve_type= LINEAR
  line_search = none
-petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
-petsc_options_value='   ksp_parrot_preonly   lu  NONZERO               mumps'
+ petsc_options_iname=' -ksp_type ' #-pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
+ petsc_options_value='   ksp_parrot_preonly ' #   lu  NONZERO               mumps'
 # petsc_options_value='   preonly   lu       NONZERO               mumps'
 
  

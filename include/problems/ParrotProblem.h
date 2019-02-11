@@ -11,6 +11,9 @@
 #define PARROTPROBLEM_H
 
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
+#include <petsc/private/kspimpl.h>
+#include "ksp_parrot_impl.h"
 
 
 class ParrotProblem;
@@ -22,6 +25,14 @@ class ParrotProblem : public FEProblem
 {
 public:
     ParrotProblem(const InputParameters & parameters);
+    
+    virtual void initialSetup();
+    virtual void timestepSetup();
+    
+    KSP_PARROT * _ksp_ptr;
+    
+    PC _problem_PC;
+    int _factorized;
 };
 
 
