@@ -18,11 +18,14 @@ validParams<SideFlux>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
   params.addClassDescription("Computes the integral of the flux over the specified boundary");
+  params.addRequiredParam<Real>("coef","stab coef");
   return params;
 }
 
 SideFlux::SideFlux(const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
+   _coef(getParam<bool>("coef")),
+   _K(getMaterialProperty<RealTensorValue>("conductivityTensor")),
    _U(getMaterialProperty<RealVectorValue>("VelocityVector"))
 {
 }
@@ -30,5 +33,9 @@ SideFlux::SideFlux(const InputParameters & parameters)
 Real
 SideFlux::computeQpIntegral()
 {
-  return 1.0 * _U[_qp] * _u[_qp] * _normals[_qp];
+	Real v_mod = _U[_qp].norm();
+	Real h = _current_elem->hmax();
+	Real stab = 1.0 * _coef * h * 1./(v_mod);
+
+  return 1.0 * _U[_qp] * _u[_qp] * _normals[_qp] - stab * _K[_qp] * _grad_u[_qp] * _normals[_qp] ;
 }
