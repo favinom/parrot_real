@@ -6,8 +6,9 @@
 PetscErrorCode KSPSetUp_Parrot_PREONLY(KSP ksp)
 {
     std::cout<<"called SetUp\n";
-  PetscFunctionBegin;
-  PetscFunctionReturn(0);
+    PetscFunctionBegin;
+    std::cout<<"done SetUp\n";
+    PetscFunctionReturn(0);
 }
 
 //static
@@ -17,21 +18,47 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
   PetscErrorCode ierr;
   PetscBool      diagonalscale;
   PCFailedReason pcreason;
-
+    
   PetscFunctionBegin;
   ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
   if (diagonalscale) SETERRQ1(PetscObjectComm((PetscObject)ksp),PETSC_ERR_SUP,"Krylov method %s does not support diagonal scaling",((PetscObject)ksp)->type_name);
   if (!ksp->guess_zero) SETERRQ(PetscObjectComm((PetscObject)ksp),PETSC_ERR_USER,"Running KSP of preonly doesn't make sense with nonzero initial guess\n\
                you probably want a KSP type of Richardson");
   ksp->its = 0;
-  ierr     = KSP_PCApply(ksp,ksp->vec_rhs,ksp->vec_sol);CHKERRQ(ierr);
-  ierr     = PCGetSetUpFailedReason(ksp->pc,&pcreason);CHKERRQ(ierr); 
-  if (pcreason) {
-    ksp->reason = KSP_DIVERGED_PCSETUP_FAILED;
-  } else {
+    
+    Mat Hmat,Pmat;
+    ierr = KSPGetOperators(ksp,&Hmat,&Pmat);CHKERRQ(ierr);
+
+    PC pc_lu;
+    PCCreate(PetscObjectComm((PetscObject)ksp), &pc_lu);
+    PCSetType(pc_lu,PCLU);
+    PCSetOperators(pc_lu,Hmat,Pmat);
+    std::cout<<"start factorizing?\n";
+    PCSetUp(pc_lu);
+    std::cout<<"done factorizing?\n";
+    std::cout<<"start solving?\n";
+    PCApply(pc_lu,ksp->vec_rhs,ksp->vec_sol);
+    
+    
+    Vec r;
+    VecDuplicate(ksp->vec_rhs,&r);
+    MatResidual(Hmat,ksp->vec_rhs,ksp->vec_sol,r);
+    PetscReal norm;
+    VecNorm(r,NORM_2,&norm);
+    std::cout<<"qui "<<norm<<std::endl;
+    PetscPrintf(PETSC_COMM_WORLD,"   %14.12e \n", norm);
+
+    
+//  ierr     = KSP_PCApply(ksp,ksp->vec_rhs,ksp->vec_sol);CHKERRQ(ierr);
+//  ierr     = PCGetSetUpFailedReason(ksp->pc,&pcreason);CHKERRQ(ierr);
+//  if (pcreason) {
+//    ksp->reason = KSP_DIVERGED_PCSETUP_FAILED;
+//  } else {
+      std::cout<<"qui\n";
     ksp->its    = 1;
     ksp->reason = KSP_CONVERGED_ITS;
-  }
+//  }
+    std::cout<<"done solving?\n";
   PetscFunctionReturn(0);
 }
 
@@ -78,5 +105,6 @@ PETSC_EXTERN PetscErrorCode KSPCreate_Parrot_PREONLY(KSP ksp)
   ksp->ops->buildresidual  = KSPBuildResidualDefault;
   ksp->ops->setfromoptions = 0;
   ksp->ops->view           = 0;
-  PetscFunctionReturn(0);
+std::cout<<"done Create\n";
+    PetscFunctionReturn(0);
 }
