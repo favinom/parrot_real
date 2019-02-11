@@ -22,7 +22,7 @@ public:
   OutflowBC(const InputParameters & parameters);
 
 protected:
-  RealVectorValue _velocity;
+  // RealVectorValue _velocity;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   const MaterialProperty<RealVectorValue> &_U;

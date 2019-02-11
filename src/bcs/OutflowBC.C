@@ -16,7 +16,7 @@ InputParameters
 validParams<OutflowBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
+  // params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
 
   return params;
 }
