@@ -23,6 +23,7 @@ validParams<AdvectionUpwind>()
     params.addParam<MooseEnum>("upwinding_type",
                                upwinding_type,
                                "Type of upwinding used");
+    params.addRequiredParam<bool>("int_by_parts", "true if you want to integrate by parts");
     return params;
 }
 
@@ -32,7 +33,8 @@ _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
 _u_nodal(_var.dofValues()),
 _upwind_node(0),
-_dtotal_mass_out(0)
+_dtotal_mass_out(0),
+_int_by_parts(getParam<bool>("int_by_parts"))
 
 {
 }
@@ -42,16 +44,19 @@ _dtotal_mass_out(0)
 Real
 AdvectionUpwind::computeQpResidual()
 {
-   
-    
-    return - 1.0 * _grad_test[_i][_qp] * _U[_qp]  * _u[_qp];
+    if(_int_by_parts) 
+        return - 1.0 * _grad_test[_i][_qp] * _U[_qp]  * _u[_qp];
+    else
+         return 1.0 * _grad_u[_qp] * ( _U[_qp] * _test[_i][_qp] );
 }
 
 Real
 AdvectionUpwind::computeQpJacobian()
 {
-    
-    return - 1.0 * _grad_test[_i][_qp] * _U[_qp] * _phi[_j][_qp];
+    if(_int_by_parts) 
+        return - 1.0 * _grad_test[_i][_qp] * _U[_qp] * _phi[_j][_qp];
+    else
+        return 1.0 * _grad_phi[_j][_qp] * ( _U[_qp] * _test[_i][_qp] );
 }
 
 void

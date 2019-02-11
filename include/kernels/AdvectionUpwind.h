@@ -47,6 +47,8 @@ protected:
     std::vector<Real> _dtotal_mass_out;
     
     void fullUpwind(JacRes res_or_jac);
+
+    bool _int_by_parts;
 };
 
 #endif // CONSERVATIVEADVECTION_H
