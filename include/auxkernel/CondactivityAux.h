@@ -41,9 +41,9 @@ protected:
   virtual Real computeValue();
 
   unsigned int _comp_i;
-  unsigned int _comp_j;
-  bool _fracture;
+  // unsigned int _comp_j;
+  // bool _fracture;
 
-  MaterialProperty<RealTensorValue> const &_K;
+  MaterialProperty<RealVectorValue> const &_U;
 };
 #endif
