@@ -4,6 +4,9 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+#include "petscksp.h"
+#include "Parrot_preonly.h"
+
 template <>
 InputParameters
 validParams<parrot_realApp>()
@@ -39,6 +42,10 @@ void
 parrot_realApp::registerObjects(Factory & factory)
 {
     Registry::registerObjectsTo(factory, {"parrot_realApp"});
+    
+    PetscErrorCode ierr;
+    ierr = KSPRegister("ksp_parrot_preonly", KSPCreate_Parrot_PREONLY);
+    CHKERRV(ierr);
 }
 
 void

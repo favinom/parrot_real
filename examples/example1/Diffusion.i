@@ -179,7 +179,7 @@ execute_on = timestep_end
  solve_type= LINEAR
  line_search = none
 petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
-petsc_options_value='   preonly   lu  NONZERO               mumps'
+petsc_options_value='   ksp_parrot_preonly   lu  NONZERO               mumps'
 # petsc_options_value='   preonly   lu       NONZERO               mumps'
 
  
