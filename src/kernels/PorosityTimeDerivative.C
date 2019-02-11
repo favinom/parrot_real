@@ -9,7 +9,7 @@
 
 #include "PorosityTimeDerivative.h"
 
-registerMooseObject("MooseApp", PorosityTimeDerivative);
+registerMooseObject("parrot_realApp", PorosityTimeDerivative);
 
 template <>
 InputParameters

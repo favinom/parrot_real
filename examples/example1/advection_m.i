@@ -44,12 +44,27 @@ execute_on ='initial'
 [./conductivity6] type = HydraulicConductivity block = 6 conductivity = 1e-6 pressure=P_aux [../]
 [./conductivity7] type = HydraulicConductivity block = 7 conductivity = 1e-5 pressure=P_aux [../]
 
+# PER FAVORE CONTROLLARE LA PHI GIUSTA
 [./porosity2] type = Porosity block = 2 phi = 0.2  [../]
 [./porosity4] type = Porosity block = 4 phi = 0.2  [../]
 [./porosity5] type = Porosity block = 5 phi = 0.2  [../]
 [./porosity6] type = Porosity block = 6 phi = 0.2  [../]
 [./porosity7] type = Porosity block = 7 phi = 0.25 [../]
 
+ # PER FAVORE CONTROLLARE IL BLOCCO GIUSTO
+[./dummy2] type = GenericConstantMaterial block = 2 prop_names = dummy prop_values = 0.0  [../]
+[./dummy4] type = GenericConstantMaterial block = 4 prop_names = dummy prop_values = 0.0  [../]
+[./dummy5] type = GenericConstantMaterial block = 5 prop_names = dummy prop_values = 0.0  [../]
+[./dummy6] type = GenericConstantMaterial block = 6 prop_names = dummy prop_values = 0.0  [../]
+[./dummy7] type = GenericConstantMaterial block = 7 prop_names = dummy prop_values = 1.0 [../]
+
+# PER FAVORE CONTROLLARE IL BLOCCO GIUSTO (DI QUESTO SONO SICURO)
+[./epsInt2] type = GenericConstantMaterial block = 2 prop_names = epsInt prop_values = 0.01  [../]
+[./epsInt4] type = GenericConstantMaterial block = 4 prop_names = epsInt prop_values = 0.0  [../]
+[./epsInt5] type = GenericConstantMaterial block = 5 prop_names = epsInt prop_values = 0.0  [../]
+[./epsInt6] type = GenericConstantMaterial block = 6 prop_names = epsInt prop_values = 0.0  [../]
+[./epsInt7] type = GenericConstantMaterial block = 7 prop_names = epsInt prop_values = 0.0 [../]
+ 
 []
 
 
@@ -161,8 +176,24 @@ execute_on = 'initial'
 type = SideFlux
 variable = CM
 boundary = outflow
+# PER FAVORE CONTROLLARE IL COEF
+ coef = 0.0
 [../]
 
+ [./int3]
+ type = ElementIntegral_phi_c_MatProp
+ variable = CM
+ mat_prop = dummy
+ execute_on = 'timestep_end'
+ [../]
+
+ [./intFrac]
+ type = ElementIntegral_phi_c_MatProp
+ variable = CM
+ mat_prop = epsInt
+ execute_on = 'timestep_end'
+ [../]
+ 
 [] 
 
 
