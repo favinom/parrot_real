@@ -24,7 +24,7 @@ validParams<SideFlux>()
 
 SideFlux::SideFlux(const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
-   _coef(getParam<bool>("coef")),
+   _coef(getParam<Real>("coef")),
    _K(getMaterialProperty<RealTensorValue>("conductivityTensor")),
    _U(getMaterialProperty<RealVectorValue>("VelocityVector"))
 {

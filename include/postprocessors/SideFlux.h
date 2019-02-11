@@ -32,7 +32,7 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  bool _coef;
+  Real _coef;
 
   const MaterialProperty<RealTensorValue> &_K;
 
