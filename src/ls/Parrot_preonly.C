@@ -2,7 +2,7 @@
 #include "Parrot_preonly.h"
 #include "ksp_parrot_impl.h"
 #include "iostream"
-
+#include "chrono"
 //static
 PetscErrorCode KSPSetUp_Parrot_PREONLY(KSP ksp)
 {
@@ -27,19 +27,43 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
                you probably want a KSP type of Richardson");
   ksp->its = 0;
     
+    KSP_PARROT * _ksp_ptr;
+    _ksp_ptr = (KSP_PARROT *)ksp->data;
+    int factorized=_ksp_ptr[0].factorized[0];
+    std::cout<<factorized<<std::endl;
     Mat Hmat,Pmat;
-    ierr = KSPGetOperators(ksp,&Hmat,&Pmat);CHKERRQ(ierr);
-
-    PC pc_lu;
-    PCCreate(PetscObjectComm((PetscObject)ksp), &pc_lu);
-    PCSetType(pc_lu,PCLU);
-    PCSetOperators(pc_lu,Hmat,Pmat);
-    std::cout<<"start factorizing?\n";
-    PCSetUp(pc_lu);
-    std::cout<<"done factorizing?\n";
-    std::cout<<"start solving?\n";
-    PCApply(pc_lu,ksp->vec_rhs,ksp->vec_sol);
     
+    ierr = KSPGetOperators(ksp,&Hmat,&Pmat);CHKERRQ(ierr);
+    
+    if (factorized==0)
+    {
+        _ksp_ptr[0].factorized[0]=1;
+    
+    
+    //PC pc_lu;
+    PCCreate(PetscObjectComm((PetscObject)ksp), _ksp_ptr[0].local_pc);
+    PCSetType(_ksp_ptr[0].local_pc[0],PCLU);
+    PCSetOperators(_ksp_ptr[0].local_pc[0],Hmat,Pmat);
+    std::cout<<"start factorizing?\n";
+    auto t_start = std::chrono::high_resolution_clock::now();
+    PCSetUp(_ksp_ptr[0].local_pc[0]);
+    auto t_end = std::chrono::high_resolution_clock::now();
+    std::cout<<"done factorizing?\n";
+        std::cout<<"fact time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
+    }
+    std::cout<<"start solving?\n";
+    auto t_start = std::chrono::high_resolution_clock::now();
+    PCApply(_ksp_ptr[0].local_pc[0],ksp->vec_rhs,ksp->vec_sol);
+    auto t_end = std::chrono::high_resolution_clock::now();
+    std::cout<<"done solving?\n";
+    std::cout<<"solve time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
+
+    std::cout<<"start solving?\n";
+     t_start = std::chrono::high_resolution_clock::now();
+    PCApply(_ksp_ptr[0].local_pc[0],ksp->vec_rhs,ksp->vec_sol);
+     t_end = std::chrono::high_resolution_clock::now();
+    std::cout<<"done solving?\n";
+    std::cout<<"solve time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
     
     Vec r;
     VecDuplicate(ksp->vec_rhs,&r);
@@ -55,11 +79,10 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
 //  if (pcreason) {
 //    ksp->reason = KSP_DIVERGED_PCSETUP_FAILED;
 //  } else {
-      std::cout<<"qui\n";
     ksp->its    = 1;
     ksp->reason = KSP_CONVERGED_ITS;
 //  }
-    std::cout<<"done solving?\n";
+    
   PetscFunctionReturn(0);
 }
 
@@ -92,6 +115,9 @@ PETSC_EXTERN PetscErrorCode KSPCreate_Parrot_PREONLY(KSP ksp)
     KSP_PARROT       *ksp_parrot;
 
   PetscFunctionBegin;
+    
+    ierr = PetscNewLog(ksp,&ksp_parrot);CHKERRQ(ierr);
+    
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_NONE,PC_LEFT,3);CHKERRQ(ierr);
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_NONE,PC_RIGHT,2);CHKERRQ(ierr);
   ierr = KSPSetSupportedNorm(ksp,KSP_NORM_PRECONDITIONED,PC_LEFT,2);CHKERRQ(ierr);
