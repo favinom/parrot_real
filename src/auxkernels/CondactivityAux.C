@@ -38,7 +38,7 @@ CondactivityAux::CondactivityAux(const InputParameters &parameters):
    _comp_i(getParam<unsigned>("comp_i")),
    // _comp_j(getParam<unsigned>("comp_j")),
    // _fracture(getParam<bool>("fracture")),
-   _U(getMaterialProperty<RealTensorValue>("VelocityVector"))
+   _U(getMaterialProperty<RealVectorValue>("VelocityVector"))
 {
 }
 
