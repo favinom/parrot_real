@@ -91,5 +91,5 @@ CondactivityAux::computeValue()
     //   return _K[_qp](_comp_i,_comp_j);
     // }
 
-    return _U(_comp_i);
+    return _U[_qp](_comp_i);
 }
