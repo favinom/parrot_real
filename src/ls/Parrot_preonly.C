@@ -51,6 +51,7 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
     std::cout<<"done factorizing?\n";
         std::cout<<"fact time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
     }
+    PCSetReusePreconditioner(_ksp_ptr[0].local_pc[0], PETSC_TRUE);
     std::cout<<"start solving?\n";
     auto t_start = std::chrono::high_resolution_clock::now();
     PCApply(_ksp_ptr[0].local_pc[0],ksp->vec_rhs,ksp->vec_sol);

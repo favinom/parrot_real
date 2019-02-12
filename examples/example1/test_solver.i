@@ -132,11 +132,11 @@ full = true
 type = Transient
 solve_type= LINEAR
 line_search = none
-petsc_options_iname=' -ksp_type           -pc_type '
-petsc_options_value='  ksp_parrot_preonly  jacobi  '
+petsc_options_iname=' -ksp_type            '
+petsc_options_value='  ksp_parrot_preonly  '
 
 # this is needed to reuse the factorization in the same newton iteration
-# -snes_lag_preconditioner -1
+#
 
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
