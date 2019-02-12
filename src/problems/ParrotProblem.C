@@ -23,6 +23,8 @@ ParrotProblem::ParrotProblem(const InputParameters & parameters) :
 FEProblem(parameters)
 {
     _const_jacobian=true;
+    PCCreate(PETSC_COMM_WORLD, &_problem_PC);
+    PCSetType(_problem_PC,PCLU);
 }
 
 void ParrotProblem::initialSetup()
@@ -60,16 +62,21 @@ void ParrotProblem::timestepSetup()
     dynamic_cast<PetscNonlinearSolver<Number> *>((*_nl_sys).nonlinearSolver());
     SNES snes = petsc_solver->snes();
     KSP ksp;
+    PC pc;
     SNESType ttype;
     KSPType type;
-
+    PCType ptype;
+    
     ierr = SNESGetKSP(snes,&ksp);
+    ierr = KSPGetPC(ksp,&pc);
     ierr = SNESSetFromOptions(snes);
     ierr = SNESGetType(snes, &ttype);
     ierr = KSPGetType(ksp, &type);
+    ierr = PCGetType(pc, &ptype);
     
     std::cout<< "SNES type da passo steady exec:"<<ttype<<std::endl;
     std::cout<< "KSP type da passo steady exec:"<<type<<std::endl;
+    std::cout<< "PC type da passo steady exec:"<<ptype<<std::endl;
     
     _ksp_ptr = (KSP_PARROT *)ksp->data;
     (_ksp_ptr[0].local_pc)=&_problem_PC;

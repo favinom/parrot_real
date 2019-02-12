@@ -41,8 +41,8 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
     
     
     //PC pc_lu;
-    PCCreate(PetscObjectComm((PetscObject)ksp), _ksp_ptr[0].local_pc);
-    PCSetType(_ksp_ptr[0].local_pc[0],PCLU);
+//    PCCreate(PetscObjectComm((PetscObject)ksp), _ksp_ptr[0].local_pc);
+//    PCSetType(_ksp_ptr[0].local_pc[0],PCLU);
     PCSetOperators(_ksp_ptr[0].local_pc[0],Hmat,Pmat);
     std::cout<<"start factorizing?\n";
     auto t_start = std::chrono::high_resolution_clock::now();
@@ -58,12 +58,14 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
     std::cout<<"done solving?\n";
     std::cout<<"solve time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
 
-    std::cout<<"start solving?\n";
-     t_start = std::chrono::high_resolution_clock::now();
-    PCApply(_ksp_ptr[0].local_pc[0],ksp->vec_rhs,ksp->vec_sol);
-     t_end = std::chrono::high_resolution_clock::now();
-    std::cout<<"done solving?\n";
-    std::cout<<"solve time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
+    _ksp_ptr[0].local_pc=NULL;
+    
+//    std::cout<<"start solving?\n";
+//     t_start = std::chrono::high_resolution_clock::now();
+//    PCApply(_ksp_ptr[0].local_pc[0],ksp->vec_rhs,ksp->vec_sol);
+//     t_end = std::chrono::high_resolution_clock::now();
+//    std::cout<<"done solving?\n";
+//    std::cout<<"solve time: "<< std::chrono::duration<double, std::milli>(t_end-t_start).count()<< " ms\n";
     
     Vec r;
     VecDuplicate(ksp->vec_rhs,&r);
