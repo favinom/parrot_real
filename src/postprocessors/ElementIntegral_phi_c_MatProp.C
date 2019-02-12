@@ -32,5 +32,5 @@ _scalar(getMaterialProperty<Real>("mat_prop"))
 Real
 ElementIntegral_phi_c_MatProp::computeQpIntegral()
 {
-  return _scalar[_qp];
+  return _u[_qp]*_scalar[_qp]*_porosity[_qp];
 }
