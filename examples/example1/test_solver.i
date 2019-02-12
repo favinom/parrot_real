@@ -43,7 +43,6 @@ execute_on = 'initial'
 [./conductivity5] type = HydraulicConductivity         block = 5 conductivity = 1e-6                                       [../]
 [./conductivity6] type = HydraulicConductivity         block = 6 conductivity = 1e-6                                       [../]
 [./conductivity7] type = HydraulicConductivity         block = 7 conductivity = 1e-5                                       [../]
-[]
 
 [./porosity2] type = Porosity block = 2 phi = 0.4  [../]
 [./porosity4] type = Porosity block = 4 phi = 0.2  [../]
