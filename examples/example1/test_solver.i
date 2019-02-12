@@ -38,11 +38,11 @@ execute_on = 'initial'
 []
 
 [Materials]
-[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 1e-1' theta = '0.0 30.9638 0.0' [../]
-[./conductivity4] type = HydraulicConductivity         block = 4 conductivity = 1e-6                                       [../]
-[./conductivity5] type = HydraulicConductivity         block = 5 conductivity = 1e-6                                       [../]
-[./conductivity6] type = HydraulicConductivity         block = 6 conductivity = 1e-6                                       [../]
-[./conductivity7] type = HydraulicConductivity         block = 7 conductivity = 1e-5                                       [../]
+[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 1e-1' theta = '0.0 30.9638 0.0' pressure = P_aux [../]
+[./conductivity4] type = HydraulicConductivity         block = 4 conductivity = 1e-6                                       pressure = P_aux [../]
+[./conductivity5] type = HydraulicConductivity         block = 5 conductivity = 1e-6                                       pressure = P_aux [../]
+[./conductivity6] type = HydraulicConductivity         block = 6 conductivity = 1e-6                                       pressure = P_aux [../]
+[./conductivity7] type = HydraulicConductivity         block = 7 conductivity = 1e-5                                       pressure = P_aux [../]
 
 [./porosity2] type = Porosity block = 2 phi = 0.4  [../]
 [./porosity4] type = Porosity block = 4 phi = 0.2  [../]
