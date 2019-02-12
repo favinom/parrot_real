@@ -28,6 +28,7 @@ public:
     
     virtual void initialSetup();
     virtual void timestepSetup();
+    virtual void solve();
     
     KSP_PARROT * _ksp_ptr;
     
