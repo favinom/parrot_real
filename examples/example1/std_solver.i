@@ -1,13 +1,11 @@
-[Problem]
-type = ParrotProblem
-[]
+# [Problem] type = ParrotProblem []
 
 [Mesh]
-file = Mesh_level3.e
-block_id = '2 4 5 6 7'
-boundary_id = '1 2'
-boundary_name = 'inflow outflow'
-uniform_refine = 0
+ file = Mesh_level3.e
+ block_id = '2 4 5 6 7'
+ boundary_id = '1 2'
+ boundary_name = 'inflow outflow'
+ uniform_refine = 0
 #second_order=true
 []
 
@@ -38,11 +36,11 @@ execute_on = 'initial'
 []
 
 [Materials]
-[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 1e-1' theta = '0.0 30.9638 0.0' pressure = P_aux [../]
-[./conductivity4] type = HydraulicConductivity         block = 4 conductivity = 1e-6                                       pressure = P_aux [../]
-[./conductivity5] type = HydraulicConductivity         block = 5 conductivity = 1e-6                                       pressure = P_aux [../]
-[./conductivity6] type = HydraulicConductivity         block = 6 conductivity = 1e-6                                       pressure = P_aux [../]
-[./conductivity7] type = HydraulicConductivity         block = 7 conductivity = 1e-5                                       pressure = P_aux [../]
+[./conductivity2] type = HydraulicConductivityFracture block = 2 conductivity = '1e-1 1e-1 1e-1' theta = '0.0 30.9638 0.0' [../]
+[./conductivity4] type = HydraulicConductivity         block = 4 conductivity = 1e-6                                       [../]
+[./conductivity5] type = HydraulicConductivity         block = 5 conductivity = 1e-6                                       [../]
+[./conductivity6] type = HydraulicConductivity         block = 6 conductivity = 1e-6                                       [../]
+[./conductivity7] type = HydraulicConductivity         block = 7 conductivity = 1e-5                                       [../]
 
 [./porosity2] type = Porosity block = 2 phi = 0.4  [../]
 [./porosity4] type = Porosity block = 4 phi = 0.2  [../]
@@ -68,44 +66,44 @@ execute_on = 'initial'
 [Kernels]
 active='convection stab time'
 
-[upwind]
-type = AdvectionUpwind
-upwinding_type=full
-variable = CM
+[upwind] 
+type = AdvectionUpwind 
+upwinding_type=full 
+variable = CM 
 [../]
 
 
-[./convection]
-type = Advection
-variable = CM
+[./convection] 
+type = Advection 
+variable = CM 
 int_by_parts=true
 [../]
 
-[./stab]
-type = AdvectionSUPG
-variable = CM
+[./stab] 
+type = AdvectionSUPG 
+variable = CM 
 coef=0.3
 use_h=true
 [../]
 
-[./timestab]
-type = TimeAdvectionSUPG
-variable = CM
+[./timestab] 
+type = TimeAdvectionSUPG 
+variable = CM 
 coef=0.3
 use_h=true
 lumping=true
 [../]
 
-[./time]
-type = PorosityTimeDerivative
-variable = CM
-lumping = true
+[./time] 
+type = PorosityTimeDerivative 
+variable = CM 
+lumping = true 
 [../]
 
-[./diff]
-type = AnisotropicDiffusion
-variable = CM
-tensor_coeff='1.e-8 0 0 0 1.0e-8 0 0 0 1.0e-8'
+[./diff]  
+type = AnisotropicDiffusion 
+variable = CM 
+tensor_coeff='1.e-8 0 0 0 1.0e-8 0 0 0 1.0e-8' 
 [../]
 []
 
@@ -126,10 +124,9 @@ full = true
 type = Transient
 solve_type= LINEAR
 line_search = none
-
-petsc_options_iname=' -ksp_type            '
-petsc_options_value='  ksp_parrot_preonly  '
-
+petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
+petsc_options_value='   preonly   lu      NONZERO               mumps                       '
+ 
 dt = 1e7
 num_steps=100
 
@@ -163,26 +160,25 @@ type = SideFlux
 variable = CM
 boundary = outflow
 # PER FAVORE CONTROLLARE IL COEF
-coef = 0.0
-execute_on = 'timestep_end'
+ coef = 0.0
+ execute_on = 'timestep_end'
 [../]
 
-[./int3]
-type = ElementIntegral_phi_c_MatProp
-variable = CM
-mat_prop = dummy
-execute_on = 'timestep_end'
-[../]
+ [./int3]
+ type = ElementIntegral_phi_c_MatProp
+ variable = CM
+ mat_prop = dummy
+ execute_on = 'timestep_end'
+ [../]
 
-[./intFrac]
-type = ElementIntegral_phi_c_MatProp
-variable = CM
-mat_prop = epsInt
-execute_on = 'timestep_end'
-[../]
-
-[]
-
+ [./intFrac]
+ type = ElementIntegral_phi_c_MatProp
+ variable = CM
+ mat_prop = epsInt
+ execute_on = 'timestep_end'
+ [../]
+ 
+[] 
 
 
 
