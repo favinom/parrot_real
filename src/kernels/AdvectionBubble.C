@@ -42,21 +42,71 @@ AdvectionBubble::computeQpResidual()
 void
 AdvectionBubble::computeResidual()
 {
+    DenseVector<Number> my_re;
+    my_re.resize(_test.size()+1);
+
+    DenseVector<Number> my_re_b;
+    my_re_b.resize(_test.size()+1);
+
+    
     prepareVectorTag(_assembly, _var.number());
     
     precalculateResidual();
-    for (_i = 0; _i < _test.size(); _i++)
+    
+    for (_i = 0; _i < _test.size()+1; _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+        {
+            Real test;
+            if (_i!=_test.size())
+                test=_test[_i][_qp];
+            else
+            {
+                test=_test[0][_qp]*_test[6][_qp];
+            }
+            
+            my_re(_i)=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_dot[_qp]+_U[_qp]*_grad_u[_qp])*test;
+        }
+
+    std::vector<Real> bubble;
+    std::vector<RealVectorValue> bubbleGrad;
+    bubble.resize(_qrule->n_points());
+    bubbleGrad.resize(_qrule->n_points());
+    
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+        bubble[_qp]=_test[0][_qp]*_test[6][_qp];
+        bubbleGrad[_qp]=_grad_test[0][_qp]*_test[6][_qp]+
+        _test[0][_qp]*_grad_test[6][_qp];
+    }
+    
+    for (_i = 0; _i < _test.size()+1; _i++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        {
+            Real test;
+            if (_i!=_test.size())
+                test=_test[_i][_qp];
+            else
+            {
+                test=_test[0][_qp]*_test[6][_qp];
+            }
+            
+            
+            
+            
+            my_re_b(_i)=_JxW[_qp] * _coord[_qp] * (_poro[_qp]/_dt*bubble[_qp]+_U[_qp]*bubbleGrad[_qp])*test;
+        }
+    
+    for (_i = 0; _i < _test.size(); _i++)
+        _local_re(_i) = my_re(_i)-my_re_b(_i)/my_re_b(_test.size())*my_re(_test.size());
+
+    
+    
+//    for (_i = 0; _i < _test.size(); _i++)
+//        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+//            _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
     
     accumulateTaggedLocalResidual();
     
-    if (_has_save_in)
-    {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (const auto & var : _save_in)
-            var->sys().solution().add_vector(_local_re, var->dofIndices());
-    }
 }
 
 void
