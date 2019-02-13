@@ -39,6 +39,8 @@ protected:
     
     const MaterialProperty<RealVectorValue> &_U;
     
+    const VariableValue & _u_nodal;
+    
     const MaterialProperty<Real> &_poro;
     
 
