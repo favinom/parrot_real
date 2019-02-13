@@ -27,7 +27,10 @@ AdvectionBubble::AdvectionBubble(const InputParameters & parameters) :
 Kernel(parameters),
  _u_old(_var.slnOld()),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
-_poro(getMaterialProperty<Real>("Porosity"))
+_poro(getMaterialProperty<Real>("Porosity")),
+_u_dot(_var.uDot())
+
+
 //_int_by_parts(getParam<bool>("int_by_parts"))
 {}
 
@@ -35,7 +38,7 @@ Real
 AdvectionBubble::computeQpResidual()
 {
 
-        return 1.0 * _grad_u[_qp] * ( _U[_qp] * _test[_i][_qp] );
+        return  1.0 * _grad_u[_qp] * ( _U[_qp] * _test[_i][_qp] );
     
 }
 
@@ -101,7 +104,7 @@ AdvectionBubble::computeResidual()
         }
     
     for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) = my_re(_i)-my_re_b(_i)/my_re_b(_test.size())*my_re(_test.size());
+        _local_re(_i) = my_re(_i) - 1.0 * my_re_b(_i)/my_re_b(_test.size())*my_re(_test.size());
 
     
     
@@ -165,8 +168,7 @@ AdvectionBubble::computeJacobian()
     
     for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j)=my_ke(_i, _j)
-            -my_ke(_i, _phi.size() )*my_ke(_test.size(), _j)/my_ke(_test.size(), _phi.size());
+            _local_ke(_i, _j)=my_ke(_i, _j) - 1.0 * my_ke(_i, _phi.size() )*my_ke(_test.size(), _j)/my_ke(_test.size(), _phi.size());
     
     accumulateTaggedLocalMatrix();
     

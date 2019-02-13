@@ -40,7 +40,8 @@ protected:
     const MaterialProperty<RealVectorValue> &_U;
     
     const MaterialProperty<Real> &_poro;
-    
+   
+    const VariableValue & _u_dot;    
 
 };
 
