@@ -64,7 +64,7 @@ AdvectionBubble::computeResidual()
                 test=_test[0][_qp]*_test[6][_qp];
             }
             
-            my_re(_i)=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_dot[_qp]+_U[_qp]*_grad_u[_qp])*test;
+            my_re(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_dot[_qp]+_U[_qp]*_grad_u[_qp])*test;
         }
 
     std::vector<Real> bubble;
@@ -93,7 +93,7 @@ AdvectionBubble::computeResidual()
             
             
             
-            my_re_b(_i)=_JxW[_qp] * _coord[_qp] * (_poro[_qp]/_dt*bubble[_qp]+_U[_qp]*bubbleGrad[_qp])*test;
+            my_re_b(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]/_dt*bubble[_qp]+_U[_qp]*bubbleGrad[_qp])*test;
         }
     
     for (_i = 0; _i < _test.size(); _i++)
