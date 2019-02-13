@@ -26,6 +26,7 @@ AlgebraicDiffusion::AlgebraicDiffusion(const InputParameters & parameters) :
 Kernel(parameters),
  _u_old(_var.slnOld()),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
+_u_nodal(_var.dofValues()),
 _poro(getMaterialProperty<Real>("Porosity"))
 //_int_by_parts(getParam<bool>("int_by_parts"))
 {}
@@ -107,13 +108,25 @@ AlgebraicDiffusion::computeJacobian()
         }
         artifDiff(_i,_i)+=sum;
     }
-    std::cout<<_local_ke<<std::endl;
+//    std::cout<<_local_ke<<std::endl;
     _local_ke+=artifDiff;
-    std::cout<<_local_ke<<std::endl;
-    
-//    _u_nodal[n];
-//    return;
+//    std::cout<<_local_ke<<std::endl;
     
     accumulateTaggedLocalMatrix();
+    
+    prepareVectorTag(_assembly, _var.number());
+    DenseVector<Number> artifResidual;
+    artifResidual.resize(_test.size());
+    artifResidual.zero();
+    
+    for (_i=0; _i<_test.size(); ++_i)
+    {
+        artifResidual(_i)=0;
+        for (_j=0; _j<_phi.size(); ++_j)
+            artifResidual(_i)+=artifDiff(_i,_j)*_u_nodal[_j];
+        _local_re(_i)+=artifResidual(_i);
+    }
+    
+    accumulateTaggedLocalResidual();
     
 }
