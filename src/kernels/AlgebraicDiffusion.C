@@ -58,67 +58,24 @@ AlgebraicDiffusion::computeResidual()
             (_poro[_qp]*(_u[_qp]-_u_old[_qp])/_dt+_U[_qp]*_grad_u[_qp])*test;
         }
     
-
+    // PARTE DEL RESIDUO LEGATA A DIFFUSIONE ARTIFICIALE
     
-    accumulateTaggedLocalResidual();
-    
-}
-
-void
-AlgebraicDiffusion::computeJacobian()
-{
-    DenseMatrix<Number> artifDiff;
-    artifDiff.resize(_test.size(), _phi.size());
-    artifDiff.zero();
-    
-    prepareMatrixTag(_assembly, _var.number(), _var.number());
-    
-    precalculateJacobian();
-    
-    for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < _phi.size(); _j++)
-            for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            {
-                Real phi, test;
-                RealVectorValue gradPhi;
-                    test=_test[_i][_qp];
-                    phi=_phi[_j][_qp];
-                    gradPhi=_grad_phi[_j][_qp];
-                
-                
-                _local_ke(_i, _j)+=_JxW[_qp] * _coord[_qp] *
-                (_poro[_qp]/_dt*test * phi+
-                (gradPhi * _U[_qp]) * test) ;
-                
-            }
-    
-    for (_i = 0; _i < _test.size(); _i++)
-    {
-        Real sum =0.0;
-        for (_j = 0; _j < _phi.size(); _j++)
-        {
-            if (_i!=_j)
-            {
-                if (_local_ke(_i,_j)>0.0)
-                {
-                    sum+=_local_ke(_i,_j);
-                    artifDiff(_i,_j)=-_local_ke(_i,_j);
-                }
-            }
-        }
-        artifDiff(_i,_i)+=sum;
-    }
-//    std::cout<<_local_ke<<std::endl;
-    _local_ke+=artifDiff;
-//    std::cout<<_local_ke<<std::endl;
-    
-    accumulateTaggedLocalMatrix();
-    
-    prepareVectorTag(_assembly, _var.number());
     DenseVector<Number> artifResidual;
     artifResidual.resize(_test.size());
     artifResidual.zero();
     
+    DenseMatrix<Number> myOperator;
+    myOperator.resize(_test.size(), _test.size());
+    myOperator.zero();
+
+    DenseMatrix<Number> artifDiff;
+    artifDiff.resize(_test.size(), _test.size());
+    artifDiff.zero();
+
+    myAssembleJacobian(myOperator);
+    //std::cout<<myOperator<<std::endl;
+    myComputeArtificialDiffusion(myOperator,artifDiff);
+
     for (_i=0; _i<_test.size(); ++_i)
     {
         artifResidual(_i)=0;
@@ -126,7 +83,73 @@ AlgebraicDiffusion::computeJacobian()
             artifResidual(_i)+=artifDiff(_i,_j)*_u_nodal[_j];
         _local_re(_i)+=artifResidual(_i);
     }
-    
+
     accumulateTaggedLocalResidual();
     
+}
+
+void
+AlgebraicDiffusion::computeJacobian()
+{
+    DenseMatrix<Number> myOperator;
+    myOperator.resize(_test.size(), _phi.size());
+    myOperator.zero();
+
+    DenseMatrix<Number> artifDiff;
+    artifDiff.resize(_test.size(), _phi.size());
+    artifDiff.zero();
+    
+    myAssembleJacobian(myOperator);
+    myComputeArtificialDiffusion(myOperator,artifDiff);
+
+    prepareMatrixTag(_assembly, _var.number(), _var.number());
+    precalculateJacobian();
+    
+    _local_ke+=myOperator;
+    _local_ke+=artifDiff;
+    
+    accumulateTaggedLocalMatrix();
+    
+}
+
+void AlgebraicDiffusion::myAssembleJacobian(DenseMatrix<Number> & in)
+{
+    for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < _test.size(); _j++)
+            for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+            {
+                Real phi, test;
+                RealVectorValue gradPhi;
+                test=_test[_i][_qp];
+                phi=_test[_j][_qp];
+                gradPhi=_grad_test[_j][_qp];
+                
+                
+                in(_i, _j)+=_JxW[_qp] * _coord[_qp] *
+                (_poro[_qp]/_dt*test * phi+
+                 (gradPhi * _U[_qp]) * test) ;
+                
+            }
+
+}
+
+void AlgebraicDiffusion::myComputeArtificialDiffusion(DenseMatrix<Number> const & op, DenseMatrix<Number> & diff)
+{
+    for (_i = 0; _i < _test.size(); _i++)
+    {
+        Real sum =0.0;
+        for (_j = 0; _j < _test.size(); _j++)
+        {
+            diff(_i,_j)=0.0;
+            if (_i!=_j)
+            {
+                if (op(_i,_j)>0.0)
+                {
+                    sum+=op(_i,_j);
+                    diff(_i,_j)=-op(_i,_j);
+                }
+            }
+        }
+        diff(_i,_i)+=sum;
+    }
 }
