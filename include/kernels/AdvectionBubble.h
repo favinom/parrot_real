@@ -35,6 +35,8 @@ protected:
 
     virtual void computeJacobian() override;
     
+    const VariableValue & _u_old;
+    
     const MaterialProperty<RealVectorValue> &_U;
     
     const MaterialProperty<Real> &_poro;

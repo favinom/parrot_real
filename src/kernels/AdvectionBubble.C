@@ -25,6 +25,7 @@ validParams<AdvectionBubble>()
 
 AdvectionBubble::AdvectionBubble(const InputParameters & parameters) :
 Kernel(parameters),
+ _u_old(_var.slnOld()),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
 _poro(getMaterialProperty<Real>("Porosity"))
 //_int_by_parts(getParam<bool>("int_by_parts"))
@@ -44,10 +45,11 @@ AdvectionBubble::computeResidual()
 {
     DenseVector<Number> my_re;
     my_re.resize(_test.size()+1);
-
+    my_re.zero();
+    
     DenseVector<Number> my_re_b;
     my_re_b.resize(_test.size()+1);
-
+    my_re.zero();
     
     prepareVectorTag(_assembly, _var.number());
     
@@ -65,6 +67,7 @@ AdvectionBubble::computeResidual()
             }
             
             my_re(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_dot[_qp]+_U[_qp]*_grad_u[_qp])*test;
+            //my_re(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_old[_qp]/_dt)*test;
         }
 
     std::vector<Real> bubble;
@@ -94,6 +97,7 @@ AdvectionBubble::computeResidual()
             
             
             my_re_b(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]/_dt*bubble[_qp]+_U[_qp]*bubbleGrad[_qp])*test;
+            //my_re_b(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]/_dt*bubble[_qp])*test;
         }
     
     for (_i = 0; _i < _test.size(); _i++)
@@ -151,8 +155,8 @@ AdvectionBubble::computeJacobian()
                 
                 
                 my_ke(_i, _j)+=_JxW[_qp] * _coord[_qp] *
-                _poro[_qp]/_dt*test * phi+
-                (gradPhi * _U[_qp]) * test ;
+                (_poro[_qp]/_dt*test * phi+
+                (gradPhi * _U[_qp]) * test) ;
                 
                 
                 //if (_i!=_test.size() && _j!=_phi.size())
@@ -162,7 +166,7 @@ AdvectionBubble::computeJacobian()
     for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
             _local_ke(_i, _j)=my_ke(_i, _j)
-            -my_ke(_test.size(), _j)*my_ke(_i, _phi.size())/my_ke(_test.size(), _phi.size());
+            -my_ke(_i, _phi.size() )*my_ke(_test.size(), _j)/my_ke(_test.size(), _phi.size());
     
     accumulateTaggedLocalMatrix();
     
