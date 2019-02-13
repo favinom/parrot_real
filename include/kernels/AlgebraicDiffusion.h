@@ -26,6 +26,9 @@ class AlgebraicDiffusion : public Kernel
 public:
     AlgebraicDiffusion(const InputParameters & parameters);
     
+    void myAssembleJacobian(DenseMatrix<Number> & in);
+    void myComputeArtificialDiffusion(DenseMatrix<Number> const & op, DenseMatrix<Number> & diff);
+    
 protected:
     virtual Real computeQpResidual() override;
     
