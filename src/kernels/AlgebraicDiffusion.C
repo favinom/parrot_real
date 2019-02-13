@@ -56,7 +56,7 @@ AlgebraicDiffusion::computeResidual()
             _local_re(_i)+=_JxW[_qp] * _coord[_qp] *
             (_poro[_qp]*(_u[_qp]-_u_old[_qp])/_dt+_U[_qp]*_grad_u[_qp])*test;
         }
-        
+    
 
     
     accumulateTaggedLocalResidual();
@@ -66,6 +66,10 @@ AlgebraicDiffusion::computeResidual()
 void
 AlgebraicDiffusion::computeJacobian()
 {
+    DenseMatrix<Number> artifDiff;
+    artifDiff.resize(_test.size(), _phi.size());
+    artifDiff.zero();
+    
     prepareMatrixTag(_assembly, _var.number(), _var.number());
     
     precalculateJacobian();
@@ -97,12 +101,18 @@ AlgebraicDiffusion::computeJacobian()
                 if (_local_ke(_i,_j)>0.0)
                 {
                     sum+=_local_ke(_i,_j);
-                    _local_ke(_i,_j)=0.0;
+                    artifDiff(_i,_j)=-_local_ke(_i,_j);
                 }
             }
         }
-        _local_ke(_i,_i)+=sum;
+        artifDiff(_i,_i)+=sum;
     }
+    std::cout<<_local_ke<<std::endl;
+    _local_ke+=artifDiff;
+    std::cout<<_local_ke<<std::endl;
+    
+//    _u_nodal[n];
+//    return;
     
     accumulateTaggedLocalMatrix();
     
