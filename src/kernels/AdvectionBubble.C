@@ -63,10 +63,11 @@ AdvectionBubble::computeResidual()
                 test=_test[_i][_qp];
             else
             {
-                test=_test[0][_qp]*_test[6][_qp];
+                test=_test[0][_qp]*_test[1][_qp];
             }
             
-            my_re(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_dot[_qp]+_U[_qp]*_grad_u[_qp])*test;
+            my_re(_i)+=_JxW[_qp] * _coord[_qp] *
+            (_poro[_qp]*(_u[_qp]-_u_old[_qp])/_dt+_U[_qp]*_grad_u[_qp])*test;
             //my_re(_i)+=_JxW[_qp] * _coord[_qp] * (_poro[_qp]*_u_old[_qp]/_dt)*test;
         }
 
@@ -77,9 +78,9 @@ AdvectionBubble::computeResidual()
     
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-        bubble[_qp]=_test[0][_qp]*_test[6][_qp];
-        bubbleGrad[_qp]=_grad_test[0][_qp]*_test[6][_qp]+
-        _test[0][_qp]*_grad_test[6][_qp];
+        bubble[_qp]=_test[0][_qp]*_test[1][_qp];
+        bubbleGrad[_qp]=_grad_test[0][_qp]*_test[1][_qp]+
+        _test[0][_qp]*_grad_test[1][_qp];
     }
     
     for (_i = 0; _i < _test.size()+1; _i++)
@@ -90,7 +91,7 @@ AdvectionBubble::computeResidual()
                 test=_test[_i][_qp];
             else
             {
-                test=_test[0][_qp]*_test[6][_qp];
+                test=_test[0][_qp]*_test[1][_qp];
             }
             
             
@@ -133,7 +134,7 @@ AdvectionBubble::computeJacobian()
                     test=_test[_i][_qp];
                 else
                 {
-                    test=_test[0][_qp]*_test[6][_qp];
+                    test=_test[0][_qp]*_test[1][_qp];
                     
                     //                for (int f=0; f<_test.size(); ++f)
                     //                    test=test*_test[f][_qp];
@@ -146,8 +147,8 @@ AdvectionBubble::computeJacobian()
                 }
                 else
                 {
-                    phi=_phi[0][_qp]*_phi[6][_qp];
-                    gradPhi=_grad_phi[0][_qp]*_phi[6][_qp]+_phi[0][_qp]*_grad_phi[6][_qp];
+                    phi=_phi[0][_qp]*_phi[1][_qp];
+                    gradPhi=_grad_phi[0][_qp]*_phi[1][_qp]+_phi[0][_qp]*_grad_phi[1][_qp];
                     //                    for (int f=0; f<_test.size(); ++f)
                     //                        phi=phi*_phi[f][_qp];
                 }
@@ -166,7 +167,7 @@ AdvectionBubble::computeJacobian()
     for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
             _local_ke(_i, _j)=my_ke(_i, _j)
-            -my_ke(_i, _phi.size() )*my_ke(_test.size(), _j)/my_ke(_test.size(), _phi.size());
+            -my_ke(_test.size(), _j )*my_ke( _i , _phi.size())/my_ke(_test.size(), _phi.size());
     
     accumulateTaggedLocalMatrix();
     
