@@ -1,6 +1,6 @@
 clear all
 
-cd('/Users/favinom/projectsN/parrot_real/results');
+cd('/Users/mariagiuseppinanestola/projects/parrot_real/results');
 
 folder = 'fracture-flow-3d-master/single/results/';
 

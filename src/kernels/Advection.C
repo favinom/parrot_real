@@ -39,6 +39,26 @@ Advection::computeQpResidual()
 
 }
 
+Real
+Advection::computeResidual()
+{
+    prepareVectorTag(_assembly, _var.number());
+
+    precalculateResidual();
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+
+      accumulateTaggedLocalResidual();
+
+      if (_has_save_in)
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        for (const auto & var : _save_in)
+          var->sys().solution().add_vector(_local_re, var->dofIndices());
+      }
+
+}
 
 Real
 Advection::computeQpJacobian()
