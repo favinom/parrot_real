@@ -1,5 +1,5 @@
 [Mesh]
-file = uniformOut_0001_mesh.xda
+file = adapt.xda
 #uniform_refine = 0
 #partitioner = parmetis
 []
