@@ -224,7 +224,7 @@ HydraulicConductivity3D::computeQpProperties()
             tangent=tangent0+tangent1;
             
             if(_cond0) _K_filettata[_qp]= 1e4* tangent+ 1e4 * n_o_n;
-            if(_cond1) _K_filettata[_qp]= /*K_2_eq* */ tangent+ /*kappa_2_eq* */ n_o_n;
+            if(_cond1) _K_filettata[_qp]= 1e-4 * tangent+ 1e-4 * n_o_n;
         }
         if (count == 2)
         {
@@ -242,7 +242,7 @@ HydraulicConductivity3D::computeQpProperties()
             outerProduct(third,third,THIRD);
             
             if(_cond0)  _K_filettata[_qp]= 1e4 *THIRD+ 1e4 * n0_o_n0 + 1e4 * n1_o_n1;
-            if(_cond1)  _K_filettata[_qp]= /*K_1_eq* */ THIRD+ /*kappa_1_eq* */ n0_o_n0 + /*kappa_1_eq* */ n1_o_n1;
+            if(_cond1)  _K_filettata[_qp]= 1e-4 * THIRD+ 1e-4 * n0_o_n0 + 1e-4 *n1_o_n1;
         }
         if (count == 3)
         {
@@ -257,7 +257,7 @@ HydraulicConductivity3D::computeQpProperties()
             outerProduct(_n[q2][2],_n[q2][2],n2_o_n2);
             
             if (_cond0) _K_filettata[_qp]= 1e4 * n0_o_n0 + 1e4 * n1_o_n1 + 1e4 * n2_o_n2;
-            if (_cond1) _K_filettata[_qp]= /*kappa_0_eq* */ n0_o_n0 + /*kappa_0_eq* */ n1_o_n1 + /*kappa_0_eq* */ n2_o_n2;
+            if (_cond1) _K_filettata[_qp]= 1e-4 * n0_o_n0 + 1e-4 * n1_o_n1 + 1e-4 * n2_o_n2;
         }
         if (count > 3)
         {
@@ -271,7 +271,7 @@ HydraulicConductivity3D::computeQpProperties()
  /*       if ((  _q_point[_qp](0)>0.5 && _q_point[_qp](1)<0.5) 
            || (_q_point[_qp](0)>0.75 
            &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.75 
-           &&  _q_point[_qp](2)>0.5) 
+i           &&  _q_point[_qp](2)>0.5) 
            || (_q_point[_qp](0)>0.625 && _q_point[_qp](0)<0.75 
            &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.625 
            &&  _q_point[_qp](2)>0.5 && _q_point[_qp](2)<0.75))
@@ -292,15 +292,17 @@ HydraulicConductivity3D::computeQpProperties()
        if (_different_material == true)
        {
              if(_cond0) _K_filettata[_qp]= 0.1 * _identity;
-           if(_cond1) _K_filettata[_qp]= /* K_3_eq* */ _identity;
+             if(_cond1) _K_filettata[_qp]= 0.1 * _identity;
        }
        else
        {
            if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
-           if(_cond1) _K_filettata[_qp]= /* K_3_eq* */ _identity;
+           if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
        }
     }
-
+     
+   
+  _K_filettata[_qp]= 1.0 * _identity;
   
 }
 
