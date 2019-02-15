@@ -235,9 +235,9 @@ SimpleMarker3D::computeElementMarker()
     }
     
     RealVectorValue _needed_points;
-    _needed_points(0)=(max_e(0)-min_e(0))/_min_dimension;
-    _needed_points(1)=(max_e(1)-min_e(1))/_min_dimension;
-    _needed_points(2)=(max_e(2)-min_e(2))/_min_dimension;
+    _needed_points(0)=1.0;//(max_e(0)-min_e(0))/_min_dimension;
+    _needed_points(1)=1.0;//(max_e(1)-min_e(1))/_min_dimension;
+    _needed_points(2)=1.0;//(max_e(2)-min_e(2))/_min_dimension;
     
     std::cout<<"start"<<std::endl<<std::flush;
     RealVectorValue point;
