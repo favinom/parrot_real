@@ -1,6 +1,6 @@
 [Mesh]
 
-  file = ../final${i}.xda
+ file = ../final${i}_${ref}.xda
   uniform_refine = 0
   #second_order=true
 []
@@ -128,7 +128,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = DiffusionOutput
+ file_base      = DiffusionOutput${i}_${ref}
  exodus         = true
  print_perf_log = true
 []

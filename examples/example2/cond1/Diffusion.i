@@ -1,7 +1,7 @@
 [Mesh]
 
-  file = adapt.xda
-  uniform_refine = 1
+ file = ../final${i}_${ref}.xda
+  uniform_refine = 0
   #second_order=true
 []
 
@@ -53,8 +53,8 @@
 [Materials]
 [./conductivity2] type = HydraulicConductivity3D
  fn = 9
- cond0=true
- cond1=false
+ cond0=false
+ cond1=true
  phi_m=1.0
  phi_f=1.0
  fx_string = '0.5,0.5,0.5,
@@ -128,7 +128,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = OutputBenchmark1
+ file_base      = DiffusionOutput${i}_${ref}
  exodus         = true
  print_perf_log = true
 []

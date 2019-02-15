@@ -3,8 +3,8 @@ type = ParrotProblem
 []
 
 [Mesh]
-  file = adapt.xda
-  uniform_refine = 1
+  file = ../final${i}_${ref}.xda
+  #uniform_refine = 1
   #second_order=true
 []
 
@@ -78,8 +78,8 @@ comp_i=2
 [./conductivity2] type = HydraulicConductivity3D
  fn = 9
  pressure=P_aux
- cond0=true
- cond1=false
+ cond0=false
+ cond1=true
  phi_m=0.1
  phi_f=0.9
  fx_string = '0.5,0.5,0.5,
@@ -189,6 +189,7 @@ order=SIXTH
 []
 
 [Outputs]
+ file_base = advectioOut${i}_${ref}
 exodus = true
 csv=true
 print_perf_log = true
@@ -198,7 +199,7 @@ print_perf_log = true
 [UserObjects]
 [./soln]
 type = SolutionUserObject
-mesh = OutputBenchmark1.e
+ mesh = DiffusionOutput${i}_${ref}.e
 timestep = 2
 system_variables = pressure
 execute_on = 'initial'
