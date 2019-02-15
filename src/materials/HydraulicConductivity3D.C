@@ -33,8 +33,13 @@ InputParameters validParams<HydraulicConductivity3D>()
     params.addRequiredParam<std::string>("fd1_string", "fracture dimension 1");
     params.addRequiredParam<std::string>("fd2_string", "fracture dimension 2");
     params.addRequiredParam<std::string>("fd3_string", "fracture dimension 3");
+    params.addCoupledVar("pressure",
+                                 "The gradient of this variable will be used as "
+                                 "the velocity vector.");
     params.addRequiredParam<bool>("cond0","condition0");
     params.addParam<bool>("cond1","false","condition1");
+    params.addRequiredParam<Real>("phi_f","phi fracture");
+    params.addRequiredParam<Real>("phi_m","phi matrix");
     return params;
 }
 
@@ -51,6 +56,11 @@ _fd1_string(getParam<std::string>("fd1_string")),
 _fd2_string(getParam<std::string>("fd2_string")),
 _fd3_string(getParam<std::string>("fd3_string")),
 _K_filettata(declareProperty<RealTensorValue>("conductivityTensor")),
+_level_set_0(declareProperty<Real>("level_set_0")),
+_level_set_1(declareProperty<Real>("level_set_1")),
+_phi(declareProperty<Real>("Porosity")),
+_phiFracture(getParam<Real>("phi_f")),
+_phiMatrix(getParam<Real>("phi_m")),
 _cond0(getParam<bool>("cond0")),
 _cond1(getParam<bool>("cond1")),
 _gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
@@ -209,6 +219,7 @@ HydraulicConductivity3D::computeQpProperties()
     if (count>0)
     {
         //We are inside at least a fracture
+        _phi[_qp]=_phiFracture;     
         
         if (count == 1)
         {
@@ -275,7 +286,9 @@ i           &&  _q_point[_qp](2)>0.5)
            || (_q_point[_qp](0)>0.625 && _q_point[_qp](0)<0.75 
            &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.625 
            &&  _q_point[_qp](2)>0.5 && _q_point[_qp](2)<0.75))
-*/     bool _different_material=false;
+*/      
+        _phi[_qp]=_phiMatrix;
+       bool _different_material=false;
        Real x = _q_point[_qp](0);
        Real y = _q_point[_qp](1);
        Real z = _q_point[_qp](2);
@@ -293,15 +306,21 @@ i           &&  _q_point[_qp](2)>0.5)
        {
              if(_cond0) _K_filettata[_qp]= 0.1 * _identity;
              if(_cond1) _K_filettata[_qp]= 0.1 * _identity;
+             _level_set_0[_qp]=1.0;
+             _level_set_1[_qp]=0.0;
+        
        }
        else
        {
            if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
            if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
+           _level_set_1[_qp]=0.0;
+           _level_set_1[_qp]=1.0;
        }
     }
      
-   
+//      std::cout<<" _U[_qp] "<<  _gradP[_qp] <<std::endl;   
+     _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
 //  _K_filettata[_qp]= 1.0 * _identity;
   
 }

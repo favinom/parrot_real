@@ -96,7 +96,10 @@ protected:
     
     RealTensorValue _identity;
     
+
     MaterialProperty<RealTensorValue> &_K_filettata;
+    MaterialProperty<Real> &_level_set_0, &_level_set_1,  &_phi;
+    Real _phiFracture,_phiMatrix;
     bool _cond0, _cond1;
     const VariableGradient &_gradP;
     MaterialProperty<RealVectorValue> &_U;

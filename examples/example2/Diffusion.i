@@ -1,7 +1,7 @@
 [Mesh]
 
   file = adapt.xda
-  uniform_refine = 2
+  uniform_refine = 1
   #second_order=true
 []
 
@@ -11,7 +11,7 @@
  boundary_id_old = 'right'
  boundary_id_new = 10
  block_id = 0
- bottom_left = '0 0.87499 0.87499'
+ bottom_left = '0 0.87501 0.87501'
  top_right =   '1.00001  1.00001 1.00001'
  [../]
  
@@ -20,7 +20,7 @@
  boundary_id_old = 'top'
  boundary_id_new = 11
  block_id = 0
- bottom_left = '0.87499 0  0.87499'
+ bottom_left = '0.87501 0  0.87501'
  top_right =   '1.00001  1.00001 1.00001'
  [../]
  
@@ -29,7 +29,7 @@
  boundary_id_old = 'front'
  boundary_id_new = 12
  block_id = 0
- bottom_left = '0.87499  0.87499 0'
+ bottom_left = '0.87501  0.87501 0'
  top_right =   '1.00001  1.00001 1.00001'
 [../]
 []
@@ -55,6 +55,8 @@
  fn = 9
  cond0=true
  cond1=false
+ phi_m=1.0
+ phi_f=1.0
  fx_string = '0.5,0.5,0.5,
               0.749975,0.75,0.749975,
               0.625,0.625,0.625'
@@ -113,7 +115,7 @@
  solve_type= LINEAR
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               mumps'
+ petsc_options_value='  preonly   lu       NONZERO               superlu_dist'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
