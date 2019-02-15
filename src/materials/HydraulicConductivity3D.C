@@ -314,7 +314,7 @@ i           &&  _q_point[_qp](2)>0.5)
        {
            if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
            if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
-           _level_set_1[_qp]=0.0;
+           _level_set_0[_qp]=0.0;
            _level_set_1[_qp]=1.0;
        }
     }
