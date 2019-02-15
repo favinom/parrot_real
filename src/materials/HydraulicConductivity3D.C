@@ -235,9 +235,16 @@ HydraulicConductivity3D::computeQpProperties()
             // we are inside on a line.
             int q0=_whichFrac.at(0);
             int q1=_whichFrac.at(1);
-            //std::cout<<"we are on a line intesacting surface "<<q0<<" and "<<q1<<std::endl;
-            //std::cout<<"normals are"<<_n[q0][2]<<" and "<<_n[q1][2]<<std::endl;
             
+            RealVectorValue third=_n[q0][0].cross(_n[q0][0]);
+            
+            RealTensorValue n0_o_n0,n1_o_n1,THIRD;
+            
+            outerProduct(_n[q0][0],_n[q0][0],n0_o_n0);
+            outerProduct(_n[q1][1],_n[q1][1],n1_o_n1);
+            outerProduct(third,third,THIRD);
+            
+            _K_filettata[_qp]= /*K_1_eq* */ THIRD+ /*kappa_1_eq* */ n0_o_n0 + /*kappa_1_eq* */ n1_o_n1;
             
         }
         if (count == 3)
