@@ -33,7 +33,10 @@ InputParameters validParams<HydraulicConductivity3D>()
     params.addRequiredParam<std::string>("fd1_string", "fracture dimension 1");
     params.addRequiredParam<std::string>("fd2_string", "fracture dimension 2");
     params.addRequiredParam<std::string>("fd3_string", "fracture dimension 3");
-    
+    params.addRequiredParam<std::vector<Real>>("conductivityMatrix","conductivity of the Matrix");
+    params.addRequiredParam<std::vector<Real>>("conductivityFracture0","conductivity of intersection 0");
+    params.addRequiredParam<std::vector<Real>>("conductivityFracture1","conductivity of intersection 1");
+    params.addRequiredParam<std::vector<Real>>("conductivityFracture2","conductivity of the fracture");
     return params;
 }
 
@@ -50,10 +53,10 @@ _fd1_string(getParam<std::string>("fd1_string")),
 _fd2_string(getParam<std::string>("fd2_string")),
 _fd3_string(getParam<std::string>("fd3_string")),
 _K(declareProperty<RealTensorValue>("conductivityTensor")),
-_K0(declareProperty<RealTensorValue>("conductivityTensorFracture0")),
-_K1(declareProperty<RealTensorValue>("conductivityTensorFracture1")),
-_K2(declareProperty<RealTensorValue>("conductivityTensorFracture2")),
-_K3(declareProperty<RealTensorValue>("conductivityTensorMatrix")),
+_cond0(getParam<std::vector<Real>>("conductivityFracture0")),
+_cond1(getParam<std::vector<Real>>("conductivityFracture1")),
+_cond2(getParam<std::vector<Real>>("conductivityFracture2")),
+_cond3(getParam<std::vector<Real>>("conductivityMatrix")),
 _gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
 _U(declareProperty<RealVectorValue>("VelocityVector")),
 _numOfFrac(declareProperty<Real>("numero"))
@@ -217,7 +220,7 @@ HydraulicConductivity3D::computeQpProperties()
             // we are inside a single fracture.
             int q=_whichFrac.at(0);
             //std::cout<<"we are in Frac "<<q<<"con normale "<<_n[q][2]<<std::endl;
-           _K[q]=_K0[q]*_identity;
+           _K[q]=_cond0[q]*_identity;
         }
         if (count == 2)
         {
@@ -226,8 +229,8 @@ HydraulicConductivity3D::computeQpProperties()
             int q1=_whichFrac.at(1);
             //std::cout<<"we are on a line intesacting surface "<<q0<<" and "<<q1<<std::endl;
             //std::cout<<"normals are"<<_n[q0][2]<<" and "<<_n[q1][2]<<std::endl;
-             _K[q0]=_K1[q0]*_identity;
-             _K[q1]=_K1[q1]*_identity;
+             _K[q0]=_cond1[q0]*_identity;
+             _K[q1]=_cond1[q1]*_identity;
          }
         if (count == 3)
         {
@@ -237,9 +240,9 @@ HydraulicConductivity3D::computeQpProperties()
             int q2=_whichFrac.at(2);
             //std::cout<<"we are on a dot intesacting surfaces "<<q0<<" and "<<q1<<" and "<<q2<<std::endl;
             //std::cout<<"normals are"<<_n[q0][2]<<", "<<_n[q1][2]<<" and " <<_n[q2][2]<<std::endl;
-             _K[q0]=_K2[q0]*_identity; 
-             _K[q1]=_K2[q1]*_identity;
-             _K[q2]=_K2[q2]*_identity;
+             _K[q0]=_cond2[q0]*_identity; 
+             _K[q1]=_cond2[q1]*_identity;
+             _K[q2]=_cond2[q2]*_identity;
        }
         if (count > 3)
         {
@@ -250,7 +253,7 @@ HydraulicConductivity3D::computeQpProperties()
     else
     {
         //we are in background
-        _K[_qp]=_K3[_qp]*_identity;
+        _K[_qp]=_cond3[_qp]*_identity;
     }
 
     
