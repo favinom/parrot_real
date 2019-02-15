@@ -487,7 +487,7 @@ int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
         }
         if (in)
         {
-            if (i!= -1)
+            if (returnValue!= -1)
             {
                 std::cout<<"c'e' un problema\n";
                 exit(1);
@@ -495,10 +495,10 @@ int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
             returnValue = i;
         }
     }
-    if (returnValue==-1)
-    {
-        std::cout<<"c'e' un problema2\n";
-        exit(1);
-    }
+    //if (returnValue==-1)
+    //{
+    //    std::cout<<"c'e' un problema2\n";
+    //    exit(1);
+    //}
     return returnValue;
 }
