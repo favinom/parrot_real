@@ -27,7 +27,8 @@ AdvectionBubble::AdvectionBubble(const InputParameters & parameters) :
 Kernel(parameters),
  _u_old(_var.slnOld()),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
-_poro(getMaterialProperty<Real>("Porosity"))
+_poro(getMaterialProperty<Real>("Porosity")),
+_u_dot(_var.uDot())
 //_int_by_parts(getParam<bool>("int_by_parts"))
 {}
 
@@ -172,3 +173,4 @@ AdvectionBubble::computeJacobian()
     accumulateTaggedLocalMatrix();
     
 }
+
