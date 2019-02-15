@@ -111,7 +111,7 @@ comp_i=2
 []
 
 [Kernels]
-active='convection MyDiffusion stab time'
+active='convection stab time'
 
 [upwind]
 type = AlgebraicDiffusion
@@ -148,7 +148,7 @@ lumping=false
 [./time]
 type = PorosityTimeDerivative
 variable = CM
-lumping = true
+lumping = false
 [../]
 
 [./diff]
