@@ -62,6 +62,8 @@ protected:
 
     void outerProduct
     (RealVectorValue const & in1, RealVectorValue const &  in2, RealTensorValue & out);
+    int findRegion(RealVectorValue const & point);
+    
     int _fn;
     
     int _prec;
@@ -98,7 +100,7 @@ protected:
     
 
     MaterialProperty<RealTensorValue> &_K_filettata;
-    MaterialProperty<Real> &_level_set_0, &_level_set_1,  &_phi;
+    MaterialProperty<Real> &_phi;
     Real _phiFracture,_phiMatrix;
     bool _cond0, _cond1;
     const VariableGradient &_gradP;
@@ -107,6 +109,10 @@ protected:
     MaterialProperty<Real> &_numOfFrac;
     
     std::vector<int> _whichFrac;
+    
+    std::vector<RealVectorValue> _regionMin;
+    std::vector<RealVectorValue> _regionMax;
+    MaterialProperty<int> &_regionID;
     
 };
 

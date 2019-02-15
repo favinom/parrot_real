@@ -56,8 +56,6 @@ _fd1_string(getParam<std::string>("fd1_string")),
 _fd2_string(getParam<std::string>("fd2_string")),
 _fd3_string(getParam<std::string>("fd3_string")),
 _K_filettata(declareProperty<RealTensorValue>("conductivityTensor")),
-_level_set_0(declareProperty<Real>("level_set_0")),
-_level_set_1(declareProperty<Real>("level_set_1")),
 _phi(declareProperty<Real>("Porosity")),
 _phiFracture(getParam<Real>("phi_f")),
 _phiMatrix(getParam<Real>("phi_m")),
@@ -65,7 +63,8 @@ _cond0(getParam<bool>("cond0")),
 _cond1(getParam<bool>("cond1")),
 _gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
 _U(declareProperty<RealVectorValue>("VelocityVector")),
-_numOfFrac(declareProperty<Real>("numero"))
+_numOfFrac(declareProperty<Real>("numero")),
+_regionID(declareProperty<int>("RegionID"))
 {
     _center   =new RealVectorValue [_fn];
     _rotation =new RealVectorValue [_fn];
@@ -189,12 +188,78 @@ _numOfFrac(declareProperty<Real>("numero"))
     delete [] _rotation;
     
     _identity=RealTensorValue(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);
-    
+    // reg 0
+    _regionMin.push_back(RealVectorValue(0.0,0.0,0.0) );
+    _regionMax.push_back(RealVectorValue(0.5,0.5,0.5) );
+    // reg 1
+    _regionMin.push_back(RealVectorValue(0.5,0.0,0.0) );
+    _regionMax.push_back(RealVectorValue(1.0,0.5,0.5) );
+    // region 2
+    _regionMin.push_back(RealVectorValue(0.0,0.5,0.0) );
+    _regionMax.push_back(RealVectorValue(0.5,1.0,0.5) );
+    // reg 3
+    _regionMin.push_back(RealVectorValue(0.5,0.5,0.0) );
+    _regionMax.push_back(RealVectorValue(1.0,1.0,0.5) );
+    // reg 4
+    _regionMin.push_back(RealVectorValue(0.0,0.0,0.5) );
+    _regionMax.push_back(RealVectorValue(0.5,0.5,1.0) );
+    // reg5
+    _regionMin.push_back(RealVectorValue(0.5,0.0,0.5) );
+    _regionMax.push_back(RealVectorValue(1.0,0.5,1.0) );
+    // reg6
+    _regionMin.push_back(RealVectorValue(0.0,0.5,0.5) );
+    _regionMax.push_back(RealVectorValue(0.5,1.0,1.0) );
+    //reg7
+    _regionMin.push_back(RealVectorValue(0.75,0.75,0.75) );
+    _regionMax.push_back(RealVectorValue(1.0,1.0,1.0) );
+    //reg8
+    _regionMin.push_back(RealVectorValue(0.75,0.5,0.75) );
+    _regionMax.push_back(RealVectorValue(1.0,0.75,1.0) );
+    // reg9
+    _regionMin.push_back(RealVectorValue(0.5,0.75,0.75) );
+    _regionMax.push_back(RealVectorValue(0.75,1.0,1.0) );
+    // reg 10
+    _regionMin.push_back(RealVectorValue(0.5,0.5,0.75) );
+    _regionMax.push_back(RealVectorValue(0.75,0.75,1.0) );
+    //reg 11
+    _regionMin.push_back(RealVectorValue(0.75,0.75,0.5) );
+    _regionMax.push_back(RealVectorValue(1.0,1.0,0.75) );
+    //reg 12
+    _regionMin.push_back(RealVectorValue(0.75,0.5,0.5) );
+    _regionMax.push_back(RealVectorValue(1.0,0.75,0.75) );
+    //reg 13
+    _regionMin.push_back(RealVectorValue(0.5,0.75,0.5) );
+    _regionMax.push_back(RealVectorValue(0.75,1.0,0.75) );
+    // reg 14
+    _regionMin.push_back(RealVectorValue(0.5,0.5,0.5) );
+    _regionMax.push_back(RealVectorValue(0.625,0.625,0.625) );
+    // reg 15
+    _regionMin.push_back(RealVectorValue(0.625,0.5,0.5) );
+    _regionMax.push_back(RealVectorValue(0.75,0.625,0.625) );
+    // reg16
+    _regionMin.push_back(RealVectorValue(0.5,0.625,0.5) );
+    _regionMax.push_back(RealVectorValue(0.625,0.75,0.625) );
+    // reg 17
+    _regionMin.push_back(RealVectorValue(0.625,0.625,0.5) );
+    _regionMax.push_back(RealVectorValue(0.75,0.75,0.625) );
+    // reg 18
+    _regionMin.push_back(RealVectorValue(0.5,0.5,0.625) );
+    _regionMax.push_back(RealVectorValue(0.625,0.625,0.75) );
+    // reg 19
+    _regionMin.push_back(RealVectorValue(0.625,0.5,0.625) );
+    _regionMax.push_back(RealVectorValue(0.75,0.625,0.75) );
+    // reg 20
+    _regionMin.push_back(RealVectorValue(0.5,0.625,0.625) );
+    _regionMax.push_back(RealVectorValue(0.625,0.75,0.75) );
+    // reg 21
+    _regionMin.push_back(RealVectorValue(0.625,0.625,0.625) );
+    _regionMax.push_back(RealVectorValue(0.75,0.75,0.75) );
 }
 
 void
 HydraulicConductivity3D::computeQpProperties()
 {
+    _regionID[_qp]=-1;
     RealVectorValue point=_q_point[_qp];
     
     //        for (int i=0; i<_fn; ++i)
@@ -278,16 +343,10 @@ HydraulicConductivity3D::computeQpProperties()
     }
     else
     {
-        //we are in background
- /*       if ((  _q_point[_qp](0)>0.5 && _q_point[_qp](1)<0.5) 
-           || (_q_point[_qp](0)>0.75 
-           &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.75 
-i           &&  _q_point[_qp](2)>0.5) 
-           || (_q_point[_qp](0)>0.625 && _q_point[_qp](0)<0.75 
-           &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.625 
-           &&  _q_point[_qp](2)>0.5 && _q_point[_qp](2)<0.75))
-*/      
-        _phi[_qp]=_phiMatrix;
+
+       _phi[_qp]=_phiMatrix;
+        _regionID[_qp]=findRegion(_q_point[_qp]);
+        
        bool _different_material=false;
        Real x = _q_point[_qp](0);
        Real y = _q_point[_qp](1);
@@ -306,16 +365,12 @@ i           &&  _q_point[_qp](2)>0.5)
        {
              if(_cond0) _K_filettata[_qp]= 0.1 * _identity;
              if(_cond1) _K_filettata[_qp]= 0.1 * _identity;
-             _level_set_0[_qp]=1.0;
-             _level_set_1[_qp]=0.0;
         
        }
        else
        {
            if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
            if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
-           _level_set_0[_qp]=0.0;
-           _level_set_1[_qp]=1.0;
        }
     }
      
@@ -364,12 +419,7 @@ void HydraulicConductivity3D::ComputeNormalsFromAngles(RealVectorValue const & a
     R3(2,1)=std::sin(angles(2));
     R3(2,2)=std::cos(angles(2));
     
-    //std::cout<<R1<<std::endl;
-    //std::cout<<R2<<std::endl;
-    //std::cout<<R3<<std::endl;
-    //exit(1);
     RealTensorValue R=R1*R2*R3;
-    //std::cout<<R<<std::endl;
     
     for (int i=0; i<3; ++i)
     {
@@ -377,10 +427,6 @@ void HydraulicConductivity3D::ComputeNormalsFromAngles(RealVectorValue const & a
         n2(i)=R(i,1);
         n3(i)=R(i,2);
     }
-    //    std::cout<<n1<<std::endl;
-    //    std::cout<<n2<<std::endl;
-    //    std::cout<<n3<<std::endl;
-    
 }
 
 int HydraulicConductivity3D::is_inside(RealVectorValue const & point)
@@ -419,4 +465,40 @@ void HydraulicConductivity3D::outerProduct
         {
             out(i, j) = in1(i)*in2(j);
         }
+}
+
+int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
+{
+    int returnValue = -1;
+    
+    for ( int i=0; i<_regionMin.size(); ++i )
+    {
+        bool in=1;
+        for (int dim=0; dim<3; ++dim)
+        {
+            if ( _regionMin[i](dim) < point(dim) && point(dim) < _regionMax[i](dim) )
+            {
+                // do nothing
+            }
+            else
+            {
+                in = 0;
+            }
+        }
+        if (in)
+        {
+            if (i!= -1)
+            {
+                std::cout<<"c'e' un problema\n";
+                exit(1);
+            }
+            returnValue = i;
+        }
+    }
+    if (returnValue==-1)
+    {
+        std::cout<<"c'e' un problema2\n";
+        exit(1);
+    }
+    return returnValue;
 }
