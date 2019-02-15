@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
- file = refineMesh_0003_mesh.xdr
+ file = refineMesh_0_0002_mesh.xdr #Mesh_level1.e #refineMesh_0003_mesh.xdr
  block_id = '2 4 5 6 7'
  boundary_id = '1 2'
  boundary_name = 'inflow outflow'
@@ -14,6 +14,17 @@ type = ParrotProblem
 [AuxVariables]
 [./P_aux] [../]
 []
+
+
+[MeshModifiers]
+#active=''
+[./rotate]
+type = Transform
+transform = TRANSLATE
+vector_value = '50 50 50'
+[../]
+[]
+
 
 [AuxKernels]
 [./en]
@@ -58,25 +69,32 @@ execute_on = 'initial'
 
 
 [Kernels]
-active='convection stab time'
+active='convection stab  time'
 
 [upwind]
-type = AdvectionUpwind
-upwinding_type=full
+type = AlgebraicDiffusion
+#upwinding_type=full
 variable = CM
+#int_by_parts=false
 [../]
 
+[./Stab_f]
+block='2'
+type = MyDiffusion
+variable = CM
+coef=5.e-3
+[../]
 
 [./convection]
 type = Advection
 variable = CM
-int_by_parts=true
+int_by_parts=false
 [../]
 
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=0.3
+coef=0.2  #0.17 0.13
 use_h=true
 [../]
 
@@ -95,15 +113,17 @@ lumping = true
 [../]
 
 [./diff]
-type = AnisotropicDiffusion
+block='4 5'
+type = MyDiffusion
 variable = CM
-tensor_coeff='1.e-8 0 0 0 1.0e-8 0 0 0 1.0e-8'
+coef=1.0e-3
+#tensor_coeff='1.e-10 0 0 0 1.0e-10 0 0 0 1.0e-10'
 [../]
 []
 
 [BCs]
 [./u_injection_left] type = DirichletBC boundary = inflow variable = CM value='0.01' [../]
-[./u_injection_right] type = OutflowBC boundary = 'outflow' variable = CM [../]
+#[./u_injection_right] type = OutflowBC boundary = 'outflow 3' variable = CM [../]
 []
 
 [Preconditioning]

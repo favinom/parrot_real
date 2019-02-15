@@ -32,7 +32,8 @@ protected:
   virtual Real computeQpJacobian() override;
     
   const MaterialProperty<RealTensorValue> &_K;
-    
+
+  Real _coef;    
 };
 
 #endif /* MYDIFFUSION_H */

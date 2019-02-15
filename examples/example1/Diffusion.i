@@ -21,7 +21,7 @@
 []
 
 [Kernels]
-[./myDiffusion] type = MyDiffusion variable = pressure  [../]
+[./myDiffusion] type = MyDiffusion variable = pressure coef=1 [../]
 []
 
 [Materials]

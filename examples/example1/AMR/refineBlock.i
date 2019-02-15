@@ -4,7 +4,7 @@ solve = false
 []
 
 [Mesh]
-file = Mesh_level1.e
+file = refineMesh_0003_mesh.xdr #Mesh_level0.e
 block_id = '2 4 5 6 7'
 boundary_id = '1 2'
 boundary_name = 'inflow outflow'
@@ -12,6 +12,7 @@ boundary_name = 'inflow outflow'
 []
 
 [MeshModifiers]
+active=''
 [./rotate]
 type = Transform
 transform = TRANSLATE
@@ -45,7 +46,7 @@ vector_value = '50 50 50'
  []
 
 [Outputs]
- file_base = refineMesh
+ file_base = refineMesh_0
  exodus = true
  print_linear_residuals = true
  print_perf_log = true
@@ -54,11 +55,11 @@ vector_value = '50 50 50'
 
 [Adaptivity]
  marker = simplemark
- steps = 2
+ steps = 1
  [./Markers]
  [./simplemark]
  type = BlockMarker
- blockNum = 2
+ blockNum = 7
  [../]
  [../]
 []

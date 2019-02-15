@@ -68,7 +68,7 @@ Advection::computeJacobian()
                 //std::cout<<"qpoints = "<<_qrule->n_points()<<std::endl;
             }
     
-    //std::cout<< "Advection==>" << _local_ke <<std::endl<<std::endl;
+//    std::cout<< "Advection==>" << _local_ke <<std::endl<<std::endl;
 
     ke += _local_ke;
     

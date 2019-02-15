@@ -55,7 +55,7 @@ AlgebraicDiffusion::computeResidual()
                 test=_test[_i][_qp];
             
             _local_re(_i)+=_JxW[_qp] * _coord[_qp] *
-            (_poro[_qp]*(_u[_qp]-_u_old[_qp])/_dt+_U[_qp]*_grad_u[_qp])*test;
+            (_U[_qp]*_grad_u[_qp])*test;
         }
     
     // PARTE DEL RESIDUO LEGATA A DIFFUSIONE ARTIFICIALE
@@ -126,8 +126,7 @@ void AlgebraicDiffusion::myAssembleJacobian(DenseMatrix<Number> & in)
                 
                 
                 in(_i, _j)+=_JxW[_qp] * _coord[_qp] *
-                (_poro[_qp]/_dt*test * phi+
-                 (gradPhi * _U[_qp]) * test) ;
+                ((gradPhi * _U[_qp]) * test) ;
                 
             }
 
@@ -143,10 +142,12 @@ void AlgebraicDiffusion::myComputeArtificialDiffusion(DenseMatrix<Number> const 
             diff(_i,_j)=0.0;
             if (_i!=_j)
             {
-                if (op(_i,_j)>0.0)
+                if (op(_i,_j)>0)
                 {
+                    //double max_1=std::max(op(_i,_j),op(_j,_i));
+                    //sum+=-1.0*std::max(0.0,max_1);
                     sum+=op(_i,_j);
-                    diff(_i,_j)=-op(_i,_j);
+                    diff(_i,_j)=-1*op(_i,_j);
                 }
             }
         }
