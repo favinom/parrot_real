@@ -96,10 +96,10 @@ private:
     RealTensorValue _identity;
     
     MaterialProperty<RealTensorValue> &_K;
-    std::vector<Real> _cond0;
+    Real _cond0;
     std::vector<Real> _cond1;
     std::vector<Real> _cond2;
-    std::vector<Real> _cond3;
+    Real _cond3;
     const VariableGradient &_gradP;
     MaterialProperty<RealVectorValue> &_U;
 
