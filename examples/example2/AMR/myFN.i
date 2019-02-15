@@ -1,6 +1,6 @@
  [Mesh]
-file = adapt.xda
-#uniform_refine = 0
+file = final2.xda
+# uniform_refine = 1
 #partitioner = parmetis
 []
 
@@ -23,7 +23,7 @@ file = adapt.xda
 
 [Adaptivity]
   marker = simplemark
-  steps = 2
+  steps = 1
   [./Markers]
     [./simplemark]
       type = SimpleMarker3D
@@ -69,11 +69,10 @@ fd3_string = '0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001'
 []
 
 [Outputs]
- file_base = adaptedAMR
+ file_base = adaptedAMR1
  exodus = true
  print_linear_residuals = true
  print_perf_log = true
- xdr = true
  xda = true
 []
 

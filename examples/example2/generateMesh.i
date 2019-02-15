@@ -1,9 +1,9 @@
 [Mesh]
  type = GeneratedMesh
  dim = 3
- nx = 20
- ny = 20
- nz = 20
+ nx = 16
+ ny = 16
+ nz = 16
  xmin = 0
  xmax = 1
  ymin = 0
@@ -40,7 +40,7 @@ partitioner = parmetis
 []
 
 [Outputs]
- file_base = uniformOut
+ file_base = mesh0_reg
  print_linear_residuals = true
  print_perf_log = true
  xda = true

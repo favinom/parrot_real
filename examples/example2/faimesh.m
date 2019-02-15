@@ -1,8 +1,8 @@
 clear all
 close all
 
-fid=fopen('uniformOut_0001_mesh.xda');
-wfid=fopen('adapt.xda','w');
+fid=fopen('mesh0_reg_0001_mesh.xda');
+wfid=fopen('adapt1.xda','w');
 
 dummy=textscan(fid,'%s',1,'delimiter','\n');
 fprintf(wfid,[dummy{1}{1},'\n']);
