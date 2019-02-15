@@ -302,7 +302,7 @@ i           &&  _q_point[_qp](2)>0.5)
     }
      
    
-  _K_filettata[_qp]= 1.0 * _identity;
+//  _K_filettata[_qp]= 1.0 * _identity;
   
 }
 

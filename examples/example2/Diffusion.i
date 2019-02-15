@@ -1,10 +1,38 @@
 [Mesh]
 
   file = adapt.xda
-  uniform_refine = 1
+  uniform_refine = 2
   #second_order=true
 []
 
+[MeshModifiers]
+ [./createNewSidesetX]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'right'
+ boundary_id_new = 10
+ block_id = 0
+ bottom_left = '0 0.87499 0.87499'
+ top_right =   '1.00001  1.00001 1.00001'
+ [../]
+ 
+ [./createNewSidesetY]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'top'
+ boundary_id_new = 11
+ block_id = 0
+ bottom_left = '0.87499 0  0.87499'
+ top_right =   '1.00001  1.00001 1.00001'
+ [../]
+ 
+ [./createNewSidesetZ]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'front'
+ boundary_id_new = 12
+ block_id = 0
+ bottom_left = '0.87499  0.87499 0'
+ top_right =   '1.00001  1.00001 1.00001'
+[../]
+[]
 
 [Variables]
 [./pressure] order=FIRST  family=LAGRANGE [../]
@@ -69,7 +97,7 @@
 []
 
 [BCs]
-[./dirBC]  type = FunctionDirichletBC variable = pressure function = fun_dr boundary = 'right top front'  [../]
+[./dirBC]  type = DirichletBC variable = pressure value = 1  boundary = '10 11 12'  [../]
 [./fluxBC] type = FunctionNeumannBC variable = pressure function = fun_n  boundary = 'left bottom back' [../]
 #[./inflowBC]  type = PenaltyDirichletBC variable = pressure boundary = inflow  value = 4.0 penalty = 1e10 [../]
 #[./outflowBC] type = PenaltyDirichletBC variable = pressure boundary = outflow value = 1.0 penalty = 1e10 [../]
