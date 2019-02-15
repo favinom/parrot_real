@@ -1,7 +1,7 @@
 [Mesh]
 
-  file = adapt.xda
-  uniform_refine = 1
+  file = ../final${i}.xda
+  uniform_refine = 0
   #second_order=true
 []
 
@@ -128,7 +128,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = OutputBenchmark1
+ file_base      = DiffusionOutput
  exodus         = true
  print_perf_log = true
 []

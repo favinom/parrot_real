@@ -1,5 +1,5 @@
  [Mesh]
-file = final2.xda
+file = adapt1.xda
 # uniform_refine = 1
 #partitioner = parmetis
 []
@@ -23,7 +23,7 @@ file = final2.xda
 
 [Adaptivity]
   marker = simplemark
-  steps = 1
+  steps = 2
   [./Markers]
     [./simplemark]
       type = SimpleMarker3D
