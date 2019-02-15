@@ -97,10 +97,7 @@ protected:
     RealTensorValue _identity;
     
     MaterialProperty<RealTensorValue> &_K_filettata;
-    Real _cond0;
-    std::vector<Real> _cond1;
-    std::vector<Real> _cond2;
-    Real _cond3;
+    bool _cond0, _cond1;
     const VariableGradient &_gradP;
     MaterialProperty<RealVectorValue> &_U;
 

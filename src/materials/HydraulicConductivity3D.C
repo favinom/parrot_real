@@ -33,10 +33,8 @@ InputParameters validParams<HydraulicConductivity3D>()
     params.addRequiredParam<std::string>("fd1_string", "fracture dimension 1");
     params.addRequiredParam<std::string>("fd2_string", "fracture dimension 2");
     params.addRequiredParam<std::string>("fd3_string", "fracture dimension 3");
-    params.addRequiredParam<Real>("conductivityMatrix","conductivity of the Matrix");
-    params.addRequiredParam<std::vector<Real>>("conductivityFracture2","conductivity of intersection 0");
-    params.addRequiredParam<std::vector<Real>>("conductivityFracture1","conductivity of intersection 1");
-    params.addRequiredParam<Real>("conductivityFracture0","conductivity of the fracture");
+    params.addRequiredParam<bool>("cond0","condition0");
+    params.addParam<bool>("cond1","false","condition1");
     return params;
 }
 
@@ -53,10 +51,8 @@ _fd1_string(getParam<std::string>("fd1_string")),
 _fd2_string(getParam<std::string>("fd2_string")),
 _fd3_string(getParam<std::string>("fd3_string")),
 _K_filettata(declareProperty<RealTensorValue>("conductivityTensor")),
-_cond0(getParam<Real>("conductivityFracture0")),
-_cond1(getParam<std::vector<Real>>("conductivityFracture1")),
-_cond2(getParam<std::vector<Real>>("conductivityFracture2")),
-_cond3(getParam<Real>("conductivityMatrix")),
+_cond0(getParam<bool>("cond0")),
+_cond1(getParam<bool>("cond1")),
 _gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
 _U(declareProperty<RealVectorValue>("VelocityVector")),
 _numOfFrac(declareProperty<Real>("numero"))
@@ -227,8 +223,8 @@ HydraulicConductivity3D::computeQpProperties()
             outerProduct(_n[q][1],_n[q][1],tangent1);
             tangent=tangent0+tangent1;
             
-            _K_filettata[_qp]= /*K_2_eq* */ tangent+ /*kappa_2_eq* */ n_o_n;
-            
+            if(_cond0) _K_filettata[_qp]= 1e4* tangent+ 1e4 * n_o_n;
+            if(_cond1) _K_filettata[_qp]= /*K_2_eq* */ tangent+ /*kappa_2_eq* */ n_o_n;
         }
         if (count == 2)
         {
@@ -245,8 +241,8 @@ HydraulicConductivity3D::computeQpProperties()
             outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
             outerProduct(third,third,THIRD);
             
-            _K_filettata[_qp]= /*K_1_eq* */ THIRD+ /*kappa_1_eq* */ n0_o_n0 + /*kappa_1_eq* */ n1_o_n1;
-            
+            if(_cond0)  _K_filettata[_qp]= 1e4 *THIRD+ 1e4 * n0_o_n0 + 1e4 * n1_o_n1;
+            if(_cond1)  _K_filettata[_qp]= /*K_1_eq* */ THIRD+ /*kappa_1_eq* */ n0_o_n0 + /*kappa_1_eq* */ n1_o_n1;
         }
         if (count == 3)
         {
@@ -260,8 +256,8 @@ HydraulicConductivity3D::computeQpProperties()
             outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
             outerProduct(_n[q2][2],_n[q2][2],n2_o_n2);
             
-            _K_filettata[_qp]= /*kappa_0_eq* */ n0_o_n0 + /*kappa_0_eq* */ n1_o_n1 + /*kappa_0_eq* */ n2_o_n2;
-            
+            if (_cond0) _K_filettata[_qp]= 1e4 * n0_o_n0 + 1e4 * n1_o_n1 + 1e4 * n2_o_n2;
+            if (_cond1) _K_filettata[_qp]= /*kappa_0_eq* */ n0_o_n0 + /*kappa_0_eq* */ n1_o_n1 + /*kappa_0_eq* */ n2_o_n2;
         }
         if (count > 3)
         {
@@ -272,10 +268,40 @@ HydraulicConductivity3D::computeQpProperties()
     else
     {
         //we are in background
-        _K_filettata[_qp]= /* K_3_eq* */ _identity;
+ /*       if ((  _q_point[_qp](0)>0.5 && _q_point[_qp](1)<0.5) 
+           || (_q_point[_qp](0)>0.75 
+           &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.75 
+           &&  _q_point[_qp](2)>0.5) 
+           || (_q_point[_qp](0)>0.625 && _q_point[_qp](0)<0.75 
+           &&  _q_point[_qp](1)>0.5 && _q_point[_qp](1)<0.625 
+           &&  _q_point[_qp](2)>0.5 && _q_point[_qp](2)<0.75))
+*/     bool _different_material=false;
+       Real x = _q_point[_qp](0);
+       Real y = _q_point[_qp](1);
+       Real z = _q_point[_qp](2);
+
+       if ( x > 0.5 && y < 0.5 )
+	_different_material = true;
+      
+       if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
+	_different_material = true;
+
+       if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
+	_different_material = true;
+
+       if (_different_material == true)
+       {
+             if(_cond0) _K_filettata[_qp]= 0.1 * _identity;
+           if(_cond1) _K_filettata[_qp]= /* K_3_eq* */ _identity;
+       }
+       else
+       {
+           if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
+           if(_cond1) _K_filettata[_qp]= /* K_3_eq* */ _identity;
+       }
     }
 
-    
+  
 }
 
 void HydraulicConductivity3D::ComputeNormalsFromAngles(RealVectorValue const & angles,
