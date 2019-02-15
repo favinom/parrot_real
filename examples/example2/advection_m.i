@@ -207,31 +207,205 @@ execute_on = 'initial'
 
 [Postprocessors]
 
-[./intC30]
-type = ElementIntegral_c0_MatProp
-variable = CM
-execute_on = 'timestep_end'
+[./intC00]
+type = ElementIntegral_Variable_Region
+variable = CM region = 0 execute_on = 'timestep_end'
+[../]
+[./intD00]
+type = ElementIntegral_Variable_Region
+region = 0 execute_on = 'timestep_end'
 [../]
 
-[./intC31]
-type = ElementIntegral_c1_MatProp
-variable = CM
-execute_on = 'timestep_end'
-[../]
+[./intC01]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 1 execute_on = 'timestep_end'
+ [../]
+[./intD01]
+ type = ElementIntegral_Variable_Region
+ region = 1 execute_on = 'timestep_end'
+ [../]
 
-[./vol30]
-type = ElementIntegralMaterialProperty
-mat_prop=level_set_1
-execute_on = 'timestep_end'
-[../]
+ [./intC02]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 2 execute_on = 'timestep_end'
+ [../]
+[./intD02]
+ type = ElementIntegral_Variable_Region
+ region = 2 execute_on = 'timestep_end'
+ [../]
 
+ [./intC03]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 3 execute_on = 'timestep_end'
+ [../]
+[./intD03]
+ type = ElementIntegral_Variable_Region
+ region = 3 execute_on = 'timestep_end'
+ [../]
 
-[./vol31]
-type = ElementIntegralMaterialProperty
-mat_prop=level_set_0
-execute_on = 'timestep_end'
-[../]
+ [./intC04]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 4 execute_on = 'timestep_end'
+ [../]
+[./intD04]
+ type = ElementIntegral_Variable_Region
+ region = 4 execute_on = 'timestep_end'
+ [../]
 
+ [./intC05]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 5 execute_on = 'timestep_end'
+ [../]
+[./intD05]
+ type = ElementIntegral_Variable_Region
+ region = 5 execute_on = 'timestep_end'
+ [../]
+
+ [./intC06]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 6 execute_on = 'timestep_end'
+ [../]
+[./intD06]
+ type = ElementIntegral_Variable_Region
+ region = 6 execute_on = 'timestep_end'
+ [../]
+
+ [./intC07]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 8 execute_on = 'timestep_end'
+ [../]
+[./intD07]
+ type = ElementIntegral_Variable_Region
+ region = 7 execute_on = 'timestep_end'
+ [../]
+
+ [./intC08]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 8 execute_on = 'timestep_end'
+ [../]
+[./intD08]
+ type = ElementIntegral_Variable_Region
+ region = 8 execute_on = 'timestep_end'
+ [../]
+
+ [./intC09]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 9 execute_on = 'timestep_end'
+ [../]
+[./intD09]
+ type = ElementIntegral_Variable_Region
+ region = 9 execute_on = 'timestep_end'
+ [../]
+
+ [./intC10]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 10 execute_on = 'timestep_end'
+ [../]
+[./intD10]
+ type = ElementIntegral_Variable_Region
+ region = 10 execute_on = 'timestep_end'
+ [../]
+
+ [./intC11]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 11 execute_on = 'timestep_end'
+ [../]
+[./intD11]
+ type = ElementIntegral_Variable_Region
+ region = 11 execute_on = 'timestep_end'
+ [../]
+
+ [./intC12]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 12 execute_on = 'timestep_end'
+ [../]
+[./intD12]
+ type = ElementIntegral_Variable_Region
+ region = 12 execute_on = 'timestep_end'
+ [../]
+
+ [./intC13]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 13 execute_on = 'timestep_end'
+ [../]
+[./intD13]
+ type = ElementIntegral_Variable_Region
+ region = 13 execute_on = 'timestep_end'
+ [../]
+
+ [./intC14]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 14 execute_on = 'timestep_end'
+ [../]
+[./intD14]
+ type = ElementIntegral_Variable_Region
+ region = 14 execute_on = 'timestep_end'
+ [../]
+
+ [./intC15]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 15 execute_on = 'timestep_end'
+ [../]
+[./intD15]
+ type = ElementIntegral_Variable_Region
+ region = 15 execute_on = 'timestep_end'
+ [../]
+
+ [./intC16]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 16 execute_on = 'timestep_end'
+ [../]
+[./intD16]
+ type = ElementIntegral_Variable_Region
+ region = 16 execute_on = 'timestep_end'
+ [../]
+
+ [./intC17]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 17 execute_on = 'timestep_end'
+ [../]
+[./intD17]
+ type = ElementIntegral_Variable_Region
+ region = 17 execute_on = 'timestep_end'
+ [../]
+
+ [./intC18]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 18 execute_on = 'timestep_end'
+ [../]
+[./intD18]
+ type = ElementIntegral_Variable_Region
+ region = 18 execute_on = 'timestep_end'
+ [../]
+
+ [./intC19]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 19 execute_on = 'timestep_end'
+ [../]
+[./intD19]
+ type = ElementIntegral_Variable_Region
+ region = 19 execute_on = 'timestep_end'
+ [../]
+
+ [./intC20]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 20 execute_on = 'timestep_end'
+ [../]
+[./intD20]
+ type = ElementIntegral_Variable_Region
+ region = 20 execute_on = 'timestep_end'
+ [../]
+
+ [./intC21]
+ type = ElementIntegral_Variable_Region
+ variable = CM region = 21 execute_on = 'timestep_end'
+ [../]
+[./intD21]
+ type = ElementIntegral_Variable_Region
+ region = 21 execute_on = 'timestep_end'
+ [../]
+
+ 
 []
 
 

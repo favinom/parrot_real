@@ -7,27 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ElementIntegral_c1_MatProp_H
-#define ElementIntegral_c1_MatProp_H
+#ifndef ElementIntegral_variable_region_H
+#define ElementIntegral_variable_region_H
 
 #include "ElementIntegralPostprocessor.h"
 
-class ElementIntegral_c1_MatProp;
+class ElementIntegral_Variable_Region;
 
 template <>
-InputParameters validParams<ElementIntegral_c1_MatProp>();
+InputParameters validParams<ElementIntegral_Variable_Region>();
 
-class ElementIntegral_c1_MatProp : public ElementIntegralPostprocessor
+class ElementIntegral_Variable_Region : public ElementIntegralPostprocessor
 {
 public:
-  ElementIntegral_c1_MatProp(const InputParameters & parameters);
+  ElementIntegral_Variable_Region(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
 
   const VariableValue & _u;
   
-  const MaterialProperty<Real> & _level_set_1;
+    bool _hasVariable;
+    
+  const MaterialProperty<int> & _regionID;
+  int _region;
     
 };
 
