@@ -52,7 +52,7 @@ _fa3_string(getParam<std::string>("fa3_string")),
 _fd1_string(getParam<std::string>("fd1_string")),
 _fd2_string(getParam<std::string>("fd2_string")),
 _fd3_string(getParam<std::string>("fd3_string")),
-_K(declareProperty<RealTensorValue>("conductivityTensor")),
+_K_filettata(declareProperty<RealTensorValue>("conductivityTensor")),
 _cond0(getParam<Real>("conductivityFracture0")),
 _cond1(getParam<std::vector<Real>>("conductivityFracture1")),
 _cond2(getParam<std::vector<Real>>("conductivityFracture2")),
@@ -213,13 +213,21 @@ HydraulicConductivity3D::computeQpProperties()
     if (count>0)
     {
         //We are inside at least a fracture
-        _K[_qp]=1.0*_identity;
         
         if (count == 1)
         {
             // we are inside a single fracture.
             int q=_whichFrac.at(0);
-            //std::cout<<"we are in Frac "<<q<<"con normale "<<_n[q][2]<<std::endl;
+            RealTensorValue n_o_n;
+            
+            outerProduct(_n[q][2],_n[q][2],n_o_n);
+            
+            RealTensorValue tangent0,tangent1,tangent;
+            outerProduct(_n[q][0],_n[q][0],tangent0);
+            outerProduct(_n[q][1],_n[q][1],tangent1);
+            tangent=tangent0+tangent1;
+            
+            _K_filettata[_qp]= /*K_2_eq* */ tangent+ /*kappa_2_eq* */ n_o_n;
             
         }
         if (count == 2)
@@ -230,8 +238,8 @@ HydraulicConductivity3D::computeQpProperties()
             //std::cout<<"we are on a line intesacting surface "<<q0<<" and "<<q1<<std::endl;
             //std::cout<<"normals are"<<_n[q0][2]<<" and "<<_n[q1][2]<<std::endl;
             
-         
-         }
+            
+        }
         if (count == 3)
         {
             // we are inside on a dot.
@@ -241,7 +249,7 @@ HydraulicConductivity3D::computeQpProperties()
             //std::cout<<"we are on a dot intesacting surfaces "<<q0<<" and "<<q1<<" and "<<q2<<std::endl;
             //std::cout<<"normals are"<<_n[q0][2]<<", "<<_n[q1][2]<<" and " <<_n[q2][2]<<std::endl;
             
-       }
+        }
         if (count > 3)
         {
             std::cout<<"error\n";
@@ -251,29 +259,9 @@ HydraulicConductivity3D::computeQpProperties()
     else
     {
         //we are in background
-        _K[_qp]=_cond3*_identity;
+        _K_filettata[_qp]=_cond3*_identity;
     }
 
-    
-    //    Real x_coord = _q_point[_qp](0);
-    //    Real y_coord = _q_point[_qp](1);
-    //
-    //
-    //    for (int i = 0; i < _fn; i++)
-    //    {
-    //        Real temp =_a[i]*x_coord+_b[i]*y_coord + _c[i];
-    //        if ( std::fabs(temp) <=  _ft[i]/2.0 )
-    //        {
-    //            Real tempo=_ao[i]*x_coord+_bo[i]*y_coord + _co[i];
-    //            if (std::fabs(tempo) <=  _fl[i]/2.0 )
-    //            {
-    //                std::cout<<"dentro\n";
-    //
-    //            }
-    //        }
-    //    }
-    //
-    //    // Kinematics
     
 }
 
@@ -360,4 +348,15 @@ int HydraulicConductivity3D::is_inside(RealVectorValue const & point)
         
     }
     return numOfFrac;
+}
+
+void HydraulicConductivity3D::outerProduct
+(RealVectorValue const & in1, RealVectorValue const &  in2, RealTensorValue & out)
+{
+    
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+        {
+            out(i, j) = in1(i)*in2(j);
+        }
 }

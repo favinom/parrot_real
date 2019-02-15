@@ -60,7 +60,8 @@ protected:
   virtual void computeQpProperties();
 //  virtual void initQpStatefulProperties();
 
-private:
+    void outerProduct
+    (RealVectorValue const & in1, RealVectorValue const &  in2, RealTensorValue & out);
     int _fn;
     
     int _prec;
@@ -95,7 +96,7 @@ private:
     
     RealTensorValue _identity;
     
-    MaterialProperty<RealTensorValue> &_K;
+    MaterialProperty<RealTensorValue> &_K_filettata;
     Real _cond0;
     std::vector<Real> _cond1;
     std::vector<Real> _cond2;
