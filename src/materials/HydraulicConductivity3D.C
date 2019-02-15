@@ -236,12 +236,13 @@ HydraulicConductivity3D::computeQpProperties()
             int q0=_whichFrac.at(0);
             int q1=_whichFrac.at(1);
             
-            RealVectorValue third=_n[q0][0].cross(_n[q0][0]);
+            // out tra le due normali per trovare la terza direzione
+            RealVectorValue third=_n[q0][2].cross(_n[q1][2]);
             
             RealTensorValue n0_o_n0,n1_o_n1,THIRD;
             
-            outerProduct(_n[q0][0],_n[q0][0],n0_o_n0);
-            outerProduct(_n[q1][1],_n[q1][1],n1_o_n1);
+            outerProduct(_n[q0][2],_n[q0][2],n0_o_n0);
+            outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
             outerProduct(third,third,THIRD);
             
             _K_filettata[_qp]= /*K_1_eq* */ THIRD+ /*kappa_1_eq* */ n0_o_n0 + /*kappa_1_eq* */ n1_o_n1;
@@ -253,8 +254,13 @@ HydraulicConductivity3D::computeQpProperties()
             int q0=_whichFrac.at(0);
             int q1=_whichFrac.at(1);
             int q2=_whichFrac.at(2);
-            //std::cout<<"we are on a dot intesacting surfaces "<<q0<<" and "<<q1<<" and "<<q2<<std::endl;
-            //std::cout<<"normals are"<<_n[q0][2]<<", "<<_n[q1][2]<<" and " <<_n[q2][2]<<std::endl;
+
+            RealTensorValue n0_o_n0,n1_o_n1,n2_o_n2;
+            outerProduct(_n[q0][2],_n[q0][2],n0_o_n0);
+            outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
+            outerProduct(_n[q2][2],_n[q2][2],n2_o_n2);
+            
+            _K_filettata[_qp]= /*kappa_0_eq* */ n0_o_n0 + /*kappa_0_eq* */ n1_o_n1 + /*kappa_0_eq* */ n2_o_n2;
             
         }
         if (count > 3)
@@ -266,7 +272,7 @@ HydraulicConductivity3D::computeQpProperties()
     else
     {
         //we are in background
-        _K_filettata[_qp]=_cond3*_identity;
+        _K_filettata[_qp]= /* K_3_eq* */ _identity;
     }
 
     
