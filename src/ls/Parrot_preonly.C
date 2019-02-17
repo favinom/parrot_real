@@ -44,7 +44,7 @@ PetscErrorCode  KSPSolve_Parrot_PREONLY(KSP ksp)
 //    PCCreate(PetscObjectComm((PetscObject)ksp), _ksp_ptr[0].local_pc);
 //    PCSetType(_ksp_ptr[0].local_pc[0],PCLU);
     PCSetOperators(_ksp_ptr[0].local_pc[0],Hmat,Pmat);
-        PCFactorSetMatSolverPackage(_ksp_ptr[0].local_pc[0],MATSOLVERSUPERLU_DIST);
+      //  PCFactorSetMatSolverPackage(_ksp_ptr[0].local_pc[0],MATSOLVERSUPERLU_DIST);
     std::cout<<"start factorizing?\n";
     auto t_start = std::chrono::high_resolution_clock::now();
     PCSetUp(_ksp_ptr[0].local_pc[0]);

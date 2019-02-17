@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
-  file = ../final${i}_${ref}.xda
+  file = ../refineMesh_0_0003_mesh.xda
   #uniform_refine = 1
   #second_order=true
 []
@@ -189,7 +189,7 @@ order=SIXTH
 []
 
 [Outputs]
- file_base = advectioOut${i}_${ref}
+ file_base = advectioOut1_1
 exodus = true
 csv=true
 print_perf_log = true
@@ -199,7 +199,7 @@ print_perf_log = true
 [UserObjects]
 [./soln]
 type = SolutionUserObject
- mesh = DiffusionOutput${i}_${ref}.e
+ mesh = DiffusionOutput1_1.e
 timestep = 2
 system_variables = pressure
 execute_on = 'initial'

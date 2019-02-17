@@ -1,6 +1,6 @@
 [Mesh]
 
- file = ../refineMesh_0_0003_mesh.xda
+ file = ../refineMesh_0_0002_mesh.xda
   uniform_refine = 0
   #second_order=true
 []
@@ -128,7 +128,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = DiffusionOutput1_1
+ file_base      = DiffusionOutput0_1
  exodus         = true
  print_perf_log = true
 []
