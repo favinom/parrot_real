@@ -39,7 +39,8 @@ for i=1:nudeNum
     P(i,3)=str2double(C{3});
 end
 
-A=moveNodes(P);
+%A=moveNodes(P);
+A=moveNodesPerfect(P);
 
 for i=1:nudeNum
     fprintf(wfid,[num2str( A(i,1) ),' ']);
