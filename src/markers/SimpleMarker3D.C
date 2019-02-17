@@ -230,10 +230,10 @@ SimpleMarker3D::computeElementMarker()
     }
 
     
-//    if (counter==0)
-//    {
-//        return DO_NOTHING;
-//    }
+    if (counter==0)
+    {
+        return DO_NOTHING;
+    }
     
     RealVectorValue _needed_points;
     _needed_points(0)=1.0;//(max_e(0)-min_e(0))/_min_dimension;
@@ -321,13 +321,6 @@ void SimpleMarker3D::ComputeNormalsFromAngles(RealVectorValue const & angles,
 
 bool SimpleMarker3D::is_inside(RealVectorValue const & point)
 {
-    std::cout<<"sono qui?\n";
-    if (0.49 < point(0) && point(0)<0.51 )
-    {
-        std::cout<<point<<std::endl;
-                exit(1);
-    }
-
     for (int i=0; i<_fn; ++i)
     {
         //if (shall_check[i]==true)
