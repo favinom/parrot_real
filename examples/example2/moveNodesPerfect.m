@@ -1,6 +1,6 @@
 function A=moveNodesPerfect(A)
 
-thickness=1e-4;
+thickness=0.5e-4;
 q=(0.5+0.75)/2;
 centers=[0.5 q 0.75];
 

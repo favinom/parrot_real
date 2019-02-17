@@ -228,6 +228,23 @@ SimpleMarker3D::computeElementMarker()
             }
         }
     }
+    std::cout.precision(8);
+    std::cout.setf( std::ios::fixed, std:: ios::floatfield );
+
+    if (counter!=0)
+    {
+        std::cout<<"oooooo\n   "<<std::flush;
+        
+        for (int i=0; i<(*_current_elem).n_nodes(); i++)
+        {
+            for (int j=0; j<3; ++j)
+                std::cout<<(*_current_elem).point(i)(j)<<" ";
+            std::cout<<std::endl;
+        }
+        std::cout<<"\n\n\n"<<std::flush;
+        
+        exit(1);
+    }
     
     if (counter==0)
     {
@@ -239,14 +256,14 @@ SimpleMarker3D::computeElementMarker()
     _needed_points(1)=1.0;//(max_e(1)-min_e(1))/_min_dimension;
     _needed_points(2)=1.0;//(max_e(2)-min_e(2))/_min_dimension;
     
-    std::cout<<"start"<<std::endl<<std::flush;
+    std::cout<<"start   "<<std::flush;
     RealVectorValue point;
     for (int i=0; i<std::ceil( _needed_points(0) ); ++i )
         for (int j=0; j<std::ceil( _needed_points(0) ); ++j )
             for (int k=0; k<std::ceil( _needed_points(0) ); ++k )
             {
                 for (int l=0;l<3;++l)
-                    point(l)=min_e(l)+((double)(rand()%_prec))/(double)_prec*(max_e(l)-min_e(l));
+                    point(l)=(max_e(l)-min_e(l))/2.0;
                 
                 if ( is_inside(point))
                     return REFINE;
@@ -325,13 +342,13 @@ bool SimpleMarker3D::is_inside(RealVectorValue const & point)
         if (shall_check[i]==true)
         {
             Real temp1=std::fabs( _n[i][0]*point-_d[i](0) );
-            if (temp1<_dimension[i](0)/2.0)
+            if (temp1<=_dimension[i](0)/2.0)
             {
                 Real temp2=std::fabs( _n[i][1]*point-_d[i](1) );
-                if (temp2<_dimension[i](1)/2.0)
+                if (temp2<=_dimension[i](1)/2.0)
                 {
                     Real temp3=std::fabs( _n[i][2]*point-_d[i](2) );
-                    if (temp3<_dimension[i](2)/2.0)
+                    if (temp3<=_dimension[i](2)/2.0)
                     {
                         return true;
                     }
