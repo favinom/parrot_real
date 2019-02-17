@@ -1,9 +1,9 @@
 [Mesh]
  type = GeneratedMesh
  dim = 3
- nx = 32
- ny = 32
- nz = 32
+ nx = 15
+ ny = 15
+ nz = 15
  xmin = 0
  xmax = 1
  ymin = 0
@@ -13,6 +13,16 @@
 #If you want to use quadratic elements, regenerate the mesh with the following line uncommented.
 #elem_type = QUAD9
 partitioner = parmetis
+[]
+
+[MeshModifiers]
+  [./subdomains]
+    type = SubdomainBoundingBox
+    bottom_left = '0.5 0.5 0.5'
+    block_id = 2
+    top_right = '1.0 1.0 1.0'
+    location = INSIDE
+  [../]
 []
 
 [Variables]
@@ -44,5 +54,6 @@ partitioner = parmetis
  print_linear_residuals = true
  print_perf_log = true
  xda = true
+ exodus=true
 []
 

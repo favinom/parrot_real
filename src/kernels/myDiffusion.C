@@ -36,5 +36,5 @@ MyDiffusion::computeQpResidual()
 Real
 MyDiffusion::computeQpJacobian()
 {
-  return _coef * _grad_phi[_j][_qp] * (_K[_qp]* _grad_test[_i][_qp]);
+  return _coef * _grad_phi[_j][_qp] * (_K[_qp] * _grad_test[_i][_qp]);
 }

@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
-  file = ../final${i}_${ref}.xda
+  file = ../final1_1.xda
   #uniform_refine = 1
   #second_order=true
 []

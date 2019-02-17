@@ -1,6 +1,6 @@
 [Mesh]
 
- file = ../final${i}_${ref}.xda
+ file = ../refineMesh_0_0003_mesh.xda
   uniform_refine = 0
   #second_order=true
 []
@@ -115,7 +115,7 @@
  solve_type= LINEAR
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               superlu_dist'
+ petsc_options_value='  preonly   lu       NONZERO               mumps'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
@@ -128,7 +128,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = DiffusionOutput${i}_${ref}
+ file_base      = DiffusionOutput1_1
  exodus         = true
  print_perf_log = true
 []

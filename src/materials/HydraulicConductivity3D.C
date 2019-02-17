@@ -373,6 +373,8 @@ HydraulicConductivity3D::computeQpProperties()
            if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
        }
     }
+
+      //_K_filettata[_qp]= 1.0 * _identity;
      
 //      std::cout<<" _U[_qp] "<<  _gradP[_qp] <<std::endl;   
      _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
