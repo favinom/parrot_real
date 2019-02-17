@@ -240,7 +240,7 @@ SimpleMarker3D::computeElementMarker()
     _needed_points(1)=1.0;//(max_e(1)-min_e(1))/_min_dimension;
     _needed_points(2)=1.0;//(max_e(2)-min_e(2))/_min_dimension;
     
-    std::cout<<"start   "<<std::flush;
+    //std::cout<<"start   "<<std::flush;
     RealVectorValue point;
     for (int i=0; i<std::ceil( _needed_points(0) ); ++i )
         for (int j=0; j<std::ceil( _needed_points(0) ); ++j )
@@ -254,7 +254,7 @@ SimpleMarker3D::computeElementMarker()
                 
             }
     
-    std::cout<<"stop"<<std::endl<<std::flush;
+    //std::cout<<"stop"<<std::endl<<std::flush;
     
     return DO_NOTHING;
     
