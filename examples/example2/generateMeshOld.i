@@ -1,9 +1,9 @@
 [Mesh]
  type = GeneratedMesh
  dim = 3
- nx = 35
- ny = 35
- nz = 35
+ nx = 12
+ ny = 12
+ nz = 12
  xmin = 0
  xmax = 1
  ymin = 0
