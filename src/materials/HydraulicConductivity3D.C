@@ -260,6 +260,9 @@ void
 HydraulicConductivity3D::computeQpProperties()
 {
     _regionID[_qp]=-1;
+
+    _regionID[_qp]=findRegion(_q_point[_qp]);
+    
     RealVectorValue point=_q_point[_qp];
     
     //        for (int i=0; i<_fn; ++i)
@@ -280,6 +283,8 @@ HydraulicConductivity3D::computeQpProperties()
     
     int count = is_inside(point);
     _numOfFrac[_qp]=count;
+
+    
     
     if (count>0)
     {
@@ -345,8 +350,7 @@ HydraulicConductivity3D::computeQpProperties()
     {
 
        _phi[_qp]=_phiMatrix;
-        _regionID[_qp]=findRegion(_q_point[_qp]);
-        
+
        bool _different_material=false;
        Real x = _q_point[_qp](0);
        Real y = _q_point[_qp](1);

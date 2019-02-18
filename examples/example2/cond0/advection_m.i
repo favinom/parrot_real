@@ -111,7 +111,7 @@ comp_i=2
 []
 
 [Kernels]
-active='convection stab time'
+active='convection stab time diff'
 
 [upwind]
 type = AlgebraicDiffusion
@@ -133,7 +133,7 @@ coef=1.0e-9
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=0.8
+coef=0.5
 use_h=true
 [../]
 
@@ -152,9 +152,9 @@ lumping = false
 [../]
 
 [./diff]
-type = AnisotropicDiffusion
+type = CoefDiffusion
 variable = CM
-tensor_coeff='1.e-8 0 0 0 1.0e-8 0 0 0 1.0e-8'
+coef='2.0'
 [../]
 []
 
