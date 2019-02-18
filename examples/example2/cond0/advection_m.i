@@ -7,6 +7,36 @@ type = ParrotProblem
   #uniform_refine = 1
   #second_order=true
 []
+ 
+[MeshModifiers]
+ [./createNewSidesetX]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'left'
+ boundary_id_new = 10
+ block_id = 0
+ bottom_left = '-0.1  -0.1  -0.1'
+ top_right =   '0.1  0.25 0.25'
+ [../]
+ 
+ [./createNewSidesetY]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'bottom'
+ boundary_id_new = 11
+ block_id = 0
+ bottom_left = '-0.1  -0.1  -0.1'
+ top_right =   '0.25  0.1  0.25'
+ [../]
+ 
+ [./createNewSidesetZ]
+ type = AddSideSetsFromBoundingBox
+ boundary_id_old = 'back'
+ boundary_id_new = 12
+ block_id = 0
+ bottom_left = '-0.1  -0.1  -0.1'
+ top_right =   '0.25  0.25  0.1'
+ [../]
+ []
+
 
 [AuxVariables]
 [./P_aux] [../]
@@ -44,44 +74,14 @@ comp_i=2
 [./CM] [../]
 []
 
-[MeshModifiers]
- [./createNewSidesetX]
- type = AddSideSetsFromBoundingBox
- boundary_id_old = 'left'
- boundary_id_new = 10
- block_id = 0
- bottom_left = '-0.1  -0.1  -0.1'
- top_right =   '0.1  0.25 0.25'
- [../]
-
- [./createNewSidesetY]
- type = AddSideSetsFromBoundingBox
- boundary_id_old = 'bottom'
- boundary_id_new = 11
- block_id = 0
- bottom_left = '-0.1  -0.1  -0.1'
- top_right =   '0.25  0.1  0.25' 
-[../]
-
- [./createNewSidesetZ]
- type = AddSideSetsFromBoundingBox
- boundary_id_old = 'back'
- boundary_id_new = 12
- block_id = 0
- bottom_left = '-0.1  -0.1  -0.1'
- top_right =   '0.25  0.25  0.1'
-[../]
-[]
-
-
 [Materials]
 [./conductivity2] type = HydraulicConductivity3D
- fn = 9
  pressure=P_aux
  cond0=true
  cond1=false
  phi_m=0.1
  phi_f=0.9
+ fn = 9
  fx_string = '0.5,0.5,0.5,
               0.749975,0.75,0.749975,
               0.625,0.625,0.625'
@@ -112,7 +112,8 @@ comp_i=2
 
 [Kernels]
 active='time convection stab'
-
+#active='time upwind'
+ 
 [./time]
 type = PorosityTimeDerivative
 variable = CM
@@ -139,7 +140,7 @@ coef=1.0e-9
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=2
+coef=4
 use_h=true
 [../]
 

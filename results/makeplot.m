@@ -1,4 +1,5 @@
 close all
+clear all
 
 cd('/Users/favinom/projectsN/parrot_real/results');
 
@@ -18,12 +19,12 @@ sub{9} = 'UNICE-UNIGE/VAGDisc';
 
 
 sub{10} = 'USTUTT/MPFA';
-sub{11} = 'USI-UNIL/AD';
-sub{12} = 'USI-UNIL';
+%sub{11} = 'USI-UNIL/AD';
+%sub{12} = 'USI-UNIL';
 for ref=1:3
     figure(ref)
     
-    for sub_i=1:12
+    for sub_i=1:length(sub)
         
         file = ['dot_refinement_',num2str(ref-1),'*'];
         
@@ -43,7 +44,7 @@ for ref=1:3
     for ff=1:3
         subplot(3,2,2*ff-1);
         hold on
-        for sub_i=1:12
+        for sub_i=1:length(sub)
            if (sub_i==12)
                 plot(data{sub_i}(:,1),data{sub_i}(:,ff+1),'k-', 'LineWidth', 2)
            elseif (sub_i==11)
@@ -60,7 +61,7 @@ end
 for ref=1:3
     figure(ref)
     
-    for sub_i=1:12
+    for sub_i=1:length(sub)
         
         file = ['dol_refinement_',num2str(ref-1),'*'];
         
@@ -78,7 +79,7 @@ for ref=1:3
      for ff=1:3
          subplot(3,2,2*ff);
          hold on
-         for sub_i=1:12
+         for sub_i=1:length(sub)
              if(sub_i==12)
               plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff),'k-', 'LineWidth', 2)
              elseif (sub_i==11)
