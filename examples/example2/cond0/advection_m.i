@@ -111,8 +111,14 @@ comp_i=2
 []
 
 [Kernels]
-active='convection stab time diff'
+active='time convection stab'
 
+[./time]
+type = PorosityTimeDerivative
+variable = CM
+lumping = true
+[../]
+ 
 [upwind]
 type = AlgebraicDiffusion
 variable = CM
@@ -133,7 +139,7 @@ coef=1.0e-9
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=0.5
+coef=2
 use_h=true
 [../]
 
@@ -143,12 +149,6 @@ variable = CM
 coef=0.5
 use_h=true
 lumping=false
-[../]
-
-[./time]
-type = PorosityTimeDerivative
-variable = CM
-lumping = false
 [../]
 
 [./diff]

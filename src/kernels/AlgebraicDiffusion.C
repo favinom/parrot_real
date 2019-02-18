@@ -28,7 +28,6 @@ Kernel(parameters),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
 _u_nodal(_var.dofValues()),
 _poro(getMaterialProperty<Real>("Porosity"))
-//_int_by_parts(getParam<bool>("int_by_parts"))
 {}
 
 Real

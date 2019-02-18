@@ -30,11 +30,15 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
+//    virtual void computeJacobian();
+    virtual void computeResidual();
   /**
    * This MooseArray will hold the reference we need to our
    * material property from the Material class
    */
-  const MaterialProperty<Real> &_phi;
+  const MaterialProperty<Real> &_poro;
+    
+    const VariableValue & _u_dot_nodal;
+    
 };
 #endif // COEFTIMEDERIVATIVE_H
