@@ -37,7 +37,7 @@ for sub_i=1:length(sub)
     file = c0;
     
     if (sub_i==11)
-        data{sub_i}=csvread(file,2);
+        data{sub_i}=csvread(file,1);
     else
         data{sub_i}=load(file);
     end
@@ -52,7 +52,8 @@ for sub_i=1:length(sub)
     end
     
     if (sub_i==11)
-        data{sub_i}=[data{sub_i}(2:end,1) data{sub_i}(2:end,2:23)./data{sub_i}(2:end,24:end)];
+        data{sub_i}=[data{sub_i}(1:end,1) data{sub_i}(1:end,2:23)./data{sub_i}(1:end,24:end)];
+        data{sub_i}(end,:)
     end
     
     size(data{sub_i})

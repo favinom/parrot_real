@@ -34,8 +34,8 @@ InputParameters validParams<HydraulicConductivity3D>()
     params.addRequiredParam<std::string>("fd2_string", "fracture dimension 2");
     params.addRequiredParam<std::string>("fd3_string", "fracture dimension 3");
     params.addCoupledVar("pressure",
-                                 "The gradient of this variable will be used as "
-                                 "the velocity vector.");
+                         "The gradient of this variable will be used as "
+                         "the velocity vector.");
     params.addRequiredParam<bool>("cond0","condition0");
     params.addParam<bool>("cond1","false","condition1");
     params.addRequiredParam<Real>("phi_f","phi fracture");
@@ -259,87 +259,32 @@ _regionID(declareProperty<int>("RegionID"))
 void
 HydraulicConductivity3D::computeQpProperties()
 {
-    _regionID[_qp]=-1;
-
-    _regionID[_qp]=findRegion(_q_point[_qp]);
-    
     RealVectorValue point=_q_point[_qp];
     
-    //        for (int i=0; i<_fn; ++i)
-    //        {
-    //            std::cout<<i<<std::endl;
-    //            std::cout<<_n[i][0]<<std::endl;
-    //            std::cout<<_n[i][1]<<std::endl;
-    //            std::cout<<_n[i][2]<<std::endl;
-    //            std::cout<<_d[i](0)<<std::endl;
-    //            std::cout<<_d[i](1)<<std::endl;
-    //            std::cout<<_d[i](2)<<std::endl;
-    //            std::cout<<_dimension[i](0)<<std::endl;
-    //            std::cout<<_dimension[i](1)<<std::endl;
-    //            std::cout<<_dimension[i](2)<<std::endl;
-    //            std::cout<<point<<std::endl;
-    //        }
+    _regionID[_qp]=-1;
+    _regionID[_qp]=findRegion(point);
     
+    Real permFrac;
+    Real permMatrix=1.0;
+    Real permMatrixReduced=0.1;
+    
+    if (_cond0)
+    {
+        permFrac=1e4;
+    }
+    else
+    {
+        permFrac=1e-4;
+    }
     
     int count = is_inside(point);
     _numOfFrac[_qp]=count;
-
-    
     
     if (count>0)
     {
         //We are inside at least a fracture
-        _phi[_qp]=_phiFracture;     
-        
-        if (count == 1)
-        {
-            // we are inside a single fracture.
-            int q=_whichFrac.at(0);
-            RealTensorValue n_o_n;
-            
-            outerProduct(_n[q][2],_n[q][2],n_o_n);
-            
-            RealTensorValue tangent0,tangent1,tangent;
-            outerProduct(_n[q][0],_n[q][0],tangent0);
-            outerProduct(_n[q][1],_n[q][1],tangent1);
-            tangent=tangent0+tangent1;
-            
-            if(_cond0) _K_filettata[_qp]= 1e4* tangent+ 1e4 * n_o_n;
-            if(_cond1) _K_filettata[_qp]= 1e-4 * tangent+ 1e-4 * n_o_n;
-        }
-        if (count == 2)
-        {
-            // we are inside on a line.
-            int q0=_whichFrac.at(0);
-            int q1=_whichFrac.at(1);
-            
-            // out tra le due normali per trovare la terza direzione
-            RealVectorValue third=_n[q0][2].cross(_n[q1][2]);
-            
-            RealTensorValue n0_o_n0,n1_o_n1,THIRD;
-            
-            outerProduct(_n[q0][2],_n[q0][2],n0_o_n0);
-            outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
-            outerProduct(third,third,THIRD);
-            
-            if(_cond0)  _K_filettata[_qp]= 1e4 *THIRD+ 1e4 * n0_o_n0 + 1e4 * n1_o_n1;
-            if(_cond1)  _K_filettata[_qp]= 1e-4 * THIRD+ 1e-4 * n0_o_n0 + 1e-4 *n1_o_n1;
-        }
-        if (count == 3)
-        {
-            // we are inside on a dot.
-            int q0=_whichFrac.at(0);
-            int q1=_whichFrac.at(1);
-            int q2=_whichFrac.at(2);
-
-            RealTensorValue n0_o_n0,n1_o_n1,n2_o_n2;
-            outerProduct(_n[q0][2],_n[q0][2],n0_o_n0);
-            outerProduct(_n[q1][2],_n[q1][2],n1_o_n1);
-            outerProduct(_n[q2][2],_n[q2][2],n2_o_n2);
-            
-            if (_cond0) _K_filettata[_qp]= 1e4 * n0_o_n0 + 1e4 * n1_o_n1 + 1e4 * n2_o_n2;
-            if (_cond1) _K_filettata[_qp]= 1e-4 * n0_o_n0 + 1e-4 * n1_o_n1 + 1e-4 * n2_o_n2;
-        }
+        _phi[_qp]=_phiFracture;
+        _K_filettata[_qp]= permFrac * _identity;
         if (count > 3)
         {
             std::cout<<"error\n";
@@ -348,42 +293,31 @@ HydraulicConductivity3D::computeQpProperties()
     }
     else
     {
-
-       _phi[_qp]=_phiMatrix;
-
-       bool _different_material=false;
-       Real x = _q_point[_qp](0);
-       Real y = _q_point[_qp](1);
-       Real z = _q_point[_qp](2);
-
-       if ( x > 0.5 && y < 0.5 )
-	_different_material = true;
-      
-       if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
-	_different_material = true;
-
-       if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
-	_different_material = true;
-
-       if (_different_material == true)
-       {
-             if(_cond0) _K_filettata[_qp]= 0.1 * _identity;
-             if(_cond1) _K_filettata[_qp]= 0.1 * _identity;
+        _K_filettata[_qp]= permMatrix * _identity;
+        _phi[_qp]=_phiMatrix;
         
-       }
-       else
-       {
-           if(_cond0) _K_filettata[_qp]= 1.0 * _identity;
-           if(_cond1) _K_filettata[_qp]= 1.0 * _identity;
-       }
+        bool _different_material=false;
+        Real x = _q_point[_qp](0);
+        Real y = _q_point[_qp](1);
+        Real z = _q_point[_qp](2);
+        
+        if ( x > 0.5 && y < 0.5 )
+            _different_material = true;
+        
+        if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
+            _different_material = true;
+        
+        if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
+            _different_material = true;
+        
+        if (_different_material == true)
+        {
+            _K_filettata[_qp]= permMatrixReduced * _identity;
+        }
     }
-
-      //_K_filettata[_qp]= 1.0 * _identity;
-     
-//      std::cout<<" _U[_qp] "<<  _gradP[_qp] <<std::endl;   
-     _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
-//  _K_filettata[_qp]= 1.0 * _identity;
-  
+    
+    _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
+    
 }
 
 void HydraulicConductivity3D::ComputeNormalsFromAngles(RealVectorValue const & angles,

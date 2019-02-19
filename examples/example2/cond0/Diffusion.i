@@ -87,10 +87,6 @@
 # observe that with the second BCs the stiffness matrix is SDP and we can use choleski factorization
 
 [Functions]
- [./fun_dr]
- type = ParsedFunction
- value = '1*(x>0.875)*(y>0.875)*(z>0.875)'
- [../]
  [./fun_n]
  type = ParsedFunction
  value = '1*(x<0.2500)*(y<0.2500)*(z<0.2500)'
@@ -100,8 +96,6 @@
 [BCs]
 [./dirBC]  type = DirichletBC variable = pressure value = 1  boundary = '10 11 12'  [../]
 [./fluxBC] type = FunctionNeumannBC variable = pressure function = fun_n  boundary = 'left bottom back' [../]
-#[./inflowBC]  type = PenaltyDirichletBC variable = pressure boundary = inflow  value = 4.0 penalty = 1e10 [../]
-#[./outflowBC] type = PenaltyDirichletBC variable = pressure boundary = outflow value = 1.0 penalty = 1e10 [../]
 []
  
 [Preconditioning]
