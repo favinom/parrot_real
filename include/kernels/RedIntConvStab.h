@@ -26,11 +26,13 @@ class RedIntConvStab : public Kernel
 public:
     RedIntConvStab(const InputParameters & parameters);
     
-    void myAssembleJacobian(DenseMatrix<Number> & inX,
-                            DenseMatrix<Number> & inY,
-                            DenseMatrix<Number> & inZ);
+    void myAssembleJacobian();
     
-    void myComputeArtificialDiffusion(DenseMatrix<Number> const & op, DenseMatrix<Number> & diff);
+    void myAssembleConvection();
+    
+    void myAssembleArtificialDiffusion();
+    
+    void verifyMatrix(DenseMatrix<Number> & in);
     
 protected:
     virtual Real computeQpResidual() override {return 0.0;};
@@ -48,6 +50,14 @@ protected:
     const VariableValue & _u_nodal;
     
     RealVectorValue _vel;
+    
+    DenseMatrix<Number> _convX;
+    DenseMatrix<Number> _convY;
+    DenseMatrix<Number> _convZ;
+    
+    DenseMatrix<Number> _artifDiffX;
+    DenseMatrix<Number> _artifDiffY;
+    DenseMatrix<Number> _artifDiffZ;
 };
 
 #endif

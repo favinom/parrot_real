@@ -41,41 +41,9 @@ RedIntConvStab::computeResidual()
     
     _vel/=_qrule->n_points();
     
-    DenseMatrix<Number> convX,convY,convZ;
-    convX.resize(_test.size(), _test.size());
-    convY.resize(_test.size(), _test.size());
-    convZ.resize(_test.size(), _test.size());
-    convX.zero();
-    convY.zero();
-    convZ.zero();
-    
-    myAssembleJacobian(convX,convY,convZ);
-    
-    DenseMatrix<Number> artifDiffX;
-    DenseMatrix<Number> artifDiffY;
-    DenseMatrix<Number> artifDiffZ;
-    artifDiffX.resize(_test.size(), _test.size());
-    artifDiffY.resize(_test.size(), _test.size());
-    artifDiffZ.resize(_test.size(), _test.size());
-    artifDiffX.zero();
-    artifDiffY.zero();
-    artifDiffZ.zero();
-    
-    myComputeArtificialDiffusion(convX,artifDiffX);
-    myComputeArtificialDiffusion(convY,artifDiffY);
-    myComputeArtificialDiffusion(convZ,artifDiffZ);
-    
-    prepareMatrixTag(_assembly, _var.number(), _var.number());
-    precalculateJacobian();
-    
     _local_ke.resize(_test.size(), _test.size());
     _local_ke.zero();
-    _local_ke+=convX;
-    _local_ke+=convY;
-    _local_ke+=convZ;
-    _local_ke+=artifDiffX;
-    _local_ke+=artifDiffY;
-    _local_ke+=artifDiffZ;
+    myAssembleJacobian();
     
     prepareVectorTag(_assembly, _var.number());
     precalculateResidual();
@@ -99,55 +67,26 @@ RedIntConvStab::computeJacobian()
         _vel+=_U[_qp];
     
     _vel/=_qrule->n_points();
-
-    DenseMatrix<Number> convX,convY,convZ;
-    convX.resize(_test.size(), _test.size());
-    convY.resize(_test.size(), _test.size());
-    convZ.resize(_test.size(), _test.size());
-    convX.zero();
-    convY.zero();
-    convZ.zero();
-    
-    myAssembleJacobian(convX,convY,convZ);
-    
-    DenseMatrix<Number> artifDiffX;
-    DenseMatrix<Number> artifDiffY;
-    DenseMatrix<Number> artifDiffZ;
-    artifDiffX.resize(_test.size(), _test.size());
-    artifDiffY.resize(_test.size(), _test.size());
-    artifDiffZ.resize(_test.size(), _test.size());
-    artifDiffX.zero();
-    artifDiffY.zero();
-    artifDiffZ.zero();
-
-    myComputeArtificialDiffusion(convX,artifDiffX);
-    convX+=artifDiffX;
-    myComputeArtificialDiffusion(convY,artifDiffY);
-    convY+=artifDiffY;
-    myComputeArtificialDiffusion(convZ,artifDiffZ);
-    convZ+=artifDiffZ;
     
     prepareMatrixTag(_assembly, _var.number(), _var.number());
     precalculateJacobian();
 
-    _local_ke+=convX;
-    _local_ke+=convY;
-    _local_ke+=convZ;
-//    std::cout<<convX<<std::endl;
-//        std::cout<<convY<<std::endl;
-//        std::cout<<convZ<<std::endl;
-//    std::cout<<_local_ke<<std::endl;
-//    exit(1);
+    myAssembleJacobian();
     
     accumulateTaggedLocalMatrix();
     
 }
 
-void RedIntConvStab::myAssembleJacobian(
-                                        DenseMatrix<Number> & inX,
-                                        DenseMatrix<Number> & inY,
-                                        DenseMatrix<Number> & inZ)
+void RedIntConvStab::myAssembleConvection()
 {
+    _convX.resize(_test.size(), _test.size());
+    _convY.resize(_test.size(), _test.size());
+    _convZ.resize(_test.size(), _test.size());
+    
+    _convX.zero();
+    _convY.zero();
+    _convZ.zero();
+    
     UniquePtr<FEBase> fe (FEBase::build(3, FIRST));
     QTrap qrule (3);
     fe->attach_quadrature_rule (&qrule);
@@ -155,10 +94,6 @@ void RedIntConvStab::myAssembleJacobian(
     const std::vector<Real> & JxW = fe->get_JxW();
     const std::vector<std::vector<Real> > & phi = fe->get_phi();
     const std::vector<std::vector<RealVectorValue> > & dphi = fe->get_dphi();
-    
-//    DenseMatrix<Number> Me;
-//    Me.resize(phi.size(),phi.size());
-//    Me.zero();
     
     Real test;
     RealVectorValue gradPhi;
@@ -174,31 +109,107 @@ void RedIntConvStab::myAssembleJacobian(
                 gradPhi=dphi[_j][_qp];
                 weight=JxW[_qp];
 
-                inX(_i, _j)+= weight *  gradPhi(0) * test * _vel(0);
-                inY(_i, _j)+= weight *  gradPhi(1) * test * _vel(1);
-                inZ(_i, _j)+= weight *  gradPhi(2) * test * _vel(2);
-                //_coord[_qp] *
+                _convX(_i, _j)+= weight *  gradPhi(0) * test * _vel(0);
+                _convY(_i, _j)+= weight *  gradPhi(1) * test * _vel(1);
+                _convZ(_i, _j)+= weight *  gradPhi(2) * test * _vel(2);
             }
 }
 
 
-void RedIntConvStab::myComputeArtificialDiffusion(DenseMatrix<Number> const & op, DenseMatrix<Number> & diff)
+void RedIntConvStab::myAssembleArtificialDiffusion()
 {
+    _artifDiffX.resize(_test.size(), _test.size());
+    _artifDiffY.resize(_test.size(), _test.size());
+    _artifDiffZ.resize(_test.size(), _test.size());
+
+    _artifDiffX.zero();
+    _artifDiffY.zero();
+    _artifDiffZ.zero();
+    
+    UniquePtr<FEBase> fe (FEBase::build(3, FIRST));
+    QTrap qrule (3);
+    fe->attach_quadrature_rule (&qrule);
+    fe->reinit(_current_elem);
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<std::vector<RealVectorValue> > & dphi = fe->get_dphi();
+    
+    RealVectorValue gradPhi,gradTest;
+    Real weight;
     for (_i = 0; _i < _test.size(); _i++)
-    {
-        Real sum = 0.0;
         for (_j = 0; _j < _test.size(); _j++)
-        {
-            diff(_i,_j)=0.0;
-            if (_i!=_j)
+            for (_qp = 0; _qp < _qrule->n_points(); _qp++)
             {
-                if (op(_i,_j)>0)
-                {
-                    sum+=op(_i,_j);
-                    diff(_i,_j)=-1.0*op(_i,_j);
-                }
+                gradTest= dphi[_i][_qp];
+                gradPhi = dphi[_j][_qp];
+                weight  = JxW[_qp];
+                
+                _artifDiffX(_i, _j)+= weight *  gradPhi(0) * gradTest(0);
+                _artifDiffY(_i, _j)+= weight *  gradPhi(1) * gradTest(1);
+                _artifDiffZ(_i, _j)+= weight *  gradPhi(2) * gradTest(2);
             }
-        }
-        diff(_i,_i)+=sum;
+
+}
+
+void RedIntConvStab::verifyMatrix(DenseMatrix<Number> & in)
+{
+    for (int i=0; i<in.m(); ++i)
+        for (int j=0; j<in.n(); ++j)
+            if ( i!=j && in(i,j)>1e-15)
+            {
+                std::cout<<"RedIntConvStab::verifyMatrix error\n";
+                std::cout<<_artifDiffZ<<std::endl;
+                std::cout<<_convZ<<std::endl;
+                exit(1);
+            }
+}
+
+void RedIntConvStab::myAssembleJacobian()
+{
+    myAssembleConvection();
+    myAssembleArtificialDiffusion();
+    
+    Real coeffX,coeffY,coeffZ;
+    
+        coeffX=std::fabs( _convX(0,0)/_artifDiffX(0,0) );
+        coeffY=std::fabs( _convY(0,0)/_artifDiffY(0,0) );
+        coeffZ=std::fabs( _convZ(0,0)/_artifDiffZ(0,0) );
+
+    if (coeffX<0.0)
+    {
+        std::cout<<"coeffX <0.0"<<coeffX<<std::endl;
+        exit(1);
     }
+    if (coeffY<0.0)
+    {
+        std::cout<<"coeffY <0.0"<<coeffY<<std::endl;
+        exit(1);
+    }
+    if (coeffZ<0.0)
+    {
+        std::cout<<"coeffZ <0.0"<<coeffZ<<std::endl;
+        exit(1);
+    }
+
+    _artifDiffX*=coeffX;
+    _artifDiffY*=coeffY;
+    _artifDiffZ*=coeffZ;
+    
+//    verifyMatrix(_artifDiffX);
+//    verifyMatrix(_artifDiffY);
+//    verifyMatrix(_artifDiffZ);
+
+    _convX+=_artifDiffX;
+    _convY+=_artifDiffY;
+    _convZ+=_artifDiffZ;
+    
+//    verifyMatrix(_convX);
+//    verifyMatrix(_convY);
+//   verifyMatrix(_convZ);
+    
+    _local_ke+=_convX;
+    _local_ke+=_convY;
+    _local_ke+=_convZ;
+    
+    verifyMatrix(_local_ke);
+    
 }
