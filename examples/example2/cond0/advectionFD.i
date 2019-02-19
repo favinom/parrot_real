@@ -111,10 +111,6 @@ comp_i=2
 []
 
 [Kernels]
-#active='time convection stab'
-#active='time upwind'
- active = FD
-
  [FD]
  type = RedIntConvStab
  variable = CM
@@ -125,49 +121,10 @@ type = PorosityTimeDerivative
 variable = CM
 lumping = true
 [../]
- 
-[upwind]
-type = AlgebraicDiffusion
-variable = CM
-[../]
-
-[./convection]
-type = Advection
-variable = CM
-int_by_parts=false
-[../]
-
-[./MyDiffusion]
-type = MyDiffusion
-variable = CM
-coef=1.0e-9
-[../]
-
-[./stab]
-type = AdvectionSUPG
-variable = CM
-coef=4
-use_h=true
-[../]
-
-[./timestab]
-type = TimeAdvectionSUPG
-variable = CM
-coef=0.5
-use_h=true
-lumping=false
-[../]
-
-[./diff]
-type = CoefDiffusion
-variable = CM
-coef='2.0'
-[../]
 []
 
 [BCs]
 [./u_injection_left] type = DirichletBC boundary = '10 11 12' variable = CM value='1.0' [../]
-#[./u_injection_right] type = OutflowBC boundary = 'outflow' variable = CM [../]
 []
 
 [Preconditioning]
@@ -189,10 +146,9 @@ petsc_options_value='  ksp_parrot_preonly  '
 dt = 0.0025
 num_steps=100
 
-[./Quadrature]
-type = TRAP
-#order=SIXTH
-[../]
+#[./Quadrature]
+#type = TRAP
+#[../]
 
 []
 

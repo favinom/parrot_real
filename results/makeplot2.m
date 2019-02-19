@@ -61,7 +61,7 @@ for sub_i=1:length(sub)
 end
 
 
-for i=17:17%2:size(data{sub_i},2)-1
+for i=2:size(data{sub_i},2)-1
     
     figure(i-1);
     hold on
@@ -71,15 +71,16 @@ for i=17:17%2:size(data{sub_i},2)-1
         end
         
         if (sub_i==10)
-            aaaa=10;
-            %plot(data{sub_i}(:,1),data{sub_i}(:,i),'*')
+            %aaaa=10;
+            plot(data{sub_i}(:,1),data{sub_i}(:,i),'*')
         elseif (sub_i==11)
-             plot(data{sub_i}(:,1),data{sub_i}(:,i)/5,'^')
+             plot(data{sub_i}(:,1),data{sub_i}(:,i),'^')
         else
             plot(data{sub_i}(:,1),data{sub_i}(:,i))
         end
     end
 end
+
 return
 
 
