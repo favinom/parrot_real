@@ -157,29 +157,62 @@ execute_on = 'initial'
 [../]
 []
 
-#[Postprocessors]
+ [Postprocessors]
+ [./integral1]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 1
+ [../]
+ 
+ [./integral2]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 2
+ [../]
 
-#[./flux_left]
-#type = SideFlux
-#variable = CM
-#boundary = outflow
-## PER FAVORE CONTROLLARE IL COEF
-#coef = 0.0
-#execute_on = 'timestep_end'
-#[../]
+ [./integral3]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 3
+ [../]
+ 
+ [./integral4]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 4
+ [../]
 
-#[./int3]
-#type = ElementIntegral_phi_c_MatProp
-#variable = CM
-#mat_prop = dummy
-#execute_on = 'timestep_end'
-#[../]
+ [./integral5]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 5
+ [../]
+ 
+ [./integral6]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 6
+ [../]
+ 
+ [./integral7]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 7
+ [../]
+ 
+ [./integral8]
+ type = ElementIntegralVariablePostprocessor
+ variable = CM
+ block = 8
+ [../]
+ 
+ [./volume1] type = VolumePostprocessor block = 1 [../] # execute_on = 'final'
+ [./volume2] type = VolumePostprocessor block = 2 [../] # execute_on = 'final'
+ [./volume3] type = VolumePostprocessor block = 3 [../] # execute_on = 'final
+ [./volume4] type = VolumePostprocessor block = 4 [../] # execute_on = 'final'
+ [./volume5] type = VolumePostprocessor block = 5 [../] # execute_on = 'final'
+ [./volume6] type = VolumePostprocessor block = 6 [../] # execute_on = 'final'
+ [./volume7] type = VolumePostprocessor block = 7 [../] # execute_on = 'final'
+ [./volume8] type = VolumePostprocessor block = 8 [../] # execute_on = 'final'
 
-#[./intFrac]
-#type = ElementIntegral_phi_c_MatProp
-#variable = CM
-#mat_prop = epsInt
-#execute_on = 'timestep_end'
-#[../]
-
-#[]
+ []
