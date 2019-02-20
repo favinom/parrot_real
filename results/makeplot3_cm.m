@@ -19,7 +19,7 @@ sub{9} = 'UNICE-UNIGE/VAGDisc';
 
 
 sub{10} = 'USTUTT/MPFA';
-%sub{11} = 'USI-UNIL';
+sub{11} = 'USI-UNIL';
 
 for sub_i=1:length(sub)
     
@@ -37,8 +37,12 @@ for sub_i=1:length(sub)
     if ( length(dirOut) ~= 0)
         filename=dirOut.name;
         
-        data{sub_i}=load(filename);
-        
+        if (sub_i==11)
+            data{sub_i}=csvread(filename,2);
+            data{sub_i}=[data{sub_i}(:,1) data{sub_i}(:,2:9)./data{sub_i}(:,10:end)];
+        else
+            data{sub_i}=load(filename);
+        end
     end
     
     cd(orig);
@@ -59,21 +63,25 @@ end
 
 
 for fig=2:size(data{sub_i},2)
-figure(fig-1)
-hold on
-counter=0;
-for sub_i=1:length(data)
-    if ( isempty(data{sub_i}) )
-        continue;
+    figure(fig-1)
+    hold on
+    counter=0;
+    for sub_i=1:length(data)
+        if ( isempty(data{sub_i}) )
+            continue;
+        end
+        
+        if (sub_i==11)
+            plot(data{sub_i}(:,1),data{sub_i}(:,fig),'*')
+        else
+            plot(data{sub_i}(:,1),data{sub_i}(:,fig))
+        end
+        counter=counter+1;
+        l{counter}=sub{sub_i};
     end
     
-    plot(data{sub_i}(:,1),data{sub_i}(:,2))
-    counter=counter+1;
-    l{counter}=sub{sub_i};
-end
-
-for i=1:counter
-    legend(l)
-end
-
+    for i=1:counter
+        legend(l)
+    end
+    
 end
