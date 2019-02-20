@@ -25,7 +25,7 @@ public:
 protected:
   virtual MarkerValue computeElementMarker() override;
 
-  int _block;
+  std::vector<int> _block;
 };
 
 #endif /* UNIFORMMARKER_H */

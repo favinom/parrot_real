@@ -15,22 +15,25 @@ template <>
 InputParameters
 validParams<BlockMarker>()
 {
-  InputParameters params = validParams<Marker>();
-params.addRequiredParam<int>("blockNum", "which block do you mark?");
-  return params;
+    InputParameters params = validParams<Marker>();
+    params.addRequiredParam<std::vector<int>>("blockNum", "which block do you mark?");
+    return params;
 }
 
 BlockMarker::BlockMarker(const InputParameters & parameters) :
 Marker(parameters),
-_block(getParam<int>("blockNum"))
+_block(getParam<std::vector<int>>("blockNum"))
 {
 }
 
 Marker::MarkerValue
 BlockMarker::computeElementMarker()
 {
-    if ((*_current_elem).subdomain_id() == _block)
-        return REFINE;
-    else
-        return DO_NOTHING;
+    for (int j=0; j<_block.size(); j++){
+        if ((*_current_elem).subdomain_id() == _block[j]){
+            return REFINE;
+        }
+    }
+    return DO_NOTHING;
+
 }

@@ -1,6 +1,6 @@
 [Mesh]
- file = mesh_test_3.e
- #uniform_refine = 0
+ file = prova.e
+ uniform_refine = 0
  #second_order=true
 []
 
@@ -53,7 +53,7 @@
 [./conductivity1] 
 block='1' 
 type =  HydraulicConductivity
- conductivity = 1e4 
+ conductivity = 1.e4
 [../]
 
 [./conductivity2] 
@@ -72,7 +72,7 @@ conductivity = 1.0
 []
 
 [BCs]
-[./dirBC]  type = DirichletBC variable = pressure value = 1  boundary = 11  [../]
+[./dirBC]  type = DirichletBC variable = pressure value = 0  boundary = 11  [../]
 [./fluxBC] type = NeumannBC variable = pressure value = '1'  boundary = '10' [../]
 []
  
@@ -86,7 +86,7 @@ conductivity = 1.0
  solve_type= newton
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               superlu_dist'
+ petsc_options_value='  preonly   lu       NONZERO               mumps'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
