@@ -62,7 +62,7 @@ protected:
 
     void outerProduct
     (RealVectorValue const & in1, RealVectorValue const &  in2, RealTensorValue & out);
-    int findRegion(RealVectorValue const & point);
+    int findRegion(RealVectorValue const & point,std::vector<int> & in);
     
     int _fn;
     

@@ -262,7 +262,13 @@ HydraulicConductivity3D::computeQpProperties()
     RealVectorValue point=_q_point[_qp];
     
     _regionID[_qp]=-1;
-    _regionID[_qp]=findRegion(point);
+    std::vector<int> ciao;
+    _regionID[_qp]=findRegion(point,ciao);
+    if (ciao.size()>1)
+    {
+        std::cout<<"maggiore\n";
+        exit(1);
+    }
     
     Real permFrac;
     Real permMatrix=1.0;
@@ -407,13 +413,14 @@ void HydraulicConductivity3D::outerProduct
         }
 }
 
-int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
+int HydraulicConductivity3D::findRegion(RealVectorValue const & point,std::vector<int> & in)
 {
+    in.clear();
     int returnValue = -1;
     
     for ( int i=0; i<_regionMin.size(); ++i )
     {
-        bool in=1;
+        bool isIn=1;
         for (int dim=0; dim<3; ++dim)
         {
             if ( _regionMin[i](dim) < point(dim) && point(dim) < _regionMax[i](dim) )
@@ -422,10 +429,10 @@ int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
             }
             else
             {
-                in = 0;
+                isIn = 0;
             }
         }
-        if (in)
+        if (isIn)
         {
             if (returnValue!= -1)
             {
@@ -433,12 +440,9 @@ int HydraulicConductivity3D::findRegion(RealVectorValue const & point)
                 exit(1);
             }
             returnValue = i;
+            in.push_back(i);
         }
     }
-    //if (returnValue==-1)
-    //{
-    //    std::cout<<"c'e' un problema2\n";
-    //    exit(1);
-    //}
+
     return returnValue;
 }
