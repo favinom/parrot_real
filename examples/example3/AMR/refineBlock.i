@@ -4,7 +4,7 @@ solve = false
 []
 
 [Mesh]
-file =  test_3_blocchi.e
+file =  test_3_blocchi_c2.e
 #second_order=true
 []
 
@@ -43,7 +43,7 @@ vector_value = '50 50 50'
  []
 
 [Outputs]
- file_base = refineMesh_0
+ file_base = refineMesh_1
  exodus = true
  print_linear_residuals = true
  print_perf_log = true
