@@ -36,38 +36,29 @@ for sub_i=1:length(sub)
     [c0,c1]=dirOut.name;
     file = c0;
     
-    if (sub_i==11)
-        data{sub_i}=csvread(file,1);
-    else
-        data{sub_i}=load(file);
-    end
+    data{sub_i}=load(file);
     
     cd(orig);
     
 end
 
-for sub_i=1:length(sub)
-    if ( isempty(sub{sub_i}) )
+for sub_i=1:length(data)
+    if ( isempty(data{sub_i}) )
         continue;
     end
     
-    if (sub_i==11)
-        data{sub_i}=[data{sub_i}(1:end,1) data{sub_i}(1:end,2:23)./data{sub_i}(1:end,24:end)];
-        data{sub_i}(end,:)
-    end
-    
+    sub_i
     size(data{sub_i})
     
     
 end
 
-
 for i=2:size(data{sub_i},2)-1
     
     figure(i-1);
     hold on
-    for sub_i=1:length(sub)
-        if ( isempty(sub{sub_i}) )
+    for sub_i=1:length(data)
+        if ( isempty(data{sub_i}) )
             continue;
         end
         
@@ -76,12 +67,10 @@ for i=2:size(data{sub_i},2)-1
             plot(data{sub_i}(:,1),data{sub_i}(:,i),'*')
         elseif (sub_i==11)
              plot(data{sub_i}(:,1),data{sub_i}(:,i),'^')
+        elseif (sub_i==12)
+            plot(data{sub_i}(:,1),data{sub_i}(:,i),'o')
         else
             plot(data{sub_i}(:,1),data{sub_i}(:,i))
         end
     end
 end
-
-return
-
-
