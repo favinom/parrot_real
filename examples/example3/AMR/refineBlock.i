@@ -4,7 +4,7 @@ solve = false
 []
 
 [Mesh]
-file =  test_3_blocchi_c2.e
+file =  mesh_giusta_1.e
 #second_order=true
 []
 

@@ -32,7 +32,7 @@ for sub_i=1:length(sub)
     dove=[folder,sub{sub_i}];
     cd(dove);
     
-    dirOut=dir('dol*0*1*');
+    dirOut=dir('dol*1*1*');
     
     if ( length(dirOut) ~= 0)
         filename=dirOut.name;
@@ -64,7 +64,11 @@ for sub_i=1:length(data)
         continue;
     end
     
-    plot(data{sub_i}(:,1),data{sub_i}(:,2))
+    if (sub_i==9)
+        plot(data{sub_i}(:,1),data{sub_i}(:,2),'o')
+    else
+        plot(data{sub_i}(:,1),data{sub_i}(:,2))
+    end
     counter=counter+1;
     l{counter}=sub{sub_i};
 end
