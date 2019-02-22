@@ -23,7 +23,7 @@ file = adapt1.xda
 
 [Adaptivity]
   marker = simplemark
-  steps = 2
+  steps = 1
   [./Markers]
     [./simplemark]
       type = SimpleMarker3D
