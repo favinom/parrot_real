@@ -323,6 +323,8 @@ HydraulicConductivity3D::computeQpProperties()
          */
     }
     
+    Real a=_JxW[_qp];
+    
     _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
     
 }
