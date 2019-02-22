@@ -301,25 +301,26 @@ HydraulicConductivity3D::computeQpProperties()
     {
         _K_filettata[_qp]= permMatrix * _identity;
         _phi[_qp]=_phiMatrix;
-        
-        bool _different_material=false;
-        Real x = _q_point[_qp](0);
-        Real y = _q_point[_qp](1);
-        Real z = _q_point[_qp](2);
-        
-        if ( x > 0.5 && y < 0.5 )
-            _different_material = true;
-        
-        if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
-            _different_material = true;
-        
-        if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
-            _different_material = true;
-        
-        if (_different_material == true)
-        {
-            _K_filettata[_qp]= permMatrixReduced * _identity;
-        }
+        /*
+         bool _different_material=false;
+         Real x = _q_point[_qp](0);
+         Real y = _q_point[_qp](1);
+         Real z = _q_point[_qp](2);
+         
+         if ( x > 0.5 && y < 0.5 )
+         _different_material = true;
+         
+         if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
+         _different_material = true;
+         
+         if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
+         _different_material = true;
+         
+         if (_different_material == true)
+         {
+         _K_filettata[_qp]= permMatrixReduced * _identity;
+         }
+         */
     }
     
     _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
@@ -443,6 +444,6 @@ int HydraulicConductivity3D::findRegion(RealVectorValue const & point,std::vecto
             in.push_back(i);
         }
     }
-
+    
     return returnValue;
 }
