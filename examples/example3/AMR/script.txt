@@ -1,0 +1,96 @@
+reset
+
+brick x 0.9 y 1.75 z 0.01
+
+brick x 0.01 y 0.25 z 0.9
+
+brick x 0.01 y 0.3 z 0.4
+
+brick x 0.01 y 0.3 z 0.4
+
+move Volume 1 location 0.5 1.125 0.5
+
+move Volume 2 location 0.5 0.175 0.5
+
+move Volume 3 location 0.77 2.05 0.5
+
+move Volume 4 location 0.83 2.05 0.5
+
+
+brick x 0.9 y 1.25 z 0.01
+rotate Volume 5 angle 16.2602  about X 
+
+brick x 0.9 y 1.2472 z 0.01
+rotate Volume 6 angle -15.819193  about X
+
+
+brick x 0.01 y 0.30594 z 0.4
+rotate Volume 7 angle 11.3099  about Z
+
+brick x 0.01 y 0.30594 z 0.4
+rotate Volume 8 angle -11.3099  about Z
+
+move Volume 5 location 0.5 1.6 0.675
+
+move Volume 6 location 0.5 1.6 0.31
+
+move Volume 7 location 0.2 2.05 0.5
+
+move Volume 8 location 0.2 2.05 0.5
+
+subtract body 1  from body 5 2 6 4 3 8 7  keep 
+
+delete Volume 2
+delete Volume 3
+delete Volume 4
+delete Volume 5
+delete Volume 6
+delete Volume 7
+delete Volume 8
+
+imprint volume all 
+
+merge volume all 
+
+set duplicate block elements off
+block 1 add volume 1 
+set duplicate block elements off
+block 2 add volume 10 
+set duplicate block elements off
+block 3 add volume 9 
+set duplicate block elements off
+block 4 add volume 11 
+set duplicate block elements off
+block 5 add volume 15 
+delete Block 5
+set duplicate block elements off
+block 5 add volume 14 
+set duplicate block elements off
+block 6 add volume 15 
+set duplicate block elements off
+block 7 add volume 13 
+set duplicate block elements off
+block 8 add volume 12 
+
+brick x 1 y 2.25 z 1
+brick x 1 y 2.25 z 0.3333
+subtract body 17 from body 16  keep 
+
+delete Volume 16
+move Volume 18 17 19 x 0.5 y 1.125 z 0.5 
+subtract body 10 1 9 12 13 15 14 11  from body 18 17  keep 
+
+delete Volume 17
+delete Body 18
+
+imprint volume all 
+merge volume all 
+
+set duplicate block elements off
+block 11 add volume 21 
+set duplicate block elements off
+block 12 add volume 22 
+set duplicate block elements off
+block 13 add volume 20 
+sideset 21 add surface 313  
+sideset 22 add surface 225 210  
