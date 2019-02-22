@@ -32,7 +32,7 @@ for sub_i=1:length(sub)
     dove=[folder,sub{sub_i}];
     cd(dove);
     
-    dirOut=dir('dot*0*');
+    dirOut=dir('dot*1*');
     
     if ( length(dirOut) ~= 0)
         filename=dirOut.name;
