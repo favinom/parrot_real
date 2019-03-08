@@ -1,6 +1,6 @@
 [Mesh]
 type = FileMesh
-file = mesh_f.e
+file = mesh_f_r.e
 []
 
 #[Mesh]
@@ -99,6 +99,7 @@ solve_type ='LINEAR'
  porosity_m=1
  porosity_f=1
  id_slave=1
+ boundary=false
  [../]
  
  []

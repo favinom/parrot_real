@@ -86,6 +86,7 @@ validParams<FractureNetworkUserObject>()
     params.addParam<double>("porosity_f","posrosity fracture");
     params.addParam<bool>("pressure","false","put true if you solve pressure system");
     params.addParam<bool>("transport","false","put true if you transport system");
+    params.addParam<bool>("boundary","false","put true for surface to volume coupling");
     params.addParam<bool>("constraint_m","false","put true if matrix has Dirichlet BC");
     params.addParam<bool>("constraint_f","false","put true if fibres has Dirichlet BC");
     params.addRequiredParam<MultiAppName>("multi_app", "The MultiApp's name in your input file!");
@@ -110,6 +111,7 @@ _operator_type(getParam<std::string>("operator_type")),
 _solve_cg(getParam<bool>("solve_cg")),
 _pressure(getParam<bool>("pressure")),
 _transport(getParam<bool>("transport")),
+_boundary(getParam<bool>("boundary")),
 _constraint_m(getParam<bool>("constraint_m")),
 _constraint_f(getParam<bool>("constraint_f")),
 _porosity_m(getParam<double>("porosity_m")),
@@ -149,43 +151,64 @@ FractureNetworkUserObject::initialize()
     MooseVariable & _f_var = from_problem.getStandardVariable(0,_f_var_name);
     
     MooseVariable & _m_var = to_problem.getStandardVariable(0, _m_var_name);
-    
-    BoundaryMesh _b_mesh(_f_mesh->comm(), cast_int<unsigned char>(_f_mesh->mesh_dimension()-1));
 
-    _f_mesh->get_boundary_info().sync(_b_mesh);
-
-    EquationSystems _b_es (_b_mesh);
-
-    _b_es.add_system<LinearImplicitSystem> ("boundary_sys");
-
-    auto _l_var_num = _b_es.get_system("boundary_sys").add_variable("lambda", FIRST); 
-
-    _b_es.init();
-
-    libMesh::Variable _l_var = _b_es.get_system("boundary_sys").variable(_l_var_num);
-
-    //bool is_shell = _b_mesh.mesh_dimension() < _b_mesh.spatial_dimension();
-
-    auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
-    
-    auto V_f = utopia::LibMeshFunctionSpace(utopia::make_ref(_f_var.sys().system().get_equation_systems()),_f_var.sys().system().number(), _f_var.number());
-
-    auto V_l = utopia::LibMeshFunctionSpace(utopia::make_ref(_b_es),_b_es.get_system<LinearImplicitSystem>("boundary_sys").number(), _l_var.number());
+    bool boundary=false;
 
     _P = std::make_shared<SparseMatT>();
 
-    bundary_volume_permulation_matrix(_b_es, _l_var_num, _f_var, _P);
+    if(_boundary){
     
-    assemble_projection(V_m, V_l, B_temp, D_temp);
+        BoundaryMesh _b_mesh(_f_mesh->comm(), cast_int<unsigned char>(_f_mesh->mesh_dimension()-1));
+
+        _f_mesh->get_boundary_info().sync(_b_mesh);
+
+        EquationSystems _b_es (_b_mesh);
+
+        _b_es.add_system<LinearImplicitSystem> ("boundary_sys");
+
+        auto _l_var_num = _b_es.get_system("boundary_sys").add_variable("lambda", FIRST); 
+
+        _b_es.init();
+
+        libMesh::Variable _l_var = _b_es.get_system("boundary_sys").variable(_l_var_num);
+
+        auto V_b = utopia::LibMeshFunctionSpace(utopia::make_ref(_b_es),_b_es.get_system<LinearImplicitSystem>("boundary_sys").number(), _l_var.number());
+        
+        bundary_volume_permulation_matrix(_b_es, _l_var_num, _f_var, _P);
+
+        auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
+
+        assemble_projection(V_m, V_b, B_temp, D_temp);
+
+    }
+
+    else{
+
+        auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
+    
+        auto V_f = utopia::LibMeshFunctionSpace(utopia::make_ref(_f_var.sys().system().get_equation_systems()),_f_var.sys().system().number(), _f_var.number());
+    
+        assemble_projection(V_m, V_f, B_temp, D_temp);
+    }
 
     D_temp *=-1.;
 
-    D = transpose(*_P) * D_temp * (*_P);
+    if (_boundary){
+        D = transpose(*_P) * D_temp * (*_P);
+    }
+    else{
+        D=D_temp;
+    }
 
-    //D+= -1.0 * local_identity(local_size(D).get(0),local_size(D).get(1));
 
-    B = transpose(*_P) * B_temp;
-    
+    if (_boundary){
+        B = transpose(*_P) * B_temp;
+    }
+    else{
+        B = B_temp;
+    }
+
+    //D+= -1.0 * local_identity(local_size(D).get(0),local_size(D).get(1));    
     //B+= 1.0 * identity(B.size().get(0),B.size().get(1));
 
     D_t = transpose(D);

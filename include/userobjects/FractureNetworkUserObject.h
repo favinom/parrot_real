@@ -96,7 +96,7 @@ protected:
 
     void constraint_concentration_mat(utopia::UVector &boundary, utopia::USparseMatrix &mat, bool has_constaints);
     
-    bool _solve_cg, _pressure, _transport, _constraint_m, _constraint_f;
+    bool _solve_cg, _pressure, _transport, _boundary, _constraint_m, _constraint_f;
 
     double _porosity_m, _porosity_f;
 
