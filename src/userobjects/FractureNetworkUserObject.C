@@ -175,8 +175,6 @@ FractureNetworkUserObject::initialize()
     _P = std::make_shared<SparseMatT>();
 
     bundary_volume_permulation_matrix(_b_es, _l_var_num, _f_var, _P);
-
-    utopia::USparseMatrix D_temp, B_temp;
     
     assemble_projection(V_m, V_l, B_temp, D_temp);
 
@@ -184,7 +182,7 @@ FractureNetworkUserObject::initialize()
 
     D = transpose(*_P) * D_temp * (*_P);
 
-    //D+= -1.0 * identity(D.size().get(0),D.size().get(0));
+    //D+= -1.0 * local_identity(local_size(D).get(0),local_size(D).get(1));
 
     B = transpose(*_P) * B_temp;
     
@@ -466,6 +464,8 @@ bool FractureNetworkUserObject::solve_monolithic()
     x_f  = utopia::local_zeros(local_size(rhs_f));
 
     lagr = utopia::local_zeros(local_size(z));
+
+    //lagr = utopia::local_zeros(local_size(D_temp).get(0));
     
     utopia::UVector sol = blocks(x_m, x_f, lagr);
     

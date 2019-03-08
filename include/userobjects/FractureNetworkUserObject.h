@@ -103,6 +103,8 @@ protected:
     std::string _multiapp_name;
     
     utopia::USparseMatrix D, B, D_t, B_t, A_m_t, A_f_t; //, A_t2;
+
+    utopia::USparseMatrix D_temp, B_temp;
     
     utopia::UVector x_m, x_f, lagr;
     
