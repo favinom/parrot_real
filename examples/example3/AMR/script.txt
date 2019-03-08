@@ -12,7 +12,7 @@ move Volume 1 location 0.5 1.125 0.5
 
 move Volume 2 location 0.5 0.175 0.5
 
-move Volume 3 location 0.77 2.05 0.5
+move Volume 3 location 0.77 2.05 0.5 
 
 move Volume 4 location 0.83 2.05 0.5
 

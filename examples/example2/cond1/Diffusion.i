@@ -1,8 +1,7 @@
 [Mesh]
-
- file = ../refineMesh_0_0002_mesh.xda
-  uniform_refine = 0
-  #second_order=true
+ file = ../final${i}_${ref}.xda
+ #uniform_refine = 0
+ #second_order=true
 []
 
 [MeshModifiers]
@@ -51,10 +50,10 @@
  []
  
 [Materials]
-[./conductivity2] type = HydraulicConductivity3D
+[./conductivity2] type =  HydraulicConductivity3D
  fn = 9
- cond0=false
- cond1=true
+ cond0=true
+ cond1=false
  phi_m=1.0
  phi_f=1.0
  fx_string = '0.5,0.5,0.5,
@@ -88,10 +87,6 @@
 # observe that with the second BCs the stiffness matrix is SDP and we can use choleski factorization
 
 [Functions]
- [./fun_dr]
- type = ParsedFunction
- value = '1*(x>0.875)*(y>0.875)*(z>0.875)'
- [../]
  [./fun_n]
  type = ParsedFunction
  value = '1*(x<0.2500)*(y<0.2500)*(z<0.2500)'
@@ -101,8 +96,6 @@
 [BCs]
 [./dirBC]  type = DirichletBC variable = pressure value = 1  boundary = '10 11 12'  [../]
 [./fluxBC] type = FunctionNeumannBC variable = pressure function = fun_n  boundary = 'left bottom back' [../]
-#[./inflowBC]  type = PenaltyDirichletBC variable = pressure boundary = inflow  value = 4.0 penalty = 1e10 [../]
-#[./outflowBC] type = PenaltyDirichletBC variable = pressure boundary = outflow value = 1.0 penalty = 1e10 [../]
 []
  
 [Preconditioning]
@@ -112,10 +105,10 @@
 [Executioner]
 
  type=Steady
- solve_type= LINEAR
+ solve_type= newton
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               mumps'
+ petsc_options_value='  preonly   lu       NONZERO               superlu_dist'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
@@ -128,7 +121,7 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = DiffusionOutput0_1
+ file_base      = DiffusionOutput${i}_${ref}
  exodus         = true
  print_perf_log = true
 []

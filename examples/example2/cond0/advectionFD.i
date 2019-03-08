@@ -77,10 +77,10 @@ comp_i=2
 [Materials]
 [./conductivity2] type = HydraulicConductivity3D
  pressure=P_aux
- cond0=true
- cond1=false
+ cond0=false
+ cond1=true
  phi_m=0.1
- phi_f=0.9
+ phi_f=0.01
  fn = 9
  fx_string = '0.5,0.5,0.5,
               0.749975,0.75,0.749975,

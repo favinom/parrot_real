@@ -77,10 +77,10 @@ comp_i=2
 [Materials]
 [./conductivity2] type = HydraulicConductivity3D
  pressure=P_aux
- cond0=true
- cond1=false
+ cond0=false
+ cond1=true
  phi_m=0.1
- phi_f=0.9
+ phi_f=0.01
  fn = 9
  fx_string = '0.5,0.5,0.5,
               0.749975,0.75,0.749975,
@@ -102,7 +102,7 @@ comp_i=2
                0.0,0.0,90.0'
  fd1_string = '1.0,1.0,1.0,
                0.50005,0.50005,0.50005,
-               0.2501,0.2501,0.2501'
+i               0.2501,0.2501,0.2501'
  fd2_string = '1.0,1.0,1.0,
                0.50005,0.50005,0.50005,
                0.2501,0.2501,0.2501'
@@ -111,14 +111,14 @@ comp_i=2
 []
 
 [Kernels]
-#active='time convection stab'
+active='time convection stab'
 #active='time upwind'
- active = FD
+# active = FD
 
- [FD]
+[FD]
  type = RedIntConvStab
  variable = CM
- [../]
+[../]
  
 [./time]
 type = PorosityTimeDerivative
@@ -146,7 +146,7 @@ coef=1.0e-9
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=4
+coef=0.5
 use_h=true
 [../]
 
@@ -190,8 +190,8 @@ dt = 0.0025
 num_steps=100
 
 [./Quadrature]
-type = TRAP
-#order=SIXTH
+#type = TRAP
+order=SIXTH
 [../]
 
 []
