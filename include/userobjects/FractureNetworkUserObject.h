@@ -122,7 +122,7 @@ protected:
 
     std::shared_ptr<SparseMatT> _P= NULL;  
     
-    void transfer_volume_boundary(EquationSystems &_b_es, unsigned int _b_var_num, MooseVariable & _v_var, std::shared_ptr<SparseMatT> P_matrix);
+    void bundary_volume_permulation_matrix(EquationSystems &_b_es, unsigned int _b_var_num, MooseVariable & _v_var, std::shared_ptr<SparseMatT> P_matrix);
     //utopia::USparseMatrix A_m_tot, A_f_tot;
 
     
