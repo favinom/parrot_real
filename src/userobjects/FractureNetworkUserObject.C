@@ -191,13 +191,13 @@ FractureNetworkUserObject::initialize()
         assemble_projection(V_m, V_f, B_temp, D_temp);
     }
 
-    D_temp *=-1.;
+
 
     if (_boundary){
-        D = transpose(*_P) * D_temp * (*_P);
+        D = transpose(*_P) * D_temp * (*_P); 
     }
     else{
-        D=D_temp;
+        D = D_temp;
     }
 
 
@@ -208,53 +208,51 @@ FractureNetworkUserObject::initialize()
         B = B_temp;
     }
 
-    //D+= -1.0 * local_identity(local_size(D).get(0),local_size(D).get(1));    
-    //B+= 1.0 * identity(B.size().get(0),B.size().get(1));
-
-    D_t = transpose(D);
     
-    B_t = transpose(B);
 
-   
-    utopia::disp(B.size());
+     
+    // DVectord v = local_values(local_size(B).get(1), 1.0);
 
-    utopia::disp(D.size());
- 
-    // DVectord v = local_values(local_size(B_temp).get(1), 1.);
-
-    // utopia::USparseMatrix D = transpose(*_P) * D_temp * (*_P);
-
-    // utopia::disp(B_temp.size());
-
-    // utopia::disp((*_P).size());
-
-    // utopia::USparseMatrix B = transpose(*_P) * B_temp;
-
-    // utopia::disp(B_MF.size());
-
-    // DVectord u, sol;
+    // DVectord u, sol, tot;
 
     // u = B * v;
 
-    // local_zeros(local_size(u));
+    utopia::UVector int_dof_temp = sum(D,1);
+
+    int_dof = local_values(local_size(B).get(0), 0.0);
 
     // auto lsolver = std::make_shared<BiCGStab<DSMatrixd, DVectord>>();
     
     // lsolver->solve(D, u, sol);
 
-    // disp(sol);
+  
 
-    // disp(sol.size());
 
-    // CopyFractureSolution(sol);
+    {
+        Read<utopia::UVector>  r_v(int_dof_temp);
+        Write<utopia::UVector> w_v(int_dof); 
+        each_write(int_dof, [&int_dof_temp](const SizeType i) -> double { 
+                  auto li =  int_dof_temp.get(i);   
+                  if(li == 0)
+                    return 1.0; 
+                  else
+                    return 0; }   );
 
-    // utopia::disp(B.size().get(0));
+    }
 
-    // utopia::disp(B.size().get(1));
 
-    // utopia::disp(D.size().get(0));
+    // tot = sol + int_dof;
 
-    // utopia::disp(D.size().get(1));
+    // disp(tot);
+ 
+
+    D*=-1;
+
+    D_t = transpose(D);
+    
+    B_t = transpose(B);
+
+
 }
 
 void FractureNetworkUserObject::
@@ -469,16 +467,46 @@ bool FractureNetworkUserObject::solve_monolithic()
 
     utopia::disp(A_f.size());
 
+    utopia::USparseMatrix Id=utopia::local_sparse(local_size(D).get(0),local_size(D).get(1),1.0);
+
+
+
+
+    {
+        utopia::Read<utopia::UVector>  r_v(int_dof);
+
+        utopia::Write<utopia::USparseMatrix> w_v(Id); 
+        
+        utopia::each_read(int_dof, [&](const utopia::SizeType i, const double value) {   
+                      if(value == 1){
+                        //std::cout<<"ciao"<<std::endl;                     
+                            Id.set(i,i,1);
+                      }
+                   }   );
+
+    }
+
+    //A_f+=1.0 * utopia::local_identity(utopia::local_size(D).get(0),utopia::local_size(D).get(1));    
+
     utopia::USparseMatrix A = utopia::Blocks<utopia::USparseMatrix>(3, 3,
                                             {
                                                 utopia::make_ref(A_m), nullptr, utopia::make_ref(B_t),
                                                 nullptr, utopia::make_ref(A_f), utopia::make_ref(D_t),
-                                                utopia::make_ref(B), utopia::make_ref(D), nullptr
+                                                utopia::make_ref(B), utopia::make_ref(D), utopia::make_ref(Id)
                                             });
 
-    utopia::write("mat.m", A);
+
+
+
+    //A += 1.0 * utopia::local_identity(local_size(A).get(0),local_size(A).get(1));
+
+    // utopia::write("mat.m", A);
     
-    utopia::UVector z = utopia::local_zeros(local_size(B).get(0));
+    utopia::UVector z = utopia::local_zeros(local_size(D).get(0));
+
+    //utopia::UVector z = int_dof;
+
+    //disp(z);
 
     utopia::UVector rhs = utopia::blocks(rhs_m, rhs_f, z);
     
@@ -486,9 +514,7 @@ bool FractureNetworkUserObject::solve_monolithic()
 
     x_f  = utopia::local_zeros(local_size(rhs_f));
 
-    lagr = utopia::local_zeros(local_size(z));
-
-    //lagr = utopia::local_zeros(local_size(D_temp).get(0));
+    lagr = utopia::local_zeros(local_size(D).get(0));
     
     utopia::UVector sol = blocks(x_m, x_f, lagr);
     

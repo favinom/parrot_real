@@ -112,7 +112,7 @@ protected:
     
     utopia::UVector rhs_f_t, rhs_f_c;
     
-    utopia::UVector rhs_m_t, rhs_m_c;
+    utopia::UVector rhs_m_t, rhs_m_c, int_dof;
 
     std::shared_ptr<utopia::USparseMatrix> _A_t_store = NULL;
 
