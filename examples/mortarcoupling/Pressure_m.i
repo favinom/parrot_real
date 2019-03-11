@@ -1,20 +1,17 @@
 [Mesh]
-type = FileMesh
 file = mesh_m.e
+second_order=true
 []
 
 [Variables]
 [./P]
-order = FIRST
+order = second
 family = LAGRANGE
 [../]
 []
 
 
-[AuxVariables]
-[./p_slave]
-[../]
-[]
+
 
 
 [Kernels]

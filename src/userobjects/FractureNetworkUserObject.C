@@ -194,7 +194,7 @@ FractureNetworkUserObject::initialize()
 
 
     if (_boundary){
-        D = transpose(*_P) * D_temp * (*_P); 
+        D =  D_temp * (*_P); 
     }
     else{
         D = D_temp;
@@ -202,49 +202,12 @@ FractureNetworkUserObject::initialize()
 
 
     if (_boundary){
-        B = transpose(*_P) * B_temp;
+        B = B_temp;
     }
     else{
         B = B_temp;
     }
 
-    
-
-     
-    // DVectord v = local_values(local_size(B).get(1), 1.0);
-
-    // DVectord u, sol, tot;
-
-    // u = B * v;
-
-    utopia::UVector int_dof_temp = sum(D,1);
-
-    int_dof = local_values(local_size(B).get(0), 0.0);
-
-    // auto lsolver = std::make_shared<BiCGStab<DSMatrixd, DVectord>>();
-    
-    // lsolver->solve(D, u, sol);
-
-  
-
-
-    {
-        Read<utopia::UVector>  r_v(int_dof_temp);
-        Write<utopia::UVector> w_v(int_dof); 
-        each_write(int_dof, [&int_dof_temp](const SizeType i) -> double { 
-                  auto li =  int_dof_temp.get(i);   
-                  if(li == 0)
-                    return 1.0; 
-                  else
-                    return 0; }   );
-
-    }
-
-
-    // tot = sol + int_dof;
-
-    // disp(tot);
- 
 
     D*=-1;
 
@@ -403,31 +366,28 @@ bool FractureNetworkUserObject::solve_monolithic()
     
     MooseVariable & _m_var = _m_problem.getStandardVariable(0, _m_var_name);
     
-   // MooseVariable & _l_var = _f_problem.getStandardVariable(0, _f_var_name);
-    
     MooseVariable & _f_var   = _f_problem.getStandardVariable(0, _f_var_name);
     
     auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
     
     auto V_f = utopia::LibMeshFunctionSpace(utopia::make_ref(_f_var.sys().system().get_equation_systems()),_f_var.sys().system().number(), _f_var.number());
     
-//    to_problem.es().print_info();
-    
     auto &_f_sys = _f_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
     
     NonlinearSystemBase & _nl_f = _f_problem.getNonlinearSystemBase();
+    
     // Pointer to underlying PetscMatrix type
     libMesh::PetscMatrix<libMesh::Number> *petsc_mat_f = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_f_sys.matrix);
     
     _f_problem.computeResidualSys(_f_sys, *_nl_f.currentSolution(), _nl_f.RHS());
     
     _f_problem.computeJacobianSys(_f_sys, *_nl_f.currentSolution(), *petsc_mat_f);
-    
-//    from_problem.es().print_info();
-    
+
     auto &_m_sys = _m_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
     
     NonlinearSystemBase & _nl_m = _m_problem.getNonlinearSystemBase();
+
+
     // Pointer to underlying PetscMatrix type
     libMesh::PetscMatrix<libMesh::Number> *petsc_mat_m = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_m_sys.matrix);
     
@@ -442,7 +402,6 @@ bool FractureNetworkUserObject::solve_monolithic()
     utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_f.RHS()), rhs_f);
 
     utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_f).mat(), A_f);
-    //disp(mat_to);
     
     utopia::UVector rhs_m;
 
@@ -467,24 +426,24 @@ bool FractureNetworkUserObject::solve_monolithic()
 
     utopia::disp(A_f.size());
 
-    utopia::USparseMatrix Id=utopia::local_sparse(local_size(D).get(0),local_size(D).get(1),1.0);
+    // utopia::USparseMatrix Id=utopia::local_sparse(local_size(D).get(0),local_size(D).get(1),1.0);
 
 
 
 
-    {
-        utopia::Read<utopia::UVector>  r_v(int_dof);
+    // {
+    //     utopia::Read<utopia::UVector>  r_v(int_dof);
 
-        utopia::Write<utopia::USparseMatrix> w_v(Id); 
+    //     utopia::Write<utopia::USparseMatrix> w_v(Id); 
         
-        utopia::each_read(int_dof, [&](const utopia::SizeType i, const double value) {   
-                      if(value == 1){
-                        //std::cout<<"ciao"<<std::endl;                     
-                            Id.set(i,i,1);
-                      }
-                   }   );
+    //     utopia::each_read(int_dof, [&](const utopia::SizeType i, const double value) {   
+    //                   if(value == 1){
+    //                     //std::cout<<"ciao"<<std::endl;                     
+    //                         Id.set(i,i,1);
+    //                   }
+    //                }   );
 
-    }
+    // }
 
     //A_f+=1.0 * utopia::local_identity(utopia::local_size(D).get(0),utopia::local_size(D).get(1));    
 
@@ -492,7 +451,7 @@ bool FractureNetworkUserObject::solve_monolithic()
                                             {
                                                 utopia::make_ref(A_m), nullptr, utopia::make_ref(B_t),
                                                 nullptr, utopia::make_ref(A_f), utopia::make_ref(D_t),
-                                                utopia::make_ref(B), utopia::make_ref(D), utopia::make_ref(Id)
+                                                utopia::make_ref(B), utopia::make_ref(D), nullptr
                                             });
 
 
@@ -536,19 +495,19 @@ bool FractureNetworkUserObject::solve_cg_dual(){
     
     MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
     
-    FEProblemBase & from_problem =_multi_app.problemBase();
+    FEProblemBase & _f_problem =_multi_app.problemBase();
     
-    FEProblemBase & to_problem = _multi_app.appProblemBase(0);
+    FEProblemBase & _m_problem = _multi_app.appProblemBase(0);
     
-    MeshBase *from_mesh = &from_problem.mesh().getMesh();
+    MeshBase *_f_mesh = &_f_problem.mesh().getMesh();
     
-    MeshBase * to_mesh = &to_problem.mesh().getMesh();
+    MeshBase * _m_mesh = &_m_problem.mesh().getMesh();
     
-    MooseVariable & _m_var = from_problem.getStandardVariable(0, _m_var_name);
+    MooseVariable & _m_var = _m_problem.getStandardVariable(0, _m_var_name);
     
-    MooseVariable & _l_var = to_problem.getStandardVariable(0, _f_var_name);
+    //MooseVariable & _l_var = _f_problem.getStandardVariable(0, _l_var_name);
     
-    MooseVariable & _f_var   = to_problem.getStandardVariable(0, _f_var_name);
+    MooseVariable & _f_var   = _f_problem.getStandardVariable(0, _f_var_name);
     
     auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
     
@@ -580,41 +539,39 @@ bool FractureNetworkUserObject::solve_cg_dual(){
     
     //to_problem.es().print_info();
     
-    auto &_to_sys = to_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+    auto &_f_sys = _f_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
     
-    NonlinearSystemBase & _nl_to = to_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & _nl_f = _f_problem.getNonlinearSystemBase();
     // Pointer to underlying PetscMatrix type
-    libMesh::PetscMatrix<libMesh::Number> *petsc_mat_to = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_to_sys.matrix);
+    libMesh::PetscMatrix<libMesh::Number> *petsc_mat_f = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_f_sys.matrix);
     
-    to_problem.computeResidualSys(_to_sys, *_nl_to.currentSolution(), _nl_to.RHS());
+    _f_problem.computeResidualSys(_f_sys, *_nl_f.currentSolution(), _nl_f.RHS());
     
-    to_problem.computeJacobianSys(_to_sys, *_nl_to.currentSolution(), *petsc_mat_to);
+    _f_problem.computeJacobianSys(_f_sys, *_nl_f.currentSolution(), *petsc_mat_f);
     
-    //from_problem.es().print_info();
+    auto &_m_sys = _m_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
     
-    auto &_from_sys = from_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
-    
-    NonlinearSystemBase & _nl_from = from_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & _nl_m = _m_problem.getNonlinearSystemBase();
     
     // Pointer to underlying PetscMatrix type
-    libMesh::PetscMatrix<libMesh::Number> *petsc_mat_from = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_from_sys.matrix);
+    libMesh::PetscMatrix<libMesh::Number> *petsc_mat_m = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_m_sys.matrix);
     
-    from_problem.computeResidualSys(_from_sys, *_nl_from.currentSolution(), _nl_from.RHS());
+    _m_problem.computeResidualSys(_m_sys, *_nl_m.currentSolution(), _nl_m.RHS());
     
-    from_problem.computeJacobianSys(_from_sys, *_nl_from.currentSolution(), *petsc_mat_from);
+    _m_problem.computeJacobianSys(_m_sys, *_nl_m.currentSolution(), *petsc_mat_m);
     
     utopia::UVector rhs_f;
     utopia::USparseMatrix A_f;
     
-    utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_to.RHS()), rhs_f);
-    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_to).mat(), A_f);
+    utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_f.RHS()), rhs_f);
+    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_f).mat(), A_f);
     //disp(mat_to);
     
     utopia::UVector rhs_m;
     utopia::USparseMatrix A_m;
     
-    utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_from.RHS()), rhs_m);
-    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_from).mat(), A_m);
+    utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_m.RHS()), rhs_m);
+    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_m).mat(), A_m);
     //disp(mat_from);
     
     solver.update(utopia::make_ref(A_m),
@@ -627,6 +584,8 @@ bool FractureNetworkUserObject::solve_cg_dual(){
    
 //  rhs_f*=-1.0;
 //  rhs_m*=-1.0;
+    
+
   bool ok = solver.apply(rhs_m, rhs_f, x_m, x_f, lagr);
     
   return ok;
@@ -870,7 +829,7 @@ FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase &
     // The dimension that we are running.
     const unsigned int dim = mesh.mesh_dimension();
     
-    _problem.es().add_system<LinearImplicitSystem>("aux").add_variable("var",FIRST);
+    _problem.es().add_system<LinearImplicitSystem>("aux").add_variable("var",SECOND);
     
     _problem.es().reinit();
     

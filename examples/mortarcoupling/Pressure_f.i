@@ -1,6 +1,7 @@
 [Mesh]
 type = FileMesh
-file = mesh_f_r.e
+file = mesh_f_tri.e
+second_order=true
 []
 
 #[Mesh]
@@ -15,7 +16,7 @@ file = mesh_f_r.e
 
 [Variables]
 [./p]
-order = FIRST
+order = SECOND
 family = LAGRANGE
 [../]
 []
@@ -90,7 +91,7 @@ solve_type ='LINEAR'
  matrix_variable = P
  operator_type=MONOLITHIC
  execute_on='timestep_begin'
- solve_cg=false
+ solve_cg=true
  pressure=true
  operator_userobject = operator
  transport=false
@@ -99,7 +100,7 @@ solve_type ='LINEAR'
  porosity_m=1
  porosity_f=1
  id_slave=1
- boundary=false
+ boundary=true
  [../]
  
  []
