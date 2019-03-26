@@ -37,5 +37,5 @@ SideFlux::computeQpIntegral()
 	Real h = _current_elem->hmax();
 	Real stab = 1.0 * _coef * h * 1./(v_mod);
 
-  return 1.0 * _U[_qp] * _u[_qp] * _normals[_qp] - stab * _K[_qp] * _grad_u[_qp] * _normals[_qp] ;
+  return 1.0 * _U[_qp] * _u[_qp] * _normals[_qp];
 }

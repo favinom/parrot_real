@@ -92,6 +92,7 @@ solve_type ='LINEAR'
  operator_type=MONOLITHIC
  execute_on='timestep_begin'
  solve_cg=true
+ solve_mg=false
  pressure=true
  operator_userobject = operator
  transport=false

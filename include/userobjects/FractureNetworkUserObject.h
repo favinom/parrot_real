@@ -90,19 +90,19 @@ protected:
     
     void solve_transport_monolithic();
     
-    void assemble_mass_matrix(double _porosity, FEProblemBase & problem, utopia::USparseMatrix &Mass);
+    void assemble_mass_matrix(double _porosity, FEProblemBase & problem, utopia::USparseMatrix &Mass, utopia::USparseMatrix &L_Mass);
     
     void constraint_concentration_vec(utopia::UVector &boundary, utopia::UVector &vec, bool flag);
 
     void constraint_concentration_mat(utopia::UVector &boundary, utopia::USparseMatrix &mat, bool has_constaints);
     
-    bool _solve_cg, _pressure, _transport, _boundary, _constraint_m, _constraint_f;
+    bool _solve_cg, _solve_mg, _pressure, _transport, _boundary, _constraint_m, _constraint_f;
 
     double _porosity_m, _porosity_f;
 
     std::string _multiapp_name;
     
-    utopia::USparseMatrix D, B, D_t, B_t, A_m_t, A_f_t; //, A_t2;
+    utopia::USparseMatrix D, B, D_t, B_t, A_m_t,A_f_t; //, A_t2;
 
     utopia::USparseMatrix D_temp, B_temp;
     
@@ -120,6 +120,8 @@ protected:
 
     utopia::USparseMatrix mass_f;
 
+    utopia::USparseMatrix mass_lumped;
+
     utopia::UVector c_m_old, c_f_old;
 
     std::shared_ptr<SparseMatT> _P= NULL;  
@@ -127,7 +129,13 @@ protected:
     void bundary_volume_permulation_matrix(EquationSystems &_b_es, unsigned int _b_var_num, MooseVariable & _v_var, std::shared_ptr<SparseMatT> P_matrix);
     //utopia::USparseMatrix A_m_tot, A_f_tot;
 
+    void stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &S_matrix);
+
+    void stabilize_rhs(FEProblemBase & _problem, utopia::UVector sol, utopia::USparseMatrix &S_mat, utopia::USparseMatrix &Lump_mass_mat, utopia::USparseMatrix &Mass_mat, utopia::UVector &S_force);
+
+    void stabilize_coeffiecient(FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs);
     
+    void solve_transport_monolithic_one();
 };
 
 #endif /* L2ProjectionLibMeshTransferOld_H */

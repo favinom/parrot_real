@@ -20,13 +20,12 @@ family = LAGRANGE
 
 [Kernels]
 [./convection]
-type = ConservativeAdvectionSUPG
-variable = cm
-coef = 0.1
+type = Advection_Pressure
+variable = CM
+coef=0.1
 p = p_vel
+int_by_parts=false
 [../]
-[]
-
 
 [Executioner]
 type = Transient

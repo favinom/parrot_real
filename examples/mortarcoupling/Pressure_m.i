@@ -1,12 +1,25 @@
+#[Mesh]
+#  type = GeneratedMesh
+#  dim = 2
+#  xmin =-0.5
+#  xmax = 0.5
+#  ymin =-0.5
+#  ymax = 0.5
+#  nx = 40
+#  ny = 40
+#  elem_type = QUAD9
+#[]
+
 [Mesh]
-file = mesh_m.e
+type = FileMesh
+file = mesh_m_q3.e
 second_order=true
 []
 
+
 [Variables]
 [./P]
-order = second
-family = LAGRANGE
+order = SECOND
 [../]
 []
 
@@ -26,14 +39,14 @@ variable = P
 [./_b_22]
  type = DirichletBC
  variable = P
- boundary = 22
+ boundary = right
  value=4
 [../]
  
 [./_b_21]
  type = DirichletBC
  variable = P
- boundary = 21
+ boundary = left
  value=1
 [../]
 []

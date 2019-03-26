@@ -17,23 +17,16 @@ InputParameters
 validParams<AdvectionSUPG>()
 {
     InputParameters params = validParams<Kernel>();
-    // params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
-    //                            "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
     params.addRequiredParam<Real>("coef","stab coef");
     params.addRequiredParam<bool>("use_h","use h size");
-    // params.addRequiredCoupledVar("p",
-    //                              "The gradient of this variable will be used as "
-    //                              "the velocity vector.");
     return params;
 }
 
 AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
 : Kernel(parameters),
 _coef(getParam<Real>("coef")),
-// _gradP(coupledGradient("p")),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
 _use_h(getParam<bool>("use_h"))
-// _Hsupg(getMaterialProperty<RealValue>("Hsupg"))
 
 
 {

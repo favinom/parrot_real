@@ -81,8 +81,6 @@ TimeAdvectionSUPG::computeQpJacobian()
 
         stab = 1.0 * _coef * h * 1./(v_mod);
 
-        //std::cout<<"param_jac"<< v_mod <<std::endl;
-
     }
     else {
 

@@ -24,10 +24,11 @@ family = MONOMIAL
 
 [Kernels]
 [./convection]
-type = ConservativeAdvectionSUPG
+type = Advection_Pressure
 variable = CM
 coef=0.1
 p = P_vel
+int_by_parts=false
 [../]
 
 #[./time]

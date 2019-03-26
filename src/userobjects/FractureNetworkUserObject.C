@@ -20,8 +20,8 @@
 /*                                                              */
 /****************************************************************/
 
-
-
+#include "utopia_ForwardDeclarations.hpp"
+#include <algorithm>    // std::max
 #include "utopia.hpp"
 #include "utopia_Socket.hpp"
 #include "utopia_FractureFlowUtils.hpp"
@@ -81,7 +81,8 @@ validParams<FractureNetworkUserObject>()
                                           "The variable to transfer from.");
     params.addRequiredParam<UserObjectName>("operator_userobject","The userobject that stores our operators");
     params.addParam<std::string>("operator_type","opeartor_type" /*INTERPOLATION| L2_PROJECTION| PSEUDO_L2_PROJECTION | APPROX_L2_PROJECTION*/);
-    params.addParam<bool>("solve_cg","transpose option");
+    params.addParam<bool>("solve_cg","use cg and solve for Schur complement");
+    params.addParam<bool>("solve_mg","solve the master problem with MG");
     params.addParam<double>("porosity_m","posrosity matrix");
     params.addParam<double>("porosity_f","posrosity fracture");
     params.addParam<bool>("pressure","false","put true if you solve pressure system");
@@ -89,7 +90,7 @@ validParams<FractureNetworkUserObject>()
     params.addParam<bool>("boundary","false","put true for surface to volume coupling");
     params.addParam<bool>("constraint_m","false","put true if matrix has Dirichlet BC");
     params.addParam<bool>("constraint_f","false","put true if fibres has Dirichlet BC");
-    params.addRequiredParam<MultiAppName>("multi_app", "The MultiApp's name in your input file!");
+    //params.addRequiredParam<MultiAppName>("multi_app", "The MultiApp's name in your input file!");
     params.addParam<int>("id_slave","The boundary ID associated with the master side");
     //params.addParam<std::vector<BoundaryID>>("id_master","The boundary ID associated with the slave  side");
     // params.addParam< std::string >( "meshes",
@@ -101,31 +102,24 @@ validParams<FractureNetworkUserObject>()
 
 FractureNetworkUserObject::FractureNetworkUserObject(const InputParameters & parameters):
 GeneralUserObject(parameters),
-// _name_mesh(parameters.get< std::string >("meshes")),
 _slave_id(parameters.get<int>("id_slave")),
-// _master_id(parameters.get<std::vector<BoundaryID>>("contact_master")),
 _f_var_name(getParam<VariableName>("fracture_variable")),
 _m_var_name(getParam<VariableName>("matrix_variable")),
 _operator_storage(getUserObject<StoreTransferOperators>("operator_userobject")),
 _operator_type(getParam<std::string>("operator_type")),
 _solve_cg(getParam<bool>("solve_cg")),
+_solve_mg(getParam<bool>("solve_mg")),
 _pressure(getParam<bool>("pressure")),
 _transport(getParam<bool>("transport")),
 _boundary(getParam<bool>("boundary")),
 _constraint_m(getParam<bool>("constraint_m")),
 _constraint_f(getParam<bool>("constraint_f")),
 _porosity_m(getParam<double>("porosity_m")),
-_porosity_f(getParam<double>("porosity_f")),
-_multiapp_name(getParam<MultiAppName>("multi_app"))
+_porosity_f(getParam<double>("porosity_f"))
+//_multiapp_name(getParam<MultiAppName>("multi_app"))
 
 {
-//    std::vector<std::string> tmp = utopia::split_string(parameters.get<std::string>("dc_boundaries"), ' ');
-//    for(auto str_tmp=tmp.begin(); str_tmp != tmp.end(); str_tmp++)
-//    {
-//        _dc_boundary_id.push_back(atoi(str_tmp->c_str()));
-//    }
-//    // reading BC variables corresponding to BC ids
-//    FractureNetworkApp::determine_dc_bnd_var_id(utopia::split_string(parameters.get<std::string>("dc_variables"), ' '),_n_master_variables);
+
 }
 
 
@@ -136,84 +130,100 @@ FractureNetworkUserObject::initialize()
 {
     _console << "Initial Setup of Fracture App " << std::endl;
     
-    using namespace utopia;
+    // using namespace utopia;
     
-    MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
+    // MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
     
-    FEProblemBase & from_problem =_multi_app.problemBase();
+    // FEProblemBase & from_problem =_multi_app.problemBase();
     
-    FEProblemBase & to_problem = _multi_app.appProblemBase(0);
+    // FEProblemBase & to_problem = _multi_app.appProblemBase(0);
     
-    MeshBase *_m_mesh  = &to_problem.mesh().getMesh();
+    // MeshBase *_m_mesh  = &to_problem.mesh().getMesh();
     
-    MeshBase *_f_mesh  = &from_problem.mesh().getMesh();
+    // MeshBase *_f_mesh  = &from_problem.mesh().getMesh();
     
-    MooseVariable & _f_var = from_problem.getStandardVariable(0,_f_var_name);
+    // MooseVariable & _f_var = from_problem.getStandardVariable(0,_f_var_name);
     
-    MooseVariable & _m_var = to_problem.getStandardVariable(0, _m_var_name);
+    // MooseVariable & _m_var = to_problem.getStandardVariable(0, _m_var_name);
 
-    bool boundary=false;
+    // bool boundary=false;
 
-    _P = std::make_shared<SparseMatT>();
+    // _P = std::make_shared<SparseMatT>();
 
-    if(_boundary){
+    // if(_boundary){
     
-        BoundaryMesh _b_mesh(_f_mesh->comm(), cast_int<unsigned char>(_f_mesh->mesh_dimension()-1));
+    //     BoundaryMesh _b_mesh(_f_mesh->comm(), cast_int<unsigned char>(_f_mesh->mesh_dimension()-1));
 
-        _f_mesh->get_boundary_info().sync(_b_mesh);
+    //     _f_mesh->get_boundary_info().sync(_b_mesh);
 
-        EquationSystems _b_es (_b_mesh);
+    //     EquationSystems _b_es (_b_mesh);
 
-        _b_es.add_system<LinearImplicitSystem> ("boundary_sys");
+    //     _b_es.add_system<LinearImplicitSystem> ("boundary_sys");
 
-        auto _l_var_num = _b_es.get_system("boundary_sys").add_variable("lambda", FIRST); 
+    //     FEType _fe_type = _f_var.sys().system().get_dof_map().variable_type(_f_var.number());
 
-        _b_es.init();
+    //     _fe_type.order = static_cast<Order>(_fe_type.order - 1);
 
-        libMesh::Variable _l_var = _b_es.get_system("boundary_sys").variable(_l_var_num);
+    //     auto _l_var_num = _b_es.get_system("boundary_sys").add_variable("lambda", _fe_type); 
 
-        auto V_b = utopia::LibMeshFunctionSpace(utopia::make_ref(_b_es),_b_es.get_system<LinearImplicitSystem>("boundary_sys").number(), _l_var.number());
+    //     _b_es.init();
+
+    //     libMesh::Variable _l_var = _b_es.get_system("boundary_sys").variable(_l_var_num);
+
+    //     auto V_b = utopia::LibMeshFunctionSpace(utopia::make_ref(_b_es),_b_es.get_system<LinearImplicitSystem>("boundary_sys").number(), _l_var.number());
         
-        bundary_volume_permulation_matrix(_b_es, _l_var_num, _f_var, _P);
+    //     bundary_volume_permulation_matrix(_b_es, _l_var_num, _f_var, _P);
 
-        auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
+    //     auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
 
-        assemble_projection(V_m, V_b, B_temp, D_temp);
+    //     assemble_projection(V_m, V_b, B_temp, D_temp);
 
-    }
+    // }
 
-    else{
+    // else{
 
-        auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
+    //     auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
     
-        auto V_f = utopia::LibMeshFunctionSpace(utopia::make_ref(_f_var.sys().system().get_equation_systems()),_f_var.sys().system().number(), _f_var.number());
+    //     auto V_f = utopia::LibMeshFunctionSpace(utopia::make_ref(_f_var.sys().system().get_equation_systems()),_f_var.sys().system().number(), _f_var.number());
     
-        assemble_projection(V_m, V_f, B_temp, D_temp);
-    }
+    //     assemble_projection(V_m, V_f, B_temp, D_temp);
+    // }
 
 
 
-    if (_boundary){
-        D =  D_temp * (*_P); 
-    }
-    else{
-        D = D_temp;
-    }
+    // if (_boundary){
+    //     D =  D_temp * (*_P); 
+    // }
+    // else{
+    //     D = D_temp;
+    // }
 
 
-    if (_boundary){
-        B = B_temp;
-    }
-    else{
-        B = B_temp;
-    }
+    // if (_boundary){
+    //     B = B_temp;
+    // }
+    // else{
+    //     B = B_temp;
+    // }
 
 
-    D*=-1;
+    // D*=-1;
 
-    D_t = transpose(D);
+    // D_t = transpose(D);
     
-    B_t = transpose(B);
+    // B_t = transpose(B);
+
+    // utopia::set_zero_at_constraint_rows(V_m.dof_map(), B_t);
+    // utopia::set_zero_at_constraint_rows(V_f.dof_map(), D_t);
+
+
+
+    if (_transport){
+
+        assemble_mass_matrix(_porosity_m, _fe_problem, mass_m, mass_lumped);
+
+        //assemble_mass_matrix(_porosity_f, to_problem, mass_f);
+    }
 
 
 }
@@ -321,7 +331,6 @@ FractureNetworkUserObject::solve(){
     else{
         ok = solve_monolithic();
     }
-    //solve_cg_dual();
     
       return ok;
     
@@ -345,7 +354,7 @@ FractureNetworkUserObject::execute()
 
     if(_transport){
 
-        solve_transport_monolithic();
+        solve_transport_monolithic_one();
     }
 }
 
@@ -426,26 +435,7 @@ bool FractureNetworkUserObject::solve_monolithic()
 
     utopia::disp(A_f.size());
 
-    // utopia::USparseMatrix Id=utopia::local_sparse(local_size(D).get(0),local_size(D).get(1),1.0);
-
-
-
-
-    // {
-    //     utopia::Read<utopia::UVector>  r_v(int_dof);
-
-    //     utopia::Write<utopia::USparseMatrix> w_v(Id); 
-        
-    //     utopia::each_read(int_dof, [&](const utopia::SizeType i, const double value) {   
-    //                   if(value == 1){
-    //                     //std::cout<<"ciao"<<std::endl;                     
-    //                         Id.set(i,i,1);
-    //                   }
-    //                }   );
-
-    // }
-
-    //A_f+=1.0 * utopia::local_identity(utopia::local_size(D).get(0),utopia::local_size(D).get(1));    
+   
 
     utopia::USparseMatrix A = utopia::Blocks<utopia::USparseMatrix>(3, 3,
                                             {
@@ -455,17 +445,7 @@ bool FractureNetworkUserObject::solve_monolithic()
                                             });
 
 
-
-
-    //A += 1.0 * utopia::local_identity(local_size(A).get(0),local_size(A).get(1));
-
-    // utopia::write("mat.m", A);
-    
     utopia::UVector z = utopia::local_zeros(local_size(D).get(0));
-
-    //utopia::UVector z = int_dof;
-
-    //disp(z);
 
     utopia::UVector rhs = utopia::blocks(rhs_m, rhs_f, z);
     
@@ -505,8 +485,6 @@ bool FractureNetworkUserObject::solve_cg_dual(){
     
     MooseVariable & _m_var = _m_problem.getStandardVariable(0, _m_var_name);
     
-    //MooseVariable & _l_var = _f_problem.getStandardVariable(0, _l_var_name);
-    
     MooseVariable & _f_var   = _f_problem.getStandardVariable(0, _f_var_name);
     
     auto V_m = utopia::LibMeshFunctionSpace(utopia::make_ref(_m_var.sys().system().get_equation_systems()),_m_var.sys().system().number(), _m_var.number());
@@ -523,13 +501,10 @@ bool FractureNetworkUserObject::solve_cg_dual(){
     
     solver.use_simple_preconditioner();
     
-    bool use_mg;
-    
-    use_mg = false;
     int mg_sweeps = 1;
     int mg_levels = 5;
     
-    if(use_mg) {
+    if(_solve_mg) {
         auto mg = make_mg_solver(V_m, mg_levels);
         solver.set_master_solver(mg);
         
@@ -542,7 +517,7 @@ bool FractureNetworkUserObject::solve_cg_dual(){
     auto &_f_sys = _f_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
     
     NonlinearSystemBase & _nl_f = _f_problem.getNonlinearSystemBase();
-    // Pointer to underlying PetscMatrix type
+
     libMesh::PetscMatrix<libMesh::Number> *petsc_mat_f = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_f_sys.matrix);
     
     _f_problem.computeResidualSys(_f_sys, *_nl_f.currentSolution(), _nl_f.RHS());
@@ -585,7 +560,7 @@ bool FractureNetworkUserObject::solve_cg_dual(){
 //  rhs_f*=-1.0;
 //  rhs_m*=-1.0;
     
-
+  lagr = utopia::local_zeros(local_size(D).get(0));
   bool ok = solver.apply(rhs_m, rhs_f, x_m, x_f, lagr);
     
   return ok;
@@ -597,15 +572,15 @@ void
 FractureNetworkUserObject::CopyMatrixSolution(utopia::UVector _sol_m)
 {
     
-    MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
+    //MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
 
-    FEProblemBase & _problem_m = _multi_app.appProblemBase(0);
+    FEProblemBase & _problem_m = _fe_problem;
+
+    //_multi_app.appProblemBase(0);
     
     MooseVariable & _var_m = _problem_m.getStandardVariable(0, _m_var_name);
     
     System & _sys_m = _var_m.sys().system();
-    
-    //FEProblemBase & to_problem = _multi_app.appProblemBase(0);
     
     MeshBase *_mesh_m = &_problem_m.mesh().getMesh();
     
@@ -674,8 +649,7 @@ FractureNetworkUserObject::CopyFractureSolution(utopia::UVector _sol_f)
     MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
 
     FEProblemBase & _problem_f =_multi_app.problemBase();
-    
-//    std::cout<<" _f_var_name" << _f_var_name<<std::endl;
+
     MooseVariable & _var_f   = _problem_f.getStandardVariable(0, _f_var_name);
     
     System & _sys_f = _var_f.sys().system();
@@ -819,7 +793,7 @@ FractureNetworkUserObject::constraint_concentration_mat(utopia::UVector &boundar
 }
 
 void
-FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase & _problem, utopia::USparseMatrix &mass_matrix){
+FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase & _problem, utopia::USparseMatrix &mass_matrix, utopia::USparseMatrix &lumped_mass_matrix){
     
     _console << "Assemble_Mass_matrix() begin "  << std::endl;
     
@@ -829,7 +803,7 @@ FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase &
     // The dimension that we are running.
     const unsigned int dim = mesh.mesh_dimension();
     
-    _problem.es().add_system<LinearImplicitSystem>("aux").add_variable("var",SECOND);
+    _problem.es().add_system<LinearImplicitSystem>("aux").add_variable("var",FIRST);
     
     _problem.es().reinit();
     
@@ -888,8 +862,6 @@ FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase &
                 for (unsigned int j=0; j<phi.size(); j++)
                         Me(i,j) += JxW[qp]*phi[i][qp]*phi[j][qp];
         
-        //dof_map.constrain_element_matrix(Me, dof_indices, false);
-        //        Me.print();
         
         matrix_M.add_matrix (Me, dof_indices);
         
@@ -902,8 +874,9 @@ FractureNetworkUserObject::assemble_mass_matrix(double porosity, FEProblemBase &
     utopia::convert(const_cast<SparseMatrix<Number> &>(matrix_M), mass);
 
     mass_matrix = porosity * mass;
+
+    lumped_mass_matrix=diag(sum(mass_matrix,1));
     
-    //out = mass_matrix * in;
     
     _console << "Assemble_Mass_matrix() end "  << std::endl;
 
@@ -920,48 +893,48 @@ FractureNetworkUserObject::solve_transport_monolithic(){
 
     MultiApp &  _multi_app = * _fe_problem.getMultiApp(_multiapp_name);
         
-    FEProblemBase & from_problem =_multi_app.problemBase();
+    FEProblemBase & _f_problem =_multi_app.problemBase();
     
-    FEProblemBase & to_problem = _multi_app.appProblemBase(0);
+    FEProblemBase & _m_problem = _multi_app.appProblemBase(0);
 
-    auto &_to_sys = to_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+    auto &_m_sys = _m_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
-    NonlinearSystemBase & _nl_to = to_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & _nl_m = _m_problem.getNonlinearSystemBase();
     
-    auto &_from_sys = from_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+    auto &_f_sys = _f_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
-    NonlinearSystemBase & _nl_from = from_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & _nl_f = _f_problem.getNonlinearSystemBase();
 
 
 
     
  
-    if  (from_problem.timeStep()==1)
+    if  (_m_problem.timeStep()==1)
      {
               
         // Pointer to underlying PetscMatrix type
-        libMesh::PetscMatrix<libMesh::Number> *petsc_mat_to = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_to_sys.matrix);
+        libMesh::PetscMatrix<libMesh::Number> *petsc_mat_f = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_f_sys.matrix);
         
-        to_problem.computeJacobianSys(_to_sys, *_nl_to.currentSolution(), *petsc_mat_to);
+        _f_problem.computeJacobianSys(_f_sys, *_nl_f.currentSolution(), *petsc_mat_f);
         
         // Pointer to underlying PetscMatrix type
-        libMesh::PetscMatrix<libMesh::Number> *petsc_mat_from = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_from_sys.matrix);
+        libMesh::PetscMatrix<libMesh::Number> *petsc_mat_m = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_m_sys.matrix);
 
         
-        from_problem.computeJacobianSys(_from_sys, *_nl_from.currentSolution(), *petsc_mat_from);
+        _m_problem.computeJacobianSys(_m_sys, *_nl_m.currentSolution(), *petsc_mat_m);
         
         
-        utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_to).mat(), A_f_t);
+        utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_f).mat(), A_f_t);
 
-        utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_from).mat(), A_m_t);
+        utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_m).mat(), A_m_t);
 
-        from_problem.computeResidualSys(_from_sys, *_nl_from.currentSolution(), _nl_from.RHS());
+        _m_problem.computeResidualSys(_m_sys, *_nl_m.currentSolution(), _nl_m.RHS());
   
-        to_problem.computeResidualSys(_to_sys, *_nl_to.currentSolution(), _nl_to.RHS());
+        _f_problem.computeResidualSys(_f_sys, *_nl_f.currentSolution(), _nl_f.RHS());
 
-        utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_to.RHS()), rhs_f_t);
+        utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_f.RHS()), rhs_f_t);
 
-        utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_from.RHS()), rhs_m_t);
+        utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_m.RHS()), rhs_m_t);
 
 
         rhs_m_c = rhs_m_t; 
@@ -969,7 +942,7 @@ FractureNetworkUserObject::solve_transport_monolithic(){
         rhs_f_c = rhs_f_t; 
 
 
-        Real dt = static_cast<Transient*>(from_problem.getMooseApp().getExecutioner())->getDT();
+        Real dt = static_cast<Transient*>(_m_problem.getMooseApp().getExecutioner())->getDT();
 
         double inv_dt = 1.0/dt;
 
@@ -1015,14 +988,14 @@ FractureNetworkUserObject::solve_transport_monolithic(){
     }
 
 
-    if (from_problem.timeStep()>1)
+    if (_m_problem.timeStep()>1)
     {
 
 
 
-        auto sol_m_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_from_sys.old_local_solution.get())->vec();
+        auto sol_m_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_m_sys.old_local_solution.get())->vec();
 
-        auto sol_f_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_to_sys.old_local_solution.get())->vec();
+        auto sol_f_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_f_sys.old_local_solution.get())->vec();
 
         // UVector c_m_old, c_f_old;
 
@@ -1038,7 +1011,7 @@ FractureNetworkUserObject::solve_transport_monolithic(){
         
         // disp(rhs_m_t);
 
-        Real dt = static_cast<Transient*>(from_problem.getMooseApp().getExecutioner())->getDT();
+        Real dt = static_cast<Transient*>(_m_problem.getMooseApp().getExecutioner())->getDT();
 
         double inv_dt = 1.0/dt;
 
@@ -1081,6 +1054,8 @@ FractureNetworkUserObject::solve_transport_monolithic(){
 
         c_f*=1;
 
+
+
         CopyMatrixSolution(c_m);
         
         CopyFractureSolution(c_f);
@@ -1088,114 +1063,540 @@ FractureNetworkUserObject::solve_transport_monolithic(){
 
 }
 
-        //UVector sol;
+void
+FractureNetworkUserObject::solve_transport_monolithic_one(){
+    
+    using namespace utopia;
+    
+    _console << "solve_transport_monolithic_one()  "  << std::endl;
 
-        // Real dt = static_cast<Transient*>(from_problem.getMooseApp().getExecutioner())->getDT();
+    auto &_m_sys = _fe_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
-        // double inv_dt = 1.0/dt;
-
-        //A_m_t*=dt;
-
-        // USparseMatrix A_m_tot = A_m_t + mass_m * inv_dt;
-
-        // constrain_concentration_mat(rhs_m_c, A_m_tot, true);
-
-        // USparseMatrix A_f_tot = A_f_t + mass_f * inv_dt;
-
-        // constrain_concentration_mat(rhs_f_c, A_f_tot, false);
+    NonlinearSystemBase & _nl_m = _fe_problem.getNonlinearSystemBase();
 
 
-        // USparseMatrix A_tot = Blocks<USparseMatrix>(3, 3,
-        //                                         {
-        //                                             make_ref(A_m_tot),              nullptr,                  make_ref(B_t),
-        //                                             nullptr,                   make_ref(A_f_tot),             make_ref(D_t),
-        //                                             make_ref(B),               make_ref(D),               nullptr
-        //                                         });
+
+    if  (_fe_problem.timeStep()==1)
+     {
+              
         
+        // Pointer to underlying PetscMatrix type
+        libMesh::PetscMatrix<libMesh::Number> *petsc_mat_m = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_m_sys.matrix);
 
+        _fe_problem.computeJacobianSys(_m_sys, *_nl_m.currentSolution(), *petsc_mat_m);
 
-        //op->update(make_ref(A_m_t));
+        utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_m).mat(), A_m_t);
+
+        _fe_problem.computeResidualSys(_m_sys, *_nl_m.currentSolution(), _nl_m.RHS());
+
+        utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_m.RHS()), rhs_m_t);
+
+        rhs_m_c = rhs_m_t; 
+
+        Real dt = static_cast<Transient*>(_fe_problem.getMooseApp().getExecutioner())->getDT();
+
+        double inv_dt = 1.0/dt;
+
+        _A_t_store   = std::make_shared<USparseMatrix>(A_m_t);
+
+        const_cast<StoreTransferOperators&>(_operator_storage).setTransferOperator() = _A_t_store;
+
+        auto op = std::make_shared<utopia::Factorization<utopia::USparseMatrix, utopia::UVector> >();
+
+        const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer() = op;
+
+        c_m  = utopia::local_zeros(local_size(rhs_m_t));
+
+        CopyMatrixSolution(c_m);
         
-        //op->apply(rhs_m_t, sol);
+    
+    }
 
-        //op->update(make_ref(A_tot));
 
-        // write("A_m_tot.m", A_m_tot);
+    if (_fe_problem.timeStep()>1)
+    {
 
-        // write("rhs_m.m", rhs_m_t);
+        auto sol_m_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_m_sys.old_local_solution.get())->vec();
+
+        utopia::convert(sol_m_old, c_m_old);
+
+        Real dt = static_cast<Transient*>(_fe_problem.getMooseApp().getExecutioner())->getDT();
+
+        double inv_dt = 1.0/dt;
+
+        UVector  mass_c_m_old;
+
+        mass_c_m_old = mass_lumped * c_m_old;
+
+        mass_c_m_old_dot = mass_c_m_old * inv_dt;
+
+        rhs_m_t = - 1.0 * mass_c_m_old_dot;
+  
+        constraint_concentration_vec(rhs_m_c,  rhs_m_t, _constraint_m);
+
+        auto op = std::static_pointer_cast< Factorization<USparseMatrix, UVector> >(const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer());
+
+        _A_t_store = const_cast<StoreTransferOperators&>(_operator_storage).getTransferOperator();
         
+        USparseMatrix A_m_t_stab = *_A_t_store;
+
+        A_m_t_stab*=0;
+
+        stabilize_A_matrix(_fe_problem, A_m_t_stab);
+
+        utopia::USparseMatrix A_stab = A_m_t_stab + (*_A_t_store);
+
+        utopia::write("A.m", A_stab);
         
+        USparseMatrix A_m_tot =  1.0 * A_stab  + mass_lumped * inv_dt;
+
+        //USparseMatrix A_m_tot =  1.0 * A_stab + mass_lumped * inv_dt;
+
+        constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
+
+        op->update(make_ref(A_m_tot));
+        
+        op->apply(rhs_m_t, c_m);
+
+        utopia::UVector diag_elem, c_dot;
+
+        diag_elem = 1./sum((mass_lumped),1);
+
+        utopia::USparseMatrix inv_mass_lumped_mat = diag(diag_elem);
+
+        c_dot = inv_mass_lumped_mat * A_stab * c_m;
+
+        utopia::UVector _f_con = local_zeros(local_size(c_dot));
+
+        //constraint_concentration_vec(c_dot,  _f_con, _constraint_m);
+
+        //utopia::UVector _f = inv_mass_lumped_mat * ((mass_lumped - mass_m) * _f_con  + 1.0 * A_m_t_stab * dt * c_m);
+
+        //stabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_con);
+
+        utopia::UVector c_m_tot = c_m;
+
+        //utopia::disp(_f_con);
+
+        c_m_tot = c_m - 1.0 * _f_con * dt;
+
+        CopyMatrixSolution(c_m_tot);
+
+    }
+
+}
+
+
+void
+FractureNetworkUserObject::stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &S_matrix)
+{ 
+    auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+
+    NonlinearSystemBase & _nl = _problem.getNonlinearSystemBase();
+
+    libMesh::PetscMatrix<libMesh::Number> *petsc_mat = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_sys.matrix);
+        
+    _problem.computeJacobianSys(_sys, *_nl.currentSolution(), *petsc_mat);
+
+    utopia::USparseMatrix A_0, A_0_t;
+
+    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat).mat(), A_0);
+
+    A_0_t = utopia::transpose(A_0);
+
+
+
+
+   {    
+        utopia::Read<utopia::USparseMatrix>  r_s(A_0), r_s_t(A_0_t);
+        utopia::Write<utopia::USparseMatrix> w_s(S_matrix);
+        utopia::each_read(A_0, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
+            if(i!=j)
+            {
+                 double value_1 = 1.0 * value;
+
+                 //utopia::disp(value_1);
+
+                 double value_2 = 1.0 * A_0_t.get(i,j);
+
+                 //utopia::disp(value_2);
+
+                if(value_1 > value_2){
+
+                    double max = - 1.0 * std::max(0.0, value_1);
+
+                    S_matrix.set(i,j, max);
+                }
+
+                else{
+
+                    double max = - 1.0 * std::max(0.0, value_2);
+
+                    S_matrix.set(i,j, max);
+                }
+            }
+            else{
+
+                   S_matrix.set(i,i,0);
+            }
+        });
+    }
+
+
+
+
+    utopia::UVector diag_elem = -1.0 * sum(S_matrix,1);
+
+    utopia::USparseMatrix S_diag=diag(diag_elem);
+
+    // S_matrix += transpose(S_matrix);
+
+    // S_matrix *=0.5;
+
+    S_matrix+=S_diag;
+
+    utopia::write("S.m", S_matrix);
+
+
+  }
+
+void 
+FractureNetworkUserObject::stabilize_rhs(FEProblemBase & _problem, utopia::UVector sol, utopia::USparseMatrix &S_mat, utopia::USparseMatrix &Lump_mass_mat, utopia::USparseMatrix &Mass_mat, utopia::UVector &S_force)
+{
+
+    auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+
+    auto sol_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_sys.old_local_solution.get())->vec();
+
+    NonlinearSystemBase & _nl = _problem.getNonlinearSystemBase();
+
+    libMesh::PetscMatrix<libMesh::Number> *petsc_mat = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_sys.matrix);
+        
+    _problem.computeJacobianSys(_sys, *_nl.currentSolution(), *petsc_mat);
+
+    utopia::USparseMatrix A_mat;
+
+    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat).mat(), A_mat);   
+
+    utopia::UVector c_old;
+
+    utopia::convert(sol_old, c_old);
+
+    Real dt = static_cast<Transient*>(_problem.getMooseApp().getExecutioner())->getDT();
+
+    double inv_dt = 1.0/dt;
+
+    utopia::UVector  v, u_tilde, diag_elem;
+
+    utopia::USparseMatrix inv_Lump_mass_mat, L;
+
+    L = S_mat + A_mat;
+
+    diag_elem = 1./sum((Lump_mass_mat),1);
+
+    inv_Lump_mass_mat = diag(diag_elem);
+
+    v = -1.0 * inv_Lump_mass_mat * L * c_old;
+
+    u_tilde = c_old + dt * 0.5 * v;
+
+    utopia::USparseMatrix S_rhs = S_mat + Mass_mat; 
+
+    S_rhs *=0;
+
+     {    
+        utopia::Read<utopia::UVector>  r_u(u_tilde), r_v(v);
+        utopia::Read<utopia::USparseMatrix>  r_s(S_mat), r_m(Mass_mat);
+        utopia::Write<utopia::USparseMatrix> w_m(S_rhs);
+        utopia::each_read(Mass_mat, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
+
+              double entry = dt * value * (v.get(i) - v.get(j)) - S_mat.get(i,j) * (u_tilde.get(i) - u_tilde.get(j));
+
+              S_rhs.set(i,j,entry);
+        });
+        //Da sistemare questo per CN
+    }  
+}
+
+void 
+FractureNetworkUserObject::stabilize_coeffiecient(FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs)
+{
+
+    _console << "stabilize_coeffiecient"  << std::endl;
+
+    utopia::USparseMatrix _f = _D + _M; 
+
+    _f *=0;
+
+    {    
+        utopia::Read<utopia::UVector>  r_u(_u_dot), r_v(_u);
+        utopia::Read<utopia::USparseMatrix>  r_s(_D), r_m(_M);
+        utopia::Write<utopia::USparseMatrix> w_m(_f);
+        utopia::each_read(_M, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
+              if (i!=j){
+                
+                double entry = value * (_u_dot.get(i) - _u_dot.get(j)) - _D.get(i,j) * (_u.get(i) - _u.get(j));
+
+                 _f.set(i,j,entry);
+             }
+    });
+
+    }
+
+    utopia::write("_f.m", _f);
+
+    utopia::UVector P_plus = utopia::local_zeros(local_size(_D).get(0));
+
+
+    utopia::UVector P_minus = utopia::local_zeros(local_size(_D).get(0));
+
+
+    {    
+
+        utopia::Write<utopia::UVector> w_p(P_plus), w_m(P_minus);
+
+        utopia::each_read(_f, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
+              if(j!=i)
+              {
+                double entry_max = std::max(0.0, value);
+                
+                double entry_min = std::min(0.0, value);
+        
+                P_minus.add(i,entry_min);
+
+                P_plus.add(i,entry_max);
+            }
+        });
+    } 
+
+
+    // utopia::disp("P_minus");
+
+    // utopia::disp(P_minus);
+
+    // utopia::disp("P_plus");
+
+    // utopia::disp(P_plus);
+
+    utopia::write("P_minus.m", P_minus);
+
+    utopia::write("P_plus.m", P_plus);
+    
+
+    utopia::UVector Q_plus = utopia::local_zeros(local_size(_f).get(0));
+
+    utopia::UVector Q_minus = utopia::local_zeros(local_size(_f).get(0));
+
+    auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+
+    const DofMap & dof_map = _sys.get_dof_map();
+
+    Real dt = static_cast<Transient*>(_problem.getMooseApp().getExecutioner())->getDT();
+
+   {    
+        
+        utopia::Range rr = utopia::row_range(_M);
+        
+        utopia::Write<utopia::UVector> w_p(Q_plus), w_m(Q_minus);
+
+        utopia::Read<utopia::USparseMatrix> r_M(_M);
+
+        utopia::UVector _m = sum(_M,1);
+
+        utopia::UVector sol_ghosted = utopia::ghosted(dof_map.n_local_dofs(), dof_map.n_dofs(), dof_map.get_send_list()); 
+
+        sol_ghosted = _u;
+
+        utopia::synchronize(sol_ghosted);
+
+        utopia::Read<utopia::UVector> r_g(sol_ghosted), r_u(_u), r_m(_m);
+
+        for(auto i = rr.begin(); i != rr.end(); ++i) {
+
+            utopia::RowView<const utopia::USparseMatrix> row_view(_M, i);
+            
+            decltype(i) n_values = row_view.n_values();
+
+            std::vector<int> index_v;
+
+            for(auto index = 0; index < n_values; ++index) {
+
+                const decltype(i) j = row_view.col(index);
+
+                const auto a_ij = row_view.get(index);
+
+                //tirare fuori gli indici e loopare
+                if(a_ij!=0) {
+
+                    index_v.push_back(j);
+                }
+            }
+
+            std::vector<double> values(index_v.size());
+
+            sol_ghosted.get(index_v, values);
+
+            auto v_i = _u.get(i);
+
+            auto m_i = _m.get(i);
+
+            auto num_values = values.size();
+
+            double max = m_i/dt*(*std::max_element(std::begin(values), end(values)) - v_i);
+
+            double min = m_i/dt*(*std::min_element(std::begin(values), end(values)) - v_i);
+
+            Q_plus.set(i,max);
+
+            Q_minus.set(i,min);
+        }
+
+         _console << "stabilize_coeffiecient"  << std::endl;
+    } 
+    
 
      
+    
+    utopia::UVector R_plus = utopia::local_zeros(local_size(Q_plus));
+
+    utopia::UVector R_minus = utopia::local_zeros(local_size(Q_plus));
+
+    utopia::UVector R_plus_c = utopia::local_zeros(local_size(Q_plus));
+
+    utopia::UVector R_minus_c = utopia::local_zeros(local_size(Q_plus));
+
+   {    
+        
+
+    
+        utopia::Read<utopia::UVector> w_qp(Q_plus), w_qm(Q_minus), w_pp(P_plus), w_pm(P_minus);
+
+        utopia::Write<utopia::UVector> w_Rp(R_plus), w_Rm(R_minus);
+
+        utopia::each_read(Q_plus, [&](const utopia::SizeType i, double value){
+        
+        if(std::abs(P_plus.get(i))>1.e-15){    
+            double value_p=value/P_plus.get(i);
+            double entry_p=std::min(1.0,value_p);
+            R_plus.set(i, value_p);
+        }
+    
+        });
+
+        utopia::each_read(Q_minus, [&](const utopia::SizeType i, double value){
+        
+
+        if(std::abs(P_plus.get(i))>1.e-15){   
+            double value_m=value/P_minus.get(i);
+            double entry_m=std::min(1.0,value_m);
+            R_minus.set(i, value_m);
+        }
+    
+    
+        });
 
 
-        // c_m_old = c_m;
 
-        // c_f_old = c_f;
+    } 
+     
+    constraint_concentration_vec(R_minus,  R_minus_c, _constraint_m);
 
-        // disp("sol");
+    constraint_concentration_vec(R_plus,  R_plus_c, _constraint_m);
 
-        // disp(sol);
+    // utopia::disp("R_minus");
+
+    // utopia::disp(R_minus);
+
+    // utopia::disp("R_plus");
+
+    // utopia::disp(R_plus);
 
 
-// void
-// L2ProjectionLibMeshTransferBidirectional::Permutation(FEProblemBase *problem, std::shared_ptr<SparseMatT> B_Mm, std::shared_ptr<SparseMatT> B_Ss, std::string _complete_var_name, std::string problem_name, unsigned int number){
+    utopia::write("Q_minus.m", Q_minus);
+
+    utopia::write("Q_plus.m", Q_plus);
 
 
-//     std::cout<<"Permutation"<<std::endl;
+   
 
-//     MeshBase & mesh = problem->mesh();
+    utopia::USparseMatrix Alpha_m = _f;
 
-//     MeshBase::const_element_iterator it = mesh.local_elements_begin();
+    Alpha_m*=0;
 
-//     const MeshBase::const_element_iterator end_it = mesh.local_elements_end();
+  {
+        utopia::Write<utopia::USparseMatrix> w_Alpha(Alpha_m);
 
-//     std::vector<dof_id_type> temp_main, temp_aux;
+        utopia::Read<utopia::UVector> r_Rp(R_plus), r_Rm(R_minus);
 
-//     MooseVariable & main_var = problem->getStandardVariable(0, main_var_name);
+        utopia::Read<utopia::USparseMatrix> r_f(_f);
 
-//     DofMap & complete_dof = main_var.sys().system().get_dof_map(); //solid_problem
+        utopia::each_read(_f, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
 
-//     DofMap & _main_dof = problem->es().get_system(problem_name).get_dof_map(); //auxi_var.sys().system().get_dof_map();  //fluid_problem
+            if(value > 0){
+                double alpha = std::min(R_plus.get(i), R_minus.get(j));
+                // auto _f_bar = 1.0 * alpha * value;
+                Alpha_m.set(i, j, alpha);
+            }
+            else if(value < 0){
+                double alpha = std::min(R_minus.get(i), R_plus.get(j));
+                // auto _f_bar =  1.0 * alpha * value;
+                Alpha_m.set(i, j, alpha);
+            }
+        });
+     
+    }
+    
 
-//     std::cout<<"Permutation Loop"<<std::endl;
+    utopia::DMatrixd rhs_def = Alpha_m * _f;
 
-//     (*P_matrix)=utopia::local_sparse(auxi_dof.n_local_dofs(),main_dof.n_local_dofs(),1.0);
 
-//     std::cout<<"Permutation After allocation"<<std::endl;
-//    {
-//      utopia::Write<SparseMatT> d(*(P_matrix));
-//      auto RowRange=utopia::row_range(*P_matrix);
-//      auto ColRange=utopia::col_range(*P_matrix);
+    {
+        utopia::Write<utopia::USparseMatrix> w_Alpha(Alpha_m);
 
-//      for ( ; it != end_it; ++it)
-//      {
-//          const Elem * elem = *it;
+        utopia::Read<utopia::UVector> r_Rp(R_plus), r_Rm(R_minus);
 
-//          main_dof.dof_indices(elem, temp_main, main_var.number());
+        utopia::Read<utopia::USparseMatrix> r_f(_f);
 
-//          auxi_dof.dof_indices(elem, temp_aux, number);
+        utopia::each_read(_f, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
 
-//          for(int i=0; i<temp_aux.size(); i++){
+            if(std::abs(value) > 1.e-17){
+                //double alpha = std::min(R_plus.get(i), R_minus.get(j));
+                // auto _f_bar = 1.0 * alpha * value;
+                Alpha_m.set(i, j, value);
+            }
+            // else if(value < 0){
+            //     double alpha = std::min(R_minus.get(i), R_plus.get(j));
+            //     // auto _f_bar =  1.0 * alpha * value;
+            //     Alpha_m.set(i, j, alpha);
+            // }
+        });
+     
+    }
 
-//             const long dof_I = temp_aux[i];
+    utopia::UVector _rhs_t = 1.0 * utopia::sum(Alpha_m, 1);
 
-//             const long dof_J = temp_main[i];
+    //constraint_concentration_vec(_rhs_t,  _rhs, _constraint_m);
+    
+   
+}
 
-//             if (RowRange.inside(dof_I) && ColRange.inside(dof_J)){
 
-//                 for(utopia::SizeType d = 0; d < _n_var; ++d){
-//                    (*P_matrix).set(dof_I+d,dof_J+d,1.0);
-//                 }
-//             }
-//         }
-//      }
-//    }
-// }
+
+
+/*    UVector P_minus = sum(transpose(P_m_minus),1);
+
+    UVector P_max = sum(transpose(P_m_max),1);*/
 
 
 
     
+
+
+
+
+
+
+  
 
 
 
