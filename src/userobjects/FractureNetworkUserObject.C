@@ -1559,16 +1559,16 @@ FractureNetworkUserObject::stabilize_coeffiecient(FEProblemBase & _problem, utop
 
         utopia::each_read(_f, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
 
-            if(std::abs(value) > 1.e-17){
-                //double alpha = std::min(R_plus.get(i), R_minus.get(j));
-                // auto _f_bar = 1.0 * alpha * value;
-                Alpha_m.set(i, j, value);
+            if(std::abs(value) > 0){
+                double alpha = std::min(R_plus.get(i), R_minus.get(j));
+                auto _f_bar = 1.0 * alpha * value;
+                Alpha_m.set(i, j, _f_bar);
             }
-            // else if(value < 0){
-            //     double alpha = std::min(R_minus.get(i), R_plus.get(j));
-            //     // auto _f_bar =  1.0 * alpha * value;
-            //     Alpha_m.set(i, j, alpha);
-            // }
+            else if(value < 0){
+                double alpha = std::min(R_minus.get(i), R_plus.get(j));
+                auto _f_bar =  1.0 * alpha * value;
+                Alpha_m.set(i, j, _f_bar);
+            }
         });
      
     }
