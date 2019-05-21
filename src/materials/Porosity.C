@@ -19,11 +19,17 @@ validParams<Porosity>()
 Porosity::Porosity(const InputParameters &parameters) :
 Material(parameters),
 _phiInput(getParam<Real>("phi")),
-_phi(declareProperty<Real>("Porosity"))
+_poro(declareProperty<Real>("Porosity"))
 {}
 
 void
 Porosity::computeQpProperties()
 {
-    _phi[_qp]=_phiInput;
+    _poro[_qp]=_phiInput;
+
+
+     //std::cout<<"poro_material naterial ==>"<<_poro[_qp]<<std::endl;
+
+  
+
 }

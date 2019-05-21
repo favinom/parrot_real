@@ -142,6 +142,7 @@ constraint_m = true
 constraint_f = false
 porosity_m=0.2
 porosity_f=2.0e-5
+solve_mg=false
 [../]
 
 []

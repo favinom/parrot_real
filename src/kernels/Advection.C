@@ -25,6 +25,7 @@ validParams<Advection>()
 
 Advection::Advection(const InputParameters & parameters)
 : Kernel(parameters),
+// _poro(getMaterialProperty<Real>("Porosity")),
 _U(getMaterialProperty<RealVectorValue>("VelocityVector")),
 _int_by_parts(getParam<bool>("int_by_parts"))
 {}

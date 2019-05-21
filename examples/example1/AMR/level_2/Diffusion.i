@@ -43,16 +43,21 @@ vector_value = '50 50 50'
 []
  
 [Preconditioning]
-[./prec] type = SMP full = true ksp_norm = default [../]
+[./prec]
+ type = SMP
+ full = true
+ ksp_norm = default [../]
 []
  
 [Executioner]
 
- type=Steady
+ type=Transient
+ dt=0.01
+ num_steps=1.0
  solve_type= LINEAR
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               superlu_dist'
+ petsc_options_value='  preonly   lu       NONZERO               mumps'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
@@ -70,3 +75,24 @@ order=SIXTH
  xdr            = true
  print_perf_log = true
 []
+
+[MultiApps]
+ [sub]
+ type = TransientMultiApp
+ input_files = sub.i
+ execute_on = 'TIMESTEP_END'
+ []
+ []
+ 
+[Transfers]
+ [to_sub]
+ type = MultiAppProjectionTransfer
+ direction = to_multiapp
+ source_variable = pressure
+ variable = v
+ multi_app = sub
+ check_multiapp_execute_on = false
+ execute_on = 'TIMESTEP_END'
+ [../]
+ []
+

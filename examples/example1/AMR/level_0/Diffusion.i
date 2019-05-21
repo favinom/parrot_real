@@ -51,8 +51,8 @@ vector_value = '50 50 50'
  type=Steady
  solve_type= LINEAR
  line_search = none
- petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package -mat_view'
- petsc_options_value='  preonly   lu       NONZERO               superlu_dist ascii_info_details'
+ petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package'
+ petsc_options_value='  preonly   lu       NONZERO               mumps'
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'

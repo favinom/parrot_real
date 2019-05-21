@@ -32,6 +32,8 @@ protected:
     virtual Real computeQpJacobian() override;
 
     virtual void computeJacobian() override;
+
+    // const MaterialProperty<Real> &_poro;
     
     const MaterialProperty<RealVectorValue> &_U;
 

@@ -26,7 +26,7 @@ protected:
     protected:
     
   Real _phiInput;
-  MaterialProperty<Real> &_phi;
+  MaterialProperty<Real> &_poro;
 
 };
 

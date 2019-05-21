@@ -94,7 +94,7 @@ int_by_parts=false
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=0.2  #0.17 0.13
+coef=0.8  #0.17 0.13
 use_h=true
 [../]
 
@@ -145,9 +145,6 @@ petsc_options_value='  ksp_parrot_preonly  '
 dt = 1e7
 num_steps=100
 
-[./Quadrature]
-order=SIXTH
-[../]
 
 []
 
@@ -164,7 +161,7 @@ type = SolutionUserObject
 mesh = OutputBenchmark1.e
 timestep = 2
 system_variables = pressure
-execute_on = 'initial'
+execute_on = 'timestep_end'
 [../]
 []
 

@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
- file = refineMesh_0003_mesh.xdr
+ file = refineMesh_0000_mesh.xdr
  block_id = '2 4 5 6 7'
  boundary_id = '1 2'
  boundary_name = 'inflow outflow'

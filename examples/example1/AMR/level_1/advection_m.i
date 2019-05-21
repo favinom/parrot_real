@@ -101,7 +101,7 @@ use_h=true
 [./timestab]
 type = TimeAdvectionSUPG
 variable = CM
-coef=0.3
+coef=0.8
 use_h=true
 lumping=true
 [../]

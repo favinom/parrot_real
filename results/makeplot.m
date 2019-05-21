@@ -1,11 +1,11 @@
 close all
 clear all
 
-cd('/Users/favinom/projectsN/parrot_real/results');
+cd('/Users/mariagiuseppinanestola/projects/parrot_real/results/fracture-flow-3d-master/single/results/');
 
-folder = 'fracture-flow-3d-master/single/results/';
+folder = '/Users/mariagiuseppinanestola/projects/parrot_real/results/fracture-flow-3d-master/single/results/';
 
-sub{1} = 'NCU_TW';
+sub{1} = 'UIB/MPFA';
 
 sub{2} = 'UIB/MPFA';
 sub{3} = 'UIB/MVEM';
@@ -41,8 +41,8 @@ for ref=1:3
         
     end
     
-    for ff=1:3
-        subplot(3,2,2*ff-1);
+    for ff=3:3
+        %subplot(3,2,2*ff-1);
         hold on
         for sub_i=1:length(sub)
            if (sub_i==12)
@@ -55,40 +55,40 @@ for ref=1:3
         end
     end
     
-end
-
-
-for ref=1:3
-    figure(ref)
-    
-    for sub_i=1:length(sub)
-        
-        file = ['dol_refinement_',num2str(ref-1),'*'];
-        
-        orig=pwd;
-        dove=[folder,sub{sub_i}];
-        cd(dove);
-        filename=dir(file);
-        
-        data{sub_i}=load(filename.name);
-        
-        cd(orig);
-        
-    end
-    
-     for ff=1:3
-         subplot(3,2,2*ff);
-         hold on
-         for sub_i=1:length(sub)
-             if(sub_i==12)
-              plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff),'k-', 'LineWidth', 2)
-             elseif (sub_i==11)
-              plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff),'r-', 'LineWidth', 2)
-             else        
-              plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff))
-             end
-                          
-         end
-     end
+%end
+% 
+% 
+% for ref=1:3
+%     figure(ref)
+%     
+%     for sub_i=1:length(sub)
+%         
+%         file = ['dol_refinement_',num2str(ref-1),'*'];
+%         
+%         orig=pwd;
+%         dove=[folder,sub{sub_i}];
+%         cd(dove);
+%         filename=dir(file);
+%         
+%         data{sub_i}=load(filename.name);
+%         
+%         cd(orig);
+%         
+%     end
+%     
+%      for ff=1:3
+%          subplot(3,2,2*ff);
+%          hold on
+%          for sub_i=1:length(sub)
+%              if(sub_i==12)
+%               plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff),'k-', 'LineWidth', 2)
+%              elseif (sub_i==11)
+%               plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff),'r-', 'LineWidth', 2)
+%              else        
+%               plot(data{sub_i}(:,2*ff-1),data{sub_i}(:,2*ff))
+%              end
+%                           
+%          end
+%      end
      
 end
