@@ -78,8 +78,8 @@ PorosityTimeDerivative::computeJacobian()
     Real meanPoro=0.0;
     
     // We need these just to verify
-    Real minPoro=1000.0;
-    Real maxPoro=-10000.0;
+    Real minPoro=1000000.0;
+    Real maxPoro=-1000000.0;
     Real volM=(*_current_elem).volume();
     DenseMatrix<Real> testKE;
     testKE.resize(_test.size(),_test.size());
@@ -129,8 +129,11 @@ PorosityTimeDerivative::computeJacobian()
         
         if ( std::fabs(testKE.l1_norm() )>1e-10 )
         {
-            std::cout<<"matrix is not consistent\n";
-            exit(1);
+            std::cout<<"There is a difference between algebraic lumping and trapezoidal quadrature\n";
+            std::cout<<"Most likely the map between element "<<_current_elem[0].id()<< " and the reference element\n";
+            std::cout<<"is non-linear\n";
+            std::cout<<"Once we used to exit(1) at this point, nowadays we continue\n";
+            //exit(1);
         }
 
         accumulateTaggedLocalMatrix();
