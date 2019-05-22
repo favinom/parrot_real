@@ -32,13 +32,19 @@ protected:
   virtual Real computeQpJacobian();
     virtual void computeJacobian();
     virtual void computeResidual();
+    
+    void myComputeLumpedJacobian();
   /**
    * This MooseArray will hold the reference we need to our
    * material property from the Material class
    */
-  const MaterialProperty<Real> &_poro;
+    const MaterialProperty<Real> &_poro;
     
     const VariableValue & _u_dot_nodal;
+    
+    DenseMatrix<Real> _Ke0;
+    DenseMatrix<Real> _Ke1;
+    DenseMatrix<Real> _Ke2;
     
 };
 #endif // COEFTIMEDERIVATIVE_H
