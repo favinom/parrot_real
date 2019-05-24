@@ -1,5 +1,5 @@
 [Mesh]
-  file = refineMesh_0_0001_mesh.xdr #Mesh_level1.e#refineMesh_0003_mesh.xdr
+  file = refineMesh_0_0002_mesh.xdr #Mesh_level1.e#refineMesh_0003_mesh.xdr
   block_id = '2 4 5 6 7'
   boundary_id = '1 2'
   boundary_name = 'inflow outflow'

@@ -69,20 +69,13 @@ execute_on = 'initial'
 
 
 [Kernels]
-active='convection stab  time'
+active='time diff'
 
 [upwind]
 type = AlgebraicDiffusion
 #upwinding_type=full
 variable = CM
 #int_by_parts=false
-[../]
-
-[./Stab_f]
-block='2'
-type = MyDiffusion
-variable = CM
-coef=5.e-3
 [../]
 
 [./convection]
@@ -113,11 +106,9 @@ lumping = true
 [../]
 
 [./diff]
-block='4 5'
 type = MyDiffusion
 variable = CM
-coef=1.0e-3
-#tensor_coeff='1.e-10 0 0 0 1.0e-10 0 0 0 1.0e-10'
+coef=1.0e-1
 [../]
 []
 

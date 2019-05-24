@@ -118,14 +118,6 @@ void RedIntConvStab::myAssembleConvection()
 
 void RedIntConvStab::myAssembleArtificialDiffusion()
 {
-    _artifDiffX.resize(_test.size(), _test.size());
-    _artifDiffY.resize(_test.size(), _test.size());
-    _artifDiffZ.resize(_test.size(), _test.size());
-
-    _artifDiffX.zero();
-    _artifDiffY.zero();
-    _artifDiffZ.zero();
-    
     UniquePtr<FEBase> fe (FEBase::build(3, FIRST));
     QTrap qrule (3);
     fe->attach_quadrature_rule (&qrule);
@@ -133,11 +125,39 @@ void RedIntConvStab::myAssembleArtificialDiffusion()
     const std::vector<Real> & JxW = fe->get_JxW();
     const std::vector<std::vector<RealVectorValue> > & dphi = fe->get_dphi();
     
+    
+    const std::vector<std::vector<Real> > & phi = fe->get_phi();
+    
+    DenseMatrix<Number> A(phi.size(),phi.size());
+    
+    for (_i = 0; _i < phi.size(); _i++)
+        for (_j = 0; _j < phi.size(); _j++)
+            for (_qp = 0; _qp < qrule.n_points(); _qp++)
+            {
+                Real test = phi[_i][_qp];
+                Real fhi =  phi[_j][_qp];
+                Real w    = JxW[_qp];
+                
+                A(_i, _j)+= w *  fhi * test;
+                
+            }
+    std::cout<<A<<std::endl;
+
+    
+    
+    _artifDiffX.resize(dphi.size(), dphi.size());
+    _artifDiffY.resize(dphi.size(), dphi.size());
+    _artifDiffZ.resize(dphi.size(), dphi.size());
+    
+    _artifDiffX.zero();
+    _artifDiffY.zero();
+    _artifDiffZ.zero();
+    
     RealVectorValue gradPhi,gradTest;
     Real weight;
-    for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < _test.size(); _j++)
-            for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < dphi.size(); _i++)
+        for (_j = 0; _j < dphi.size(); _j++)
+            for (_qp = 0; _qp < qrule.n_points(); _qp++)
             {
                 gradTest= dphi[_i][_qp];
                 gradPhi = dphi[_j][_qp];
@@ -146,6 +166,7 @@ void RedIntConvStab::myAssembleArtificialDiffusion()
                 _artifDiffX(_i, _j)+= weight *  gradPhi(0) * gradTest(0);
                 _artifDiffY(_i, _j)+= weight *  gradPhi(1) * gradTest(1);
                 _artifDiffZ(_i, _j)+= weight *  gradPhi(2) * gradTest(2);
+                
             }
 
 }
@@ -190,6 +211,9 @@ void RedIntConvStab::myAssembleJacobian()
         exit(1);
     }
 
+//    std::cout<<_artifDiffX<<std::endl;
+    std::cout<<_convX<<std::endl;
+    
     _artifDiffX*=coeffX;
     _artifDiffY*=coeffY;
     _artifDiffZ*=coeffZ;
@@ -210,6 +234,6 @@ void RedIntConvStab::myAssembleJacobian()
     _local_ke+=_convY;
     _local_ke+=_convZ;
     
-    verifyMatrix(_local_ke);
+//    verifyMatrix(_local_ke);
     
 }
