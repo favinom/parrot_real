@@ -69,7 +69,7 @@ execute_on = 'initial'
 
 
 [Kernels]
-active='time diff'
+active='time upwind'
 
 [upwind]
 type = AlgebraicDiffusion
@@ -78,38 +78,12 @@ variable = CM
 #int_by_parts=false
 [../]
 
-[./convection]
-type = Advection
-variable = CM
-int_by_parts=false
-[../]
-
-[./stab]
-type = AdvectionSUPG
-variable = CM
-coef=0.2  #0.17 0.13
-use_h=true
-[../]
-
-[./timestab]
-type = TimeAdvectionSUPG
-variable = CM
-coef=0.3
-use_h=true
-lumping=true
-[../]
-
 [./time]
 type = PorosityTimeDerivative
 variable = CM
 lumping = true
 [../]
 
-[./diff]
-type = MyDiffusion
-variable = CM
-coef=1.0e-1
-[../]
 []
 
 [BCs]
@@ -130,8 +104,8 @@ type = Transient
 solve_type= LINEAR
 line_search = none
 
-petsc_options_iname=' -ksp_type            '
-petsc_options_value='  ksp_parrot_preonly  '
+ petsc_options_iname=' -ksp_type             '   # -mat_view
+ petsc_options_value='  ksp_parrot_preonly    '   # ::ascii_matlab
 
 dt = 1e7
 num_steps=100

@@ -84,9 +84,9 @@ PorosityTimeDerivative::computeJacobian()
 
 void PorosityTimeDerivative::myComputeLumpedJacobian()
 {
-    Real meanPoro=0.0;
-    Real minPoro=1.0e9;
-    Real maxPoro=-1.0e9;
+    Real meanPoro= 0.0;
+    Real minPoro = 1.0e15;
+    Real maxPoro =-1.0e15;
     
     Real volume0=0.0;
     Real volume1=0.0;
@@ -103,13 +103,15 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
         minPoro=std::min(minPoro,_poro[_qp]);
         maxPoro=std::max(maxPoro,_poro[_qp]);
     }
-    meanPoro/=_qrule->n_points();
     
     if ( std::fabs(maxPoro-minPoro)>1e-10 )
     {
         std::cout<<"Porosity is not constant over the element\n";
         exit(1);
     }
+    
+    meanPoro/=_qrule->n_points();
+    
     if ( std::fabs(meanPoro-minPoro)>1e-10 )
     {
         std::cout<<"meanPoro is wrong\n";
@@ -183,8 +185,6 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
         volume2+=myW.at(_qp);
     }
     
-    _local_ke=_Ke0;
-    
     // We need these just to verify
     if ( std::fabs(volM-volume0)>1e-10 )
     {
@@ -206,42 +206,29 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
         exit(1);
     }
     
+    DenseMatrix<Number> diff02(_Ke0);
+    diff02-=_Ke2;
+
+    if ( std::fabs(diff02.l1_norm() )>1e-10 )
+    {
+        std::cout<<"Algebraic lumping and mass lumping do not coincide, exiting...\n";
+        exit(1);
+    }
+    
     DenseMatrix<Number> diff01(_Ke0);
     diff01-=_Ke1;
     
-    DenseMatrix<Number> diff02(_Ke0);
-    diff02-=_Ke2;
+    if ( std::fabs(diff01.l1_norm() )>1e-10 && _fe_problem.currentlyComputingJacobian() )
+    {
+        std::cout<<"Element "<<_current_elem[0].id()<<std::endl;
+        std::cout<<"Difference between mass lumping in the reference and current configuration \n";
+        std::cout<<"Most likely the map between the element and the reference element is non-linear.\n";
+        std::cout<<"Once at this point we used to exit(1), nowadays we continue\n\n\n\n";
+        // exit(1);
+        
+    }
     
-    DenseMatrix<Number> diff12(_Ke1);
-    diff12-=_Ke2;
-    
-    int flag01=0;
-    int flag02=0;
-    int flag12=0;
-    
-    if ( std::fabs(diff01.l1_norm() )>1e-10 )
-        flag01=1;
-    if ( std::fabs(diff02.l1_norm() )>1e-10 )
-        flag02=1;
-    if ( std::fabs(diff12.l1_norm() )>1e-10 )
-        flag12=1;
-    /*
-     if ( (flag01>0.5 || flag02>0.5 || flag12>0.5) && _fe_problem.currentlyComputingJacobian() )
-     {
-     std::cout<<"Element "<<_current_elem[0].id()<<std::endl;
-     std::cout<<"Difference between\n";
-     if (flag01)
-     std::cout<<"Algebraic assembly and std lumping (01)\n";
-     if (flag02)
-     std::cout<<"Algebraic assembly and my lumping  (02)\n";
-     if (flag12)
-     std::cout<<"Std lumping and my lumping         (12)\n";
-     
-     std::cout<<"Most likely the map between the element and the reference element is non-linear.\n";
-     std::cout<<"Once we used to exit(1) at this point, nowadays we continue\n\n\n\n";
-     // exit(1);
-     }
-     */
+    _local_ke=_Ke0;
     
 }
 
