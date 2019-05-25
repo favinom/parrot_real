@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
- file = refineMesh_0_0002_mesh.xdr #Mesh_level1.e #refineMesh_0003_mesh.xdr
+ file = refinedMesh_${origLevel}_000${adapSteps}_mesh.xdr
  block_id = '2 4 5 6 7'
  boundary_id = '1 2'
  boundary_name = 'inflow outflow'
@@ -69,7 +69,7 @@ execute_on = 'initial'
 
 
 [Kernels]
-active='convection stab  time'
+active='time upwind'
 
 [upwind]
 type = AlgebraicDiffusion
@@ -78,47 +78,12 @@ variable = CM
 #int_by_parts=false
 [../]
 
-[./Stab_f]
-block='2'
-type = MyDiffusion
-variable = CM
-coef=5.e-3
-[../]
-
-[./convection]
-type = Advection
-variable = CM
-int_by_parts=false
-[../]
-
-[./stab]
-type = AdvectionSUPG
-variable = CM
-coef=0.2  #0.17 0.13
-use_h=true
-[../]
-
-[./timestab]
-type = TimeAdvectionSUPG
-variable = CM
-coef=0.3
-use_h=true
-lumping=true
-[../]
-
 [./time]
 type = PorosityTimeDerivative
 variable = CM
 lumping = true
 [../]
 
-[./diff]
-block='4 5'
-type = MyDiffusion
-variable = CM
-coef=1.0e-3
-#tensor_coeff='1.e-10 0 0 0 1.0e-10 0 0 0 1.0e-10'
-[../]
 []
 
 [BCs]
@@ -139,8 +104,8 @@ type = Transient
 solve_type= LINEAR
 line_search = none
 
-petsc_options_iname=' -ksp_type            '
-petsc_options_value='  ksp_parrot_preonly  '
+ petsc_options_iname=' -ksp_type             '   # -mat_view
+ petsc_options_value='  ksp_parrot_preonly    '   # ::ascii_matlab
 
 dt = 1e7
 num_steps=100
@@ -152,6 +117,7 @@ order=SIXTH
 []
 
 [Outputs]
+ file_base = AdvectionOut_${origLevel}_${adapSteps}
 exodus = true
 csv=true
 print_perf_log = true
@@ -161,7 +127,7 @@ print_perf_log = true
 [UserObjects]
 [./soln]
 type = SolutionUserObject
-mesh = OutputBenchmark1.e
+mesh = DiffusionOut_${origLevel}_${adapSteps}.e
 timestep = 2
 system_variables = pressure
 execute_on = 'initial'

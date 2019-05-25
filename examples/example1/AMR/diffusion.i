@@ -1,10 +1,20 @@
 [Mesh]
-  file = Mesh_level3.e
+ file = refinedMesh_${origLevel}_000${adapSteps}_mesh.xdr
   block_id = '2 4 5 6 7'
   boundary_id = '1 2'
   boundary_name = 'inflow outflow'
   uniform_refine = 0
-  #second_order=true
+  #second_order = true
+[]
+
+
+[MeshModifiers]
+#active=''
+[./rotate]
+type = Transform
+transform = TRANSLATE
+vector_value = '50 50 50'
+[../]
 []
 
 
@@ -12,16 +22,8 @@
 [./pressure] order=FIRST  family=LAGRANGE [../]
 []
 
-[MeshModifiers]
-  [./rotate]
-    type = Transform
-    transform = TRANSLATE
-    vector_value = '50 50 50'
-  [../]
-[]
-
 [Kernels]
-[./myDiffusion] type = MyDiffusion variable = pressure coef=1 [../]
+[./myDiffusion] type = MyDiffusion variable = pressure coef =1.0 [../]
 []
 
 [Materials]
@@ -50,7 +52,7 @@
  solve_type= LINEAR
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
- petsc_options_value='  preonly   lu       NONZERO               mumps'
+ petsc_options_value='  preonly   lu       NONZERO               mumps '
  
 # petsc_options_iname = '-pc_type -pc_hypre_type'
 # petsc_options_value = 'hypre boomeramg'
@@ -63,7 +65,8 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = OutputBenchmark1
+ file_base      = DiffusionOut_${origLevel}_${adapSteps}
  exodus         = true
+# xdr            = true
  print_perf_log = true
 []
