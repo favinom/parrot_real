@@ -84,6 +84,7 @@ full = true
 [Executioner]
 
 type = Transient
+scheme = 'void'
 solve_type= LINEAR
 line_search = none
 
