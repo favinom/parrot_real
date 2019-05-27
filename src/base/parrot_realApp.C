@@ -6,6 +6,7 @@
 
 #include "petscksp.h"
 #include "Parrot_preonly.h"
+#include "Parrot_preonly_stab.h"
 
 template <>
 InputParameters
@@ -45,6 +46,9 @@ parrot_realApp::registerObjects(Factory & factory)
     
     PetscErrorCode ierr;
     ierr = KSPRegister("ksp_parrot_preonly", KSPCreate_Parrot_PREONLY);
+    CHKERRV(ierr);
+    
+    ierr = KSPRegister("ksp_parrot_preonly_stab", KSPCreate_Parrot_PREONLY_STAB);
     CHKERRV(ierr);
 }
 

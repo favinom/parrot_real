@@ -2,7 +2,7 @@
 
 ol=1;
 as=0;
-np=1;
+np=6;
 mpirun -n ${np} ../../../parrot_real-opt -i refineBlock.i origLevel=${ol} adapSteps=${as}
 
 for (( c=0; c<=as+1; c++ ))

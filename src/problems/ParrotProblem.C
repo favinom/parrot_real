@@ -39,6 +39,8 @@ void ParrotProblem::initialSetup()
     
     PetscNonlinearSolver<Number> * petsc_solver =
     dynamic_cast<PetscNonlinearSolver<Number> *>((*_nl_sys).nonlinearSolver());
+    
+    
 
     SNES snes = petsc_solver->snes();
     KSP ksp;
@@ -88,6 +90,8 @@ void ParrotProblem::timestepSetup()
     _ksp_ptr = (KSP_PARROT *)ksp->data;
     (_ksp_ptr[0].local_pc)=&_problem_PC;
     (*_ksp_ptr).factorized=&_factorized;
+    
+    _ksp_ptr->_fe_problem = this;
     
     std::cout<<"END ParrotProblem::timestepSetup"<<std::endl;
 };
