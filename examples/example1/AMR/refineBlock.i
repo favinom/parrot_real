@@ -4,7 +4,7 @@ solve = false
 []
 
 [Mesh]
-file = Mesh_level${origLevel}.e
+file = Mesh_hex_level${origLevel}.e
 block_id = '2 4 5 6 7'
 boundary_id = '1 2'
 boundary_name = 'inflow outflow'

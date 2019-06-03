@@ -193,11 +193,11 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
     }
     
     // We need these just to verify
-    if ( std::fabs(volM-volume1)>1e-10 )
-    {
-        std::cout<<"The volume1 is different from volM\n";
-        exit(1);
-    }
+//    if ( std::fabs(volM-volume1)>1e-10 )
+//    {
+//        std::cout<<"The volume1 is different from volM\n";
+//        exit(1);
+//    }
     
     // We need these just to verify
     if ( std::fabs(volM-volume2)>1e-10 )
