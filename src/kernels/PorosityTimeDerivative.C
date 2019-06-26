@@ -11,6 +11,9 @@
 
 #include "libmesh/quadrature_trap.h"
 
+#define TOLL 1e-8
+#define DIM 3
+
 registerMooseObject("parrot_realApp", PorosityTimeDerivative);
 
 template <>
@@ -104,7 +107,7 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
         maxPoro=std::max(maxPoro,_poro[_qp]);
     }
     
-    if ( std::fabs(maxPoro-minPoro)>1e-10 )
+    if ( std::fabs(maxPoro-minPoro)>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
         std::cout<<"Porosity is not constant over the element\n";
         exit(1);
@@ -112,12 +115,12 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
     
     meanPoro/=_qrule->n_points();
     
-    if ( std::fabs(meanPoro-minPoro)>1e-10 )
+    if ( std::fabs(meanPoro-minPoro)>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
         std::cout<<"meanPoro is wrong\n";
         exit(1);
     }
-    if ( std::fabs(meanPoro-maxPoro)>1e-10 )
+    if ( std::fabs(meanPoro-maxPoro)>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
         std::cout<<"meanPoro is wrong\n";
         exit(1);
@@ -143,7 +146,7 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
     
     // In _Ke1 we use the trapezoidal rule from libmesh
     
-    int dim=3;
+    int dim=DIM;
     UniquePtr<FEBase> fe1 (FEBase::build(dim, FIRST));
     QTrap qrule1 (dim);
     fe1->attach_quadrature_rule (&qrule1);
@@ -186,30 +189,34 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
     }
     
     // We need these just to verify
-    if ( std::fabs(volM-volume0)>1e-10 )
+    if ( std::fabs(volM-volume0)>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
+        std::cout<<"volume0="<<volume0<<std::endl;
+        std::cout<<"volM="<<volM<<std::endl;
+        std::cout<<"difference="<<std::fabs(volM-volume0)<<std::endl;
         std::cout<<"The volume0 is different from volM\n";
+    }
+    
+    // We need these just to verify
+    if ( std::fabs(volM-volume1)>TOLL && _fe_problem.currentlyComputingJacobian() )
+    {
+        std::cout<<"The volume1 is different from volM\n";
         exit(1);
     }
     
     // We need these just to verify
-//    if ( std::fabs(volM-volume1)>1e-10 )
-//    {
-//        std::cout<<"The volume1 is different from volM\n";
-//        exit(1);
-//    }
-    
-    // We need these just to verify
-    if ( std::fabs(volM-volume2)>1e-10 )
+    if ( std::fabs(volM-volume2)>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
+        std::cout<<"volume2="<<volume2<<std::endl;
+        std::cout<<"volM="<<volM<<std::endl;
+        std::cout<<"difference="<<std::fabs(volM-volume2)<<std::endl;
         std::cout<<"The volume2 is different from volM\n";
-        exit(1);
     }
     
     DenseMatrix<Number> diff02(_Ke0);
     diff02-=_Ke2;
 
-    if ( std::fabs(diff02.l1_norm() )>1e-10 )
+    if ( std::fabs(diff02.l1_norm() )>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
         std::cout<<"Algebraic lumping and mass lumping do not coincide, exiting...\n";
         exit(1);
@@ -218,7 +225,7 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
     DenseMatrix<Number> diff01(_Ke0);
     diff01-=_Ke1;
     
-    if ( std::fabs(diff01.l1_norm() )>1e-10 && _fe_problem.currentlyComputingJacobian() )
+    if ( std::fabs(diff01.l1_norm() )>TOLL && _fe_problem.currentlyComputingJacobian() )
     {
         std::cout<<"Element "<<_current_elem[0].id()<<std::endl;
         std::cout<<"Difference between mass lumping in the reference and current configuration \n";

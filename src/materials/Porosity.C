@@ -25,5 +25,8 @@ _phi(declareProperty<Real>("Porosity"))
 void
 Porosity::computeQpProperties()
 {
+    
+     //std::cout<< _q_point[_qp] <<std::endl; 
     _phi[_qp]=_phiInput;
+
 }

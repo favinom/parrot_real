@@ -1,36 +1,5 @@
 [Mesh]
- file = prova.e
- uniform_refine = 0
- #second_order=true
-[]
-
-[MeshModifiers]
-# [./createNewSidesetX]
-# type = AddSideSetsFromBoundingBox
-# boundary_id_old = 3
-# boundary_id_new = 10
-# block_id = 2
-# bottom_left = '-10 -10 -10'
-# top_right =   '10  10 10'
-# [../]
- 
-# [./createNewSidesetY]
-# type = AddSideSetsFromBoundingBox
-# boundary_id_old = '2'
-# boundary_id_new = 11
-# block_id = 2
-# bottom_left = '-0.10 2.249 -0.10'
-# top_right =   '1.0  2.2510 0.3333'
-# [../]
- 
-# [./createNewSidesetZ]
-# type = AddSideSetsFromBoundingBox
-# boundary_id_old = '2'
-# boundary_id_new = 12
-# block_id = 2
-# bottom_left = '-0.10 2.249 0.6666'
-# top_right =   '1.0   2.251 1.0'
-#[../]
+ file = refinedMesh_${origLevel}_000${adapSteps}_mesh.xdr
 []
 
 [Variables]
@@ -41,49 +10,61 @@
 [./myDiffusion] type = MyDiffusion variable = pressure coef=1.0 [../]
 []
 
- [AuxVariables]
-[./pp] order=CONSTANT  family=MONOMIAL [../]
- []
- 
- [AuxKernels]
-[./ciao] type = MaterialRealTensorValueAux i = 0 j = 0 variable = pp property = conductivityTensor [../]
- []
- 
 [Materials]
 [./conductivity1] 
-block='1' 
+ block='1 2 3 4 5 6 7 8'
 type =  HydraulicConductivity
- conductivity = 1.e4
+ conductivity = 1.0e4
 [../]
 
 [./conductivity2] 
-block ='2' 
+ block ='11 12 13'
 type =  HydraulicConductivity
 conductivity = 1.0
 [../]
 []
-# observe that with the second BCs the stiffness matrix is SDP and we can use choleski factorization
 
 [Functions]
  [./fun_n]
  type = ParsedFunction
- value = '1*(x<0.2500)*(y<0.2500)*(z<0.2500)'
+ value = '1.0'
  [../]
 []
 
 [BCs]
-[./dirBC]  type = DirichletBC variable = pressure value = 0  boundary = 11  [../]
-[./fluxBC] type = NeumannBC variable = pressure value = '1'  boundary = '10' [../]
+
+[./fluxBC] type = NeumannBC variable = pressure value = 1.2752  boundary = '21' [../] #0_1_1.2650 #0_0 1.390 1.33750 1.252 1.415
+[./dirBC]  type = DirichletBC variable = pressure value = 0  boundary = '22'  [../]
 []
  
 [Preconditioning]
 [./prec] type = SMP full = true ksp_norm = default [../]
 []
  
+ 
+[Postprocessors]
+ active='average'
+ [./average]
+ type = SideAverageValue
+ boundary = 21
+ variable = pressure
+ [../]
+[./fluxBoundary]
+ type = SideIntegralForFluxPostprocessor
+ variable = pressure
+ boundary   = '21'
+ execute_on = 'timestep_end'
+ [../]
+ [./integral]
+ type = AreaPostprocessor
+ boundary = '21'
+ [../]
+ []
+ 
 [Executioner]
 
  type=Steady
- solve_type= newton
+ solve_type= LINEAR
  line_search = none
  petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
  petsc_options_value='  preonly   lu       NONZERO               mumps'
@@ -99,7 +80,9 @@ order=SIXTH
 
 
 [Outputs]
- file_base      = DiffusionOutput1
+ file_base      = DiffusionOut_${origLevel}_${adapSteps}
  exodus         = true
  print_perf_log = true
-[]
+ csv=true
+ []
+

@@ -74,6 +74,18 @@ public:
   {
         return _rhs;
   };
+
+  std::shared_ptr<VecT> &
+  setOldSol()
+  {
+        return _sol;
+  };
+
+    std::shared_ptr<VecT> &
+  getOldSol()
+  {
+        return _sol;
+  };
     
   std::shared_ptr<void> & getVoidPointer()
     {
@@ -89,7 +101,7 @@ public:
 protected:
   std::shared_ptr<SparseMatT> _B;
   std::shared_ptr<SparseMatT> _B_reverse;
-  std::shared_ptr<VecT> _rhs;
+  std::shared_ptr<VecT> _rhs, _sol;
 };
 
 #endif

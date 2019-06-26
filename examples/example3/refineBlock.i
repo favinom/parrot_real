@@ -4,20 +4,11 @@ solve = false
 []
 
 [Mesh]
-file = refineMesh_0003_mesh.xdr #Mesh_level0.e
-block_id = '2 4 5 6 7'
-boundary_id = '1 2'
+ file = prova_${origLevel}.e
+block_id = '1 2 3 4 5 6 7 8 11 12 13'
+boundary_id = '21 22'
 boundary_name = 'inflow outflow'
 #second_order=true
-[]
-
-[MeshModifiers]
-active=''
-[./rotate]
-type = Transform
-transform = TRANSLATE
-vector_value = '50 50 50'
-[../]
 []
 
 [Variables]
@@ -31,13 +22,6 @@ vector_value = '50 50 50'
 [../]
 []
 
-#[BCs]
-#[./Periodic]
-#[./pressure_real_periodic] variable = pressure auto_direction = 'x y z' [../]
-#[../]
-#[]
-
-
 [Executioner]
  type=Steady
  solve_type=LINEAR
@@ -46,20 +30,20 @@ vector_value = '50 50 50'
  []
 
 [Outputs]
- file_base = refineMesh_0
- exodus = true
+ file_base = refinedMesh_${origLevel}
+# exodus = true
  print_linear_residuals = true
  print_perf_log = true
  xdr = true
 []
 
 [Adaptivity]
- marker = simplemark
- steps = 1
+ marker = 'simplemark1'
+ steps = ${adapSteps}
  [./Markers]
- [./simplemark]
- type = BlockMarker
- blockNum = 7
- [../]
+ [./simplemark1]
+  type = UniformMarker
+  block = '1 2 3 4 5 6 7 8'
+  mark = REFINE [../]
  [../]
 []

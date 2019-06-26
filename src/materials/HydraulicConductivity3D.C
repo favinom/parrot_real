@@ -36,8 +36,8 @@ InputParameters validParams<HydraulicConductivity3D>()
     params.addCoupledVar("pressure",
                          "The gradient of this variable will be used as "
                          "the velocity vector.");
+    params.addRequiredParam<Real>("K_matrix","K_matrix");
     params.addRequiredParam<bool>("cond0","condition0");
-    params.addParam<bool>("cond1","false","condition1");
     params.addRequiredParam<Real>("phi_f","phi fracture");
     params.addRequiredParam<Real>("phi_m","phi matrix");
     return params;
@@ -59,12 +59,13 @@ _K_filettata(declareProperty<RealTensorValue>("conductivityTensor")),
 _phi(declareProperty<Real>("Porosity")),
 _phiFracture(getParam<Real>("phi_f")),
 _phiMatrix(getParam<Real>("phi_m")),
+_K_matrix(getParam<Real>("K_matrix")),
 _cond0(getParam<bool>("cond0")),
-_cond1(getParam<bool>("cond1")),
 _gradP(parameters.isParamValid("pressure") ? coupledGradient("pressure"): _grad_zero),
 _U(declareProperty<RealVectorValue>("VelocityVector")),
 _numOfFrac(declareProperty<Real>("numero")),
-_regionID(declareProperty<int>("RegionID"))
+_regionID(declareProperty<int>("RegionID")),
+_regionIDReal(declareProperty<Real>("RegionIDReal"))
 {
     _center   =new RealVectorValue [_fn];
     _rotation =new RealVectorValue [_fn];
@@ -269,14 +270,13 @@ HydraulicConductivity3D::computeQpProperties()
         std::cout<<"maggiore\n";
         exit(1);
     }
-    
+    _regionIDReal[_qp]=_regionID[_qp];
     Real permFrac;
-    Real permMatrix=1.0;
-    Real permMatrixReduced=0.1;
+    Real permMatrix=_K_matrix;
     
     if (_cond0)
     {
-        permFrac=1e4;
+        permFrac=1.0e4;
     }
     else
     {
@@ -288,7 +288,7 @@ HydraulicConductivity3D::computeQpProperties()
     
     if (count>0)
     {
-        //We are inside at least a fracture
+
         _phi[_qp]=_phiFracture;
         _K_filettata[_qp]= permFrac * _identity;
         if (count > 3)
@@ -299,31 +299,11 @@ HydraulicConductivity3D::computeQpProperties()
     }
     else
     {
-        _K_filettata[_qp]= permMatrix * _identity;
         _phi[_qp]=_phiMatrix;
-        /*
-         bool _different_material=false;
-         Real x = _q_point[_qp](0);
-         Real y = _q_point[_qp](1);
-         Real z = _q_point[_qp](2);
-         
-         if ( x > 0.5 && y < 0.5 )
-         _different_material = true;
-         
-         if ( 0.75<x && 0.5<  y &&  y <0.75 && z>0.5 )
-         _different_material = true;
-         
-         if ( 0.625 < x && x < 0.75 && 0.5 < y && y < 0.625 && 0.5 < z && z < 0.75 )
-         _different_material = true;
-         
-         if (_different_material == true)
-         {
-         _K_filettata[_qp]= permMatrixReduced * _identity;
-         }
-         */
+        _K_filettata[_qp]= permMatrix * _identity;
     }
     
-    Real a=_JxW[_qp];
+    //Real a=_JxW[_qp];
     
     _U[_qp] =  -1.0 *  _K_filettata[_qp] * _gradP[_qp];
     

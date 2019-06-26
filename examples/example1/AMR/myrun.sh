@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ol=1; #2 0 1
+ol=3; #2 0 1
 as=1; #1 2 2
 np=6;
 mpirun -n ${np} ../../../parrot_real-opt -i refineBlock.i origLevel=${ol} adapSteps=${as}

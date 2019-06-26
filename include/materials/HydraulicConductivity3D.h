@@ -101,7 +101,7 @@ protected:
 
     MaterialProperty<RealTensorValue> &_K_filettata;
     MaterialProperty<Real> &_phi;
-    Real _phiFracture,_phiMatrix;
+    Real _phiFracture,_phiMatrix, _K_matrix;
     bool _cond0, _cond1;
     const VariableGradient &_gradP;
     MaterialProperty<RealVectorValue> &_U;
@@ -113,7 +113,7 @@ protected:
     std::vector<RealVectorValue> _regionMin;
     std::vector<RealVectorValue> _regionMax;
     MaterialProperty<int> &_regionID;
-    
+    MaterialProperty<Real> &_regionIDReal;
 };
 
 #endif //FreqNavierStokesFracture2D_H

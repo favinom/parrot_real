@@ -54,24 +54,23 @@ public:
     
     typedef utopia::DVectord VecT;
     
-    void stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &S_matrix);
+    void stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &A_matrix, utopia::USparseMatrix &S_matrix);
     
     void assemble_poro_mass_matrix(FEProblemBase & problem, utopia::USparseMatrix &Mass_p, utopia::USparseMatrix &L_Mass_p);
 
         
     VariableName _m_var_name;
-    
-    // userobject to store our operators
-//    const StoreTransferOperators & _operator_storage;
-    
-    
-    void solve_stabilize_monolithic();
-    
-    void assemble_mass_matrix(FEProblemBase & problem, utopia::USparseMatrix &Mass, utopia::USparseMatrix &L_Mass);
+
+    std::vector<int> _vector_p;
+
+    std::vector<Real> _vector_value;
+
     
     void boundary_constraint_vec(utopia::UVector &boundary, utopia::UVector &vec, bool flag);
     
     void constraint_mat(utopia::UVector &boundary, utopia::USparseMatrix &mat, bool has_constaints);
+
+    void unstabilize_coeffiecient(FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs);
     
     bool  _boundary, _constraint_m;
     
@@ -102,6 +101,19 @@ public:
     std::string _userobject_name_1 = "Matrix_System";
     
     void CopyMatrixSolution(utopia::UVector _sol_m);
+
+    void send_list(FEProblemBase & _problem, utopia::USparseMatrix &_M, std::vector<int> &a);
+
+    void assemble_mass_matrix(FEProblemBase & _problem, utopia::USparseMatrix &mass_matrix, utopia::USparseMatrix &lumped_mass_matrix);
+
+    void unconstraint_concentration_vec(utopia::UVector &boundary, utopia::UVector &vec, bool has_constaints);
+
+    Real ComputeMaterialProprties(const Elem *elem);
+
+    void stabilize_coeffiecient(utopia::UVector &rhs_m_c, FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs);
+
+
+
     
 };
 

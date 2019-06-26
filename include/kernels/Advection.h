@@ -28,14 +28,18 @@ public:
     
 protected:
     virtual Real computeQpResidual() override;
+
+    //virtual void computeResidual() override;
     
     virtual Real computeQpJacobian() override;
 
-    virtual void computeJacobian() override;
+   // virtual void computeJacobian() override;
+
+    //void myAssembleJacobian(DenseMatrix<Number> & in);
     
     const MaterialProperty<RealVectorValue> &_U;
 
-    bool _int_by_parts;
+    
     
     
 

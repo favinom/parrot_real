@@ -161,23 +161,25 @@ void AlgebraicDiffusion::myComputeArtificialDiffusion(DenseMatrix<Number> const 
     a+=diff;
     //std::cout<<a<<std::endl;
     
-    for (int i=0; i<8; ++i)
-        for (int j=0; j<8; ++j)
+    for (int i=0; i<_test.size(); ++i)
+        for (int j=0; j<_test.size(); ++j)
             if (i!=j)
             {
                 if ( a(i,j) >1e-15)
                 {
                     std::cout<<a(i,j)<<std::endl;
-                    std::cout<<"fanculo\n";
+                    std::cout<<"An extra-diagonal is positive\n";
+                    exit(1);
                 }
             }
             else
-                if ( a(i,i)<0.0 )
+                if ( a(i,i)<-1e-15 )
                 {
-                    std::cout<<a(i,i)<<std::endl;
+                    std::cout<<"entries a("<<i<<","<<i<<")="<<a(i,i)<<std::endl;
                     std::cout<<op<<std::endl;
                     std::cout<<diff<<std::endl;
                     std::cout<<a<<std::endl;
+                    std::cout<<"matrix wrong\n";
                     exit(1);
                 }
     

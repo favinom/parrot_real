@@ -1,13 +1,19 @@
 
 [Mesh]
 type = FileMesh
-file = refineMesh_0_0000_mesh.xdr
+file = refinedMesh_3_0001_mesh.xdr
 []
 
 [Variables]
 [./CM]
 [../]
 []
+
+[AuxVariables]
+[./CM_aux]
+[../]
+[]
+
 
 [MeshModifiers]
 #active=''
@@ -26,6 +32,10 @@ order = FIRST
 family = MONOMIAL
 [../]
 [./flux_y]
+order = FIRST
+family = MONOMIAL
+[../]
+[./prop]
 order = FIRST
 family = MONOMIAL
 [../]
@@ -60,7 +70,14 @@ family = MONOMIAL
 
 
 [Kernels]
-active='convection'
+active='convection time'
+
+[upwind]
+type = AlgebraicDiffusion
+#upwinding_type=full
+variable = CM
+#int_by_parts=false
+[../]
 
 [./convection]
 type = Advection
@@ -71,7 +88,9 @@ int_by_parts=false
 [./time]
 type = PorosityTimeDerivative
 variable = CM
+lumping = true
 [../]
+
 []
 
 [Preconditioning]
@@ -81,21 +100,25 @@ full = true
 [../]
 []
 
+
 [Executioner]
 
 type = Transient
-scheme = 'void'
 solve_type= LINEAR
 line_search = none
 
-petsc_options_iname=' -ksp_type            '
-petsc_options_value='  ksp_parrot_preonly_stab'
+petsc_options_iname=' -ksp_type             '   # -mat_view
+petsc_options_value='  ksp_parrot_preonly    '   # ::ascii_matlab
 
-dt = 1.0e7
+dt = 1e7
 num_steps=100
 
-[./Quadrature]
-order=SIXTH
+
+
+[./TimeIntegrator]
+type = Void
+rho_f=0
+rho_s=1.0
 [../]
 
 []
@@ -159,11 +182,11 @@ positions='0.0 0.0 0.0'
 
 
 [UserObjects]
-#active='soln'
+active='soln FractureApp Matrix_Storage_1 Matrix_Storage_2 Matrix_Storage_3'
 [./soln]
 type = SolutionUserObject
-mesh = OutputBenchmark1.e
-timestep = 2
+mesh = DiffusionOut_3_1.e
+timestep = LATEST
 system_variables = pressure
 execute_on = 'timestep_begin'
 [../]
@@ -172,9 +195,25 @@ execute_on = 'timestep_begin'
 type=FractureAppConforming
 matrix_variable = CM
 constraint_m = true
+block_id ='2 4 5 6 7'
+value_p='0.4 0.2 0.2 0.2 0.25'
 [../]
 
-[./Matrix_System]
+[./FractureApp_2]
+type=SystemInitialize
+matrix_variable = CM
+[../]
+
+
+[./Matrix_Storage_1]
+type=StoreTransferOperators
+[../]
+
+[./Matrix_Storage_2]
+type=StoreTransferOperators
+[../]
+
+[./Matrix_Storage_3]
 type=StoreTransferOperators
 [../]
 []
@@ -212,7 +251,7 @@ execute_on = 'timestep_end'
 [../]
 
 [./intFrac]
-type = ElementIntegral_phi_c_MatProp
+type =  ElementIntegral_phi_c_MatProp
 variable = CM
 mat_prop = epsInt
 execute_on = 'timestep_end'
