@@ -1,0 +1,102 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef HydraulicConductivity2D_H
+#define HydraulicConductivity2D_H
+
+#include "Material.h"
+
+//Forward Declarations
+class HydraulicConductivity2D;
+
+template<>
+InputParameters validParams<HydraulicConductivity2D>();
+
+/**
+ * Example material class that defines a few properties.
+ */
+class HydraulicConductivity2D : public Material
+{
+public:
+  HydraulicConductivity2D(const InputParameters & parameters);
+    
+    void ComputeNormalsFromAngles(
+                                  RealVectorValue const & angles,
+                                  RealVectorValue & n1,
+                                  RealVectorValue & n2);
+
+    int is_inside(RealVectorValue const & point);
+    
+  ~HydraulicConductivity2D()
+    {
+       std::cout<<"Called desctructor\n";
+    };
+
+protected:
+  virtual void computeQpProperties();
+
+
+    void outerProduct
+    (RealVectorValue const & in1, RealVectorValue const &  in2, RealTensorValue & out);
+    int findRegion(RealVectorValue const & point,std::vector<int> & in);
+    
+    int _fn;
+    
+    int _prec;
+    
+    Real _min_dimension;
+    
+    std::string _fx_string;
+    std::string _fy_string;
+    std::string _fa1_string;
+    std::string _fd1_string;
+    std::string _fd2_string;
+    
+    RealVectorValue * _center;
+    RealVectorValue * _rotation;
+    RealVectorValue * _dimension;
+    
+    RealVectorValue ** _n;
+    
+    RealVectorValue *_d;
+    
+    RealVectorValue * _max_f;
+    RealVectorValue * _min_f;
+    
+    bool * shall_check;
+
+    
+    Real _pi;
+    
+    RealTensorValue _identity;
+    
+
+    MaterialProperty<RealTensorValue> &_K_filettata;
+    MaterialProperty<Real> &_phi;
+    Real _phiFracture,_phiMatrix, _K_matrix;
+    bool _cond0, _cond1;
+    const VariableGradient &_gradP;
+    MaterialProperty<RealVectorValue> &_U;
+
+    MaterialProperty<Real> &_numOfFrac;
+    
+    std::vector<int> _whichFrac;
+    
+    std::vector<RealVectorValue> _regionMin;
+    std::vector<RealVectorValue> _regionMax;
+    MaterialProperty<int> &_regionID;
+    
+};
+
+#endif //FreqNavierStokesFracture2D_H
