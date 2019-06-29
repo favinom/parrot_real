@@ -98,7 +98,7 @@ _poro(getMaterialProperty<Real>("Porosity")),
 _slave_id(parameters.get<int>("id_slave")),
 _f_var_name(getParam<VariableName>("fracture_variable")),
 _m_var_name(getParam<VariableName>("matrix_variable")),
-_operator_storage(getUserObject<StoreTransferOperators>("operator_userobject")),
+// _operator_storage(getUserObject<StoreTransferOperators>("operator_userobject")),
 _operator_type(getParam<std::string>("operator_type")),
 _solve_cg(getParam<bool>("solve_cg")),
 _solve_mg(getParam<bool>("solve_mg")),
@@ -127,6 +127,23 @@ FractureAppConforming::initialize()
         assemble_mass_matrix(_porosity_m, _fe_problem,  mass_m, mass_lumped);
 
         assemble_poro_mass_matrix(_porosity_m, _fe_problem,  mass_mp, mass_lumpedp);
+    }
+
+    if(!_fe_problem.hasUserObject(_userobject_name_1)){
+
+            _console << "Add UserObject" << std::endl;
+
+            std::string class_name = "StoreTransferOperators";
+            auto params = _fe_problem.getMooseApp().getFactory().getValidParams(class_name);
+            params.set<bool>("use_displaced_mesh") = false;
+            params.set<ExecFlagEnum>("execute_on") = "initial";
+
+            _fe_problem.addUserObject("StoreTransferOperators", _userobject_name_1, params);
+            _fe_problem.addUserObject("StoreTransferOperators", _userobject_name_2, params);
+            _fe_problem.addUserObject("StoreTransferOperators", _userobject_name_3, params);
+            _fe_problem.addUserObject("StoreTransferOperators", _userobject_name_4, params);
+
+
     }
 
 
@@ -234,17 +251,17 @@ bool FractureAppConforming::solve_monolithic()
     _console << "Solve_monolithic():: START SOLVING"  << std::endl;
 
 
-    utopia::disp(B.size());
+    // utopia::disp(B.size());
 
-    utopia::disp(D.size());
+    // utopia::disp(D.size());
 
-    utopia::disp(B_t.size());
+    // utopia::disp(B_t.size());
 
-    utopia::disp(D_t.size());
+    // utopia::disp(D_t.size());
 
-    utopia::disp(A_m.size());
+    // utopia::disp(A_m.size());
 
-    utopia::disp(A_f.size());
+    // utopia::disp(A_f.size());
 
    
 
@@ -440,10 +457,10 @@ FractureAppConforming::CopyMatrixSolution(utopia::UVector _sol_m)
     _solution_m->close();
     _sys_m.update();
 
-    if(_pressure)
-       ExodusII_IO (*_mesh_m).write_equation_systems("matrix_p.e", _var_m.sys().system().get_equation_systems());
-    else
-       ExodusII_IO (*_mesh_m).write_equation_systems("matrix_c.e", _var_m.sys().system().get_equation_systems());
+    // if(_pressure)
+    //    ExodusII_IO (*_mesh_m).write_equation_systems("matrix_p.e", _var_m.sys().system().get_equation_systems());
+    // else
+    //    ExodusII_IO (*_mesh_m).write_equation_systems("matrix_c.e", _var_m.sys().system().get_equation_systems());
     
     
 }
@@ -747,20 +764,12 @@ FractureAppConforming::assemble_mass_matrix(double porosity, FEProblemBase & _pr
                 for (unsigned int j=0; j<phi.size(); j++){
 
                         Me(i,j) += JxW[qp] * phi[i][qp] * phi[j][qp];
-
-                        //Me_p(i,j) += JxW[qp] * phi[i][qp] * phi[j][qp];
-                        //std::cout<<"poro_material"<<_poro[qp]<<std::endl;
-                        // if (ele->subdomain_id()==2) Me_p(i,j) += 0.40 * JxW[qp] * phi[i][qp] * phi[j][qp]; 
-                        // if (ele->subdomain_id()==4) Me_p(i,j) += 0.20 * JxW[qp] * phi[i][qp] * phi[j][qp];
-                        // if (ele->subdomain_id()==5) Me_p(i,j) += 0.20 * JxW[qp] * phi[i][qp] * phi[j][qp];
-                        // if (ele->subdomain_id()==6) Me_p(i,j) += 0.20 * JxW[qp] * phi[i][qp] * phi[j][qp];
-                        // if (ele->subdomain_id()==7) Me_p(i,j) += 0.25 * JxW[qp] * phi[i][qp] * phi[j][qp];
             }
         }
     }
 
         
-        dof_map.constrain_element_matrix(Me,dof_indices);
+        dof_map.constrain_element_matrix(Me,dof_indices,false);
 
         matrix_M.add_matrix (Me, dof_indices);
         //matrix_M_p.add_matrix (Me_p, dof_indices);
@@ -772,16 +781,11 @@ FractureAppConforming::assemble_mass_matrix(double porosity, FEProblemBase & _pr
     
     matrix_M.close();
 
-
-    //matrix_M_p.close();
-
     utopia::SizeType nnz_x_row = *std::max_element(dof_map.get_n_nz().begin(), dof_map.get_n_nz().end()); //dof_map.get_n_nz();
         
     utopia::USparseMatrix mass_temp = utopia::local_sparse(dof_map.n_local_dofs(), dof_map.n_local_dofs(), nnz_x_row);
 
     utopia::convert(const_cast<SparseMatrix<Number> &>(matrix_M), mass_temp);
-
-    // utopia::convert(const_cast<SparseMatrix<Number> &>(matrix_M_p), mass_mp);
 
     mass_matrix =  mass_temp;
 
@@ -878,7 +882,7 @@ FractureAppConforming::assemble_poro_mass_matrix(double porosity, FEProblemBase 
     }
 
         
-        dof_map.constrain_element_matrix(Me_p,dof_indices);
+        dof_map.constrain_element_matrix(Me_p,dof_indices,false);
 
         matrix_M_p.add_matrix (Me_p, dof_indices);
 
@@ -953,7 +957,7 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_m).mat(), A_m_t);
 
-        _m_problem.computeResidualSys(_m_sys, *_nl_m.currentSolution(), _nl_m.RHS());
+       
   
         _f_problem.computeResidualSys(_f_sys, *_nl_f.currentSolution(), _nl_f.RHS());
 
@@ -973,21 +977,95 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         _A_t_store   = std::make_shared<USparseMatrix>(A_m_t);
 
-        const_cast<StoreTransferOperators&>(_operator_storage).setTransferOperator() = _A_t_store;
+
 
         auto op = std::make_shared<utopia::Factorization<utopia::USparseMatrix, utopia::UVector> >(MATSOLVERMUMPS,PCLU);
 
-        const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer() = op;
+        const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_4)).getVoidPointer() = op;
 
         c_m  = utopia::local_zeros(local_size(rhs_m_t));
 
+
+        
+        USparseMatrix A_m_t_stab = A_m_t;
+
+        A_m_t_stab*=0;
+
+        _console << "solve_transport_monolithic_one::BEGIN "  << std::endl;
+
+        stabilize_A_matrix(_fe_problem, A_m_t, A_m_t_stab);
+
+        utopia::USparseMatrix A_stab = A_m_t_stab + A_m_t;
+
+        USparseMatrix A_m_tot =  1.0 *  A_stab + mass_lumpedp * inv_dt;
+
+        constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
+
+        op->update(make_ref(A_m_tot));
+        
+        op->apply(rhs_m_t, c_m);
+
+        
+
+        // utopia::UVector rhs_dot;
+
+        // USparseMatrix mass_m_c = mass_m;
+
+        // USparseMatrix mass_lumped_c = mass_lumped;
+
+        // constraint_concentration_mat(rhs_m_c, mass_m_c, _constraint_m);
+
+        // constraint_concentration_mat(rhs_m_c, mass_lumped_c, _constraint_m);
+
+        // UVector diag_elem_c = 1./sum((mass_lumped_c),1);
+
+        // utopia::USparseMatrix inv_mass_lumped_mat_c = diag(diag_elem_c);
+
+        // UVector diag_elem = 1./sum((mass_lumped_c),1);
+
+        // utopia::USparseMatrix inv_mass_lumped_mat = diag(diag_elem);
+
+
+        // c_dot = utopia::local_zeros(utopia::local_size(c_m));
+
+        // USparseMatrix A_stab_c = A_stab;
+
+        // constraint_concentration_mat(rhs_m_c, A_stab_c, _constraint_m);
+
+        // c_dot = 1.0 * inv_mass_lumped_mat * A_stab * c_m;
+
+        // //c_dot *= -1.0;
+
+
+        // USparseMatrix A_m_t_stab_c = A_m_t_stab;
+
+        // constraint_concentration_mat(rhs_m_c, A_m_t_stab_c, _constraint_m);
+
+        // constraint_concentration_mat(rhs_m_c, mass_m_c, _constraint_m);
+
+        // utopia::UVector _f_s = local_zeros(local_size(c_dot));
+
+        // stabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_s);
+
+
+        // utopia::UVector c_m_tot = c_m + 1.0 * dt * inv_mass_lumped_mat_c * _f_s;
+
+
         CopyMatrixSolution(c_m);
+
+        const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_3)).setTransferOperator() =  std::make_shared<USparseMatrix>(A_m_tot);
+
+        const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_1)).setTransferOperator() =  std::make_shared<USparseMatrix>(A_m_t_stab);
+
+        const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_2)).setTransferOperator() =  std::make_shared<USparseMatrix>(A_stab);
+
+        _console << "solve_transport_monolithic_one:: END "  << std::endl;
         
     
     }
 
 
-    if (_fe_problem.timeStep()>1)
+    if (_fe_problem.timeStep()>0)
     {
 
         auto sol_m_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_m_sys.old_local_solution.get())->vec();
@@ -1012,27 +1090,19 @@ FractureAppConforming::solve_stabilize_monolithic(){
   
         constraint_concentration_vec(rhs_m_c,  rhs_m_t, _constraint_m);
 
-        auto op = std::static_pointer_cast< Factorization<USparseMatrix, UVector> >(const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer());
+        auto op = std::static_pointer_cast< Factorization<USparseMatrix, UVector> >(const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_4)).getVoidPointer());
 
-        _A_t_store = const_cast<StoreTransferOperators&>(_operator_storage).getTransferOperator();
-        
-        USparseMatrix A_m_t_stab = *_A_t_store;
 
-        A_m_t_stab*=0;
-
-        _console << "solve_transport_monolithic_one:: Stabilize  "  << std::endl;
-
-        stabilize_A_matrix(_fe_problem, A_m_t_stab);
-
-        utopia::USparseMatrix A_stab = A_m_t_stab + (*_A_t_store);
 
         //utopia::write("A.m", A_stab);
         
         //USparseMatrix A_m_tot =  1.0 * A_stab  + mass_lumpedp * inv_dt;
 
-        USparseMatrix A_m_tot =  1.0 *  A_stab + mass_lumpedp * inv_dt;
+        USparseMatrix A_m_tot = *const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_3)).getTransferOperator();
 
-        constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
+        USparseMatrix A_m_t_stab = *const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_1)).getTransferOperator();
+
+        USparseMatrix A_stab = *const_cast<StoreTransferOperators&>(_fe_problem.getUserObject<StoreTransferOperators>(_userobject_name_2)).getTransferOperator();
 
          _console << "solve_transport_monolithic_one:: Solve  "  << std::endl;
 
@@ -1056,7 +1126,9 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         utopia::USparseMatrix inv_mass_lumped_mat_c = diag(diag_elem_c);
 
-        UVector diag_elem = 1./sum((mass_lumped_c),1);
+        UVector diag_elem = 1./sum((mass_lumped),1);
+
+        // disp(diag_elem_c);
 
         utopia::USparseMatrix inv_mass_lumped_mat = diag(diag_elem);
 
@@ -1066,9 +1138,9 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         USparseMatrix A_stab_c = A_stab;
 
-        constraint_concentration_mat(rhs_m_c, A_stab_c, _constraint_m);
+        //constraint_concentration_mat(rhs_m_c, A_stab_c, _constraint_m);
 
-        c_dot = 1.0 * inv_mass_lumped_mat * A_stab * c_m;
+        c_dot = 1.0 * inv_mass_lumped_mat_c * A_stab_c * c_m;
 
         // utopia::UVector rhs_l = (*_A_t_store) * c_m;
 
@@ -1080,7 +1152,8 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         // op->apply(rhs_l, c_dot);
 
-        c_dot*=-1.0;
+        c_dot*=1.0;
+
 
         // utopia::UVector c_dot_old = - 1.0 * inv_mass_lumped_mat_c * A_stab * c_m_old;
 
@@ -1112,9 +1185,11 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
         // _f_con = dt * f_s + rhs_m_t;
 
-        //constraint_concentration_vec(rhs_m_c,  _f_con, _constraint_m);
+        // unconstraint_concentration_vec(rhs_m_c,  _f_s, _constraint_m);
 
         // _console << "transport_monolithic:: Correction"  << std::endl;
+
+        //_f_s = (mass_m - mass_lumped) * (c_m_old - c_m) * inv_dt + 1.0 * A_m_t_stab * c_m;
 
         utopia::UVector c_m_tot = c_m + 1.0 * dt * inv_mass_lumped_mat_c * _f_s;
 
@@ -1138,224 +1213,26 @@ FractureAppConforming::solve_stabilize_monolithic(){
 
 }
 
-// void
-// FractureAppConforming::solve_stabilize_monolithic(){
-    
-//     using namespace utopia;
-    
-//     _console << "transport_monolithic"  << std::endl;
-
-//     auto &_m_sys = _fe_problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
-
-//     NonlinearSystemBase & _nl_m = _fe_problem.getNonlinearSystemBase();
-
-
-
-//     if  (_fe_problem.timeStep()==1)
-//      {
-              
-        
-//         // Pointer to underlying PetscMatrix type
-//         libMesh::PetscMatrix<libMesh::Number> *petsc_mat_m = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_m_sys.matrix);
-
-//         _fe_problem.computeJacobianSys(_m_sys, *_nl_m.currentSolution(), *petsc_mat_m);
-
-//         utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat_m).mat(), A_m_t);
-
-//         _fe_problem.computeResidualSys(_m_sys, *_nl_m.currentSolution(), _nl_m.RHS());
-
-//         utopia::convert(const_cast<NumericVector<libMesh::Number> &>(_nl_m.RHS()), rhs_m_t);
-
-//         rhs_m_c = rhs_m_t; 
-
-//         Real dt = static_cast<Transient*>(_fe_problem.getMooseApp().getExecutioner())->getDT();
-
-//         double inv_dt = 1.0/dt;
-
-//         _A_t_store   = std::make_shared<USparseMatrix>(A_m_t);
-
-//         const_cast<StoreTransferOperators&>(_operator_storage).setTransferOperator() = _A_t_store;
-
-//         auto op = std::make_shared<utopia::Factorization<utopia::USparseMatrix, utopia::UVector> >(MATSOLVERMUMPS,PCLU);
-
-//         const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer() = op;
-
-//         c_m  = utopia::local_zeros(local_size(rhs_m_t));
-
-//         CopyMatrixSolution(c_m);
-        
-    
-//     }
-
-
-//     if (_fe_problem.timeStep()>1)
-//     {
-
-//         auto sol_m_old = static_cast<libMesh::PetscVector<libMesh::Number> *>(_m_sys.old_local_solution.get())->vec();
-
-//         utopia::convert(sol_m_old, c_m_old);
-
-//         Real dt = static_cast<Transient*>(_fe_problem.getMooseApp().getExecutioner())->getDT();
-
-//         double inv_dt = 1.0/dt;
-
-//         UVector  mass_c_m_old;
-
-//         utopia::USparseMatrix mass_lumpedpc =  mass_lumpedp;
-
-//         constraint_concentration_mat(rhs_m_c,  mass_lumpedpc, _constraint_m);
-
-//         mass_c_m_old = mass_lumpedpc * c_m_old;
-
-//         mass_c_m_old_dot = mass_c_m_old * inv_dt;
-
-//         rhs_m_t = - 1.0 * mass_c_m_old_dot;
-  
-//         constraint_concentration_vec(rhs_m_c,  rhs_m_t, _constraint_m);
-
-//         auto op = std::static_pointer_cast< Factorization<USparseMatrix, UVector> >(const_cast<StoreTransferOperators&>(_operator_storage).getVoidPointer());
-
-//         _A_t_store = const_cast<StoreTransferOperators&>(_operator_storage).getTransferOperator();
-        
-//         USparseMatrix A_m_t_stab = *_A_t_store;
-
-//         A_m_t_stab*=0;
-
-//         _console << "solve_transport_monolithic_one:: Stabilize  "  << std::endl;
-
-//         stabilize_A_matrix(_fe_problem, A_m_t_stab);
-
-//         utopia::USparseMatrix A_stab = A_m_t_stab + (*_A_t_store);
-
-//         //utopia::write("A.m", A_stab);
-        
-//         //USparseMatrix A_m_tot =  1.0 * A_stab  + mass_lumpedp * inv_dt;
-
-//         USparseMatrix A_m_tot =  1.0 *  A_stab + mass_lumpedp * inv_dt;
-
-//         constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
-
-//          _console << "solve_transport_monolithic_one:: Solve  "  << std::endl;
-
-//         op->update(make_ref(A_m_tot));
-        
-//         op->apply(rhs_m_t, c_m);
-
-//         utopia::UVector rhs_dot;
-
-//         USparseMatrix mass_m_c = mass_m;
-
-//         USparseMatrix mass_lumped_c = mass_lumpedp;
-
-//         // constraint_concentration_mat(rhs_m_c, mass_lumped, _constraint_m);
-
-//         constraint_concentration_mat(rhs_m_c, mass_m_c, _constraint_m);
-
-//         constraint_concentration_mat(rhs_m_c, mass_lumped_c, _constraint_m);
-
-//         UVector diag_elem_c = 1./sum((mass_lumped_c),1);
-
-//         utopia::USparseMatrix inv_mass_lumped_mat_c = diag(diag_elem_c);
-
-//         UVector diag_elem = 1./sum((mass_lumped_c),1);
-
-//         utopia::USparseMatrix inv_mass_lumped_mat = diag(diag_elem);
-
-//         // rhs_dot =  A_stab * c_m;
-
-//         c_dot = utopia::local_zeros(utopia::local_size(c_m));
-
-//         USparseMatrix A_stab_c = A_stab;
-
-//         constraint_concentration_mat(rhs_m_c, A_stab_c, _constraint_m);
-
-//         c_dot = 1.0 * inv_mass_lumped_mat_c * A_stab * c_m;
-
-//         // utopia::UVector rhs_l = (*_A_t_store) * c_m;
-
-//         //utopia::UVector rhs_dot_c = local_zeros(local_size(rhs_dot));
-
-//         //constraint_concentration_vec(rhs_m_c,  c_dot, _constraint_m);
-
-//         // op->update(make_ref(mass_m_c));
-
-//         // op->apply(rhs_l, c_dot);
-
-//         // c_dot*=-1.0;
-
-//         // utopia::UVector c_dot_old = - 1.0 * inv_mass_lumped_mat_c * A_stab * c_m_old;
-
-//         // utopia::UVector c_m_tilde = c_m_old + dt/2.0 * c_dot_old;
-
-//         //constraint_concentration_vec(c_dot,  _f_con, _constraint_m);
-
-//         //utopia::UVector _f = inv_mass_lumped_mat * ((mass_lumped - mass_m) * _f_con  + 1.0 * A_m_t_stab * dt * c_m);
-
-//         USparseMatrix A_m_t_stab_c = A_m_t_stab;
-
-//         constraint_concentration_mat(rhs_m_c, A_m_t_stab_c, _constraint_m);
-
-//         constraint_concentration_mat(rhs_m_c, mass_m_c, _constraint_m);
-
-//         utopia::UVector _f_s = local_zeros(local_size(c_dot));
-
-//         // unstabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_s);
-
-//         //unconstraint_concentration_vec(rhs_m_c,  _f_s, _constraint_m);
-
-
-//         stabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_s);
-
-
-//         // utopia::UVector _f_con = local_zeros(local_size(c_m));
-
-//         // _f_con = dt * f_s + rhs_m_t;
-
-//         // unconstraint_concentration_vec(rhs_m_c,  _f_s, _constraint_m);
-
-//         // _console << "transport_monolithic:: Correction"  << std::endl;
-
-//         utopia::UVector c_m_tot = c_m + 1.0 * dt * inv_mass_lumped_mat_c * _f_s;
-
-//         //utopia::disp(corr);
-        
-//         CopyMatrixSolution(c_m_tot);
-
-//         // rhs_m_t+= _f_s;
-
-//         //utopia::disp(_f_con);
-
-//         // c_m_tot = c_m - 1.0 * _f_con * dt;
-
-//         // op->update(make_ref(A_m_tot));
-        
-//         // op->apply(_f_con, c_m);
-
-//         // CopyMatrixSolution(c_m);
-
-//     }
-
-// }
 
 
 void
-FractureAppConforming::stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &S_matrix)
+FractureAppConforming::stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &A_0, utopia::USparseMatrix &S_matrix)
 { 
     
 
     _console << "Stabilize A matrix:: begin  "  << std::endl;
 
-    auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
+    // auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
-    NonlinearSystemBase & _nl = _problem.getNonlinearSystemBase();
+    // NonlinearSystemBase & _nl = _problem.getNonlinearSystemBase();
 
-    libMesh::PetscMatrix<libMesh::Number> *petsc_mat = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_sys.matrix);
+    // libMesh::PetscMatrix<libMesh::Number> *petsc_mat = dynamic_cast<libMesh::PetscMatrix<libMesh::Number>* >(_sys.matrix);
         
-    _problem.computeJacobianSys(_sys, *_nl.currentSolution(), *petsc_mat);
+    // _problem.computeJacobianSys(_sys, *_nl.currentSolution(), *petsc_mat);
 
-    utopia::USparseMatrix A_0, A_0_t;
+    utopia::USparseMatrix A_0_t;
 
-    utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat).mat(), A_0);
+    //utopia::convert(const_cast<libMesh::PetscMatrix<libMesh::Number> &>(*petsc_mat).mat(), A_0);
 
     A_0_t = utopia::transpose(A_0);
 
@@ -1423,30 +1300,11 @@ void
 FractureAppConforming::stabilize_coeffiecient(FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs)
 {
 
-    _console << "ustabilize_coeffiecient::begin"  << std::endl;
+    _console << "stabilize_coeffiecient::begin"  << std::endl;
 
     utopia::USparseMatrix _f = _D + _M; 
 
     _f *=0;
-
-
-    // {
-    //     utopia::Read<utopia::UVector>  r_u(_u_dot), r_v(_u);
-
-    //     utopia::Read<utopia::USparseMatrix>  r_s(_D), r_m(_M);
-
-    //     utopia::Write<utopia::USparseMatrix> w_m(_f);
-
-    //     utopia::each_read(_M, [&](const utopia::SizeType i, const utopia::SizeType j, double value){
-    //       if (i!=j){
-            
-    //         double entry = value * (_u_dot.get(i) - _u_dot.get(j)) - _D.get(i,j) * (_u.get(i) - _u.get(j));
-
-    //          _f.set(i,j,entry);
-    //      }
-    //     });
-    // }
-
 
     auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
@@ -1459,6 +1317,7 @@ FractureAppConforming::stabilize_coeffiecient(FEProblemBase & _problem, utopia::
     FractureAppConforming::send_list(_fe_problem, _M, send_list_v);
 
     std::sort(send_list_v.begin(), send_list_v.end());
+
     send_list_v.erase( unique( send_list_v.begin(), send_list_v.end() ),  send_list_v.end());
 
 
@@ -1871,6 +1730,9 @@ FractureAppConforming::stabilize_coeffiecient(FEProblemBase & _problem, utopia::
 
 
     unconstraint_concentration_vec(rhs_m_c,  _rhs, _constraint_m);
+
+
+    _console << "Stabilize A matrix:: begin  "  << std::endl;
     
    
 }
@@ -1882,46 +1744,36 @@ FractureAppConforming::send_list(FEProblemBase & _problem, utopia::USparseMatrix
 
 std::set<int> set_list;
 
-std::vector<int> index_v;
-
-
 _console << "create list::begin"  << std::endl;
 
 auto &_sys = _problem.es().get_system<TransientNonlinearImplicitSystem>("nl0");
 
 DofMap & dof_map_1 = _sys.get_dof_map();
+ 
 
-{  
+utopia::Range rr = utopia::row_range(_M);
 
-        utopia::Range rr = utopia::row_range(_M);
-
-        utopia::Read<utopia::USparseMatrix>  r_m(_M);
+utopia::Read<utopia::USparseMatrix>  r_m(_M);
 
 
-        for(auto i = rr.begin(); i != rr.end(); ++i) {
+for(auto i = rr.begin(); i != rr.end(); ++i) {
 
-            utopia::RowView<const utopia::USparseMatrix> row_view(_M, i);
-            
-            decltype(i) n_values = row_view.n_values();
+    utopia::RowView<const utopia::USparseMatrix> row_view(_M, i);
+    
+    decltype(i) n_values = row_view.n_values();
 
-            index_v.clear();
+    for(auto index = 0; index < n_values; ++index) {
 
-            for(auto index = 0; index < n_values; ++index) {
+        const decltype(i) j = row_view.col(index);
 
-                const decltype(i) j = row_view.col(index);
+        const auto a_ij = row_view.get(index);
 
-                const auto a_ij = row_view.get(index);
+        set_list.insert(j);
+    }
+}
 
-                //tirare fuori gli indici e loopare
-                // if(std::abs(a_ij) > 1.e-14) {
-                    
-                    set_list.insert(j);
-                 // }
-             }
-
-             a.insert(a.end(), set_list.begin(), set_list.end());
-         }
-     }
+      a.clear();   
+      a.insert(a.end(), set_list.begin(), set_list.end());
 
      _console << "create list::end"  << std::endl;
  }
@@ -2075,7 +1927,52 @@ FractureAppConforming::unstabilize_coeffiecient(FEProblemBase & _problem, utopia
 
 
 
+      // USparseMatrix A_m_t_stab_c = A_m_t_stab;
 
+      //   constraint_concentration_mat(rhs_m_c, A_m_t_stab_c, _constraint_m);
+
+      //   constraint_concentration_mat(rhs_m_c, mass_m_c, _constraint_m);
+
+      //   utopia::UVector _f_s = local_zeros(local_size(c_dot));
+
+      //   // unstabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_s);
+
+      //   //unconstraint_concentration_vec(rhs_m_c,  _f_s, _constraint_m);
+
+
+
+
+      //   // unstabilize_coeffiecient(_fe_problem, c_m, c_dot, A_m_t_stab, mass_m, _f_s);
+
+      //   unconstraint_concentration_vec(rhs_m_c, _f_s, true);
+
+      //   //utopia::disp(_f_s);
+
+      //   // utopia::UVector _f_con = local_zeros(local_size(c_m));
+
+      //   // _f_con = dt * f_s + rhs_m_t;
+
+      //   // unconstraint_concentration_vec(rhs_m_c,  _f_s, _constraint_m);
+
+      //   // _console << "transport_monolithic:: Correction"  << std::endl;
+
+      //   utopia::UVector c_m_tot = c_m - 1.0 * inv_mass_lumped_mat * _f_s;
+
+      //   //utopia::disp(corr);
+        
+      //   CopyMatrixSolution(c_m_tot);
+
+      //   // rhs_m_t+= _f_s;
+
+      //   //utopia::disp(_f_con);
+
+      //   // c_m_tot = c_m - 1.0 * _f_con * dt;
+
+      //   // op->update(make_ref(A_m_tot));
+        
+      //   // op->apply(_f_con, c_m);
+
+      //   // CopyMatrixSolution(c_m);
   
 
 

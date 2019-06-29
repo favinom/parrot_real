@@ -1,5 +1,5 @@
 [Mesh]
- file = test_3_blocchi_c.e #refineMesh_0_0002_mesh.xdr
+ file = test_3_blocchi_c2.e #refineMesh_0_0002_mesh.xdr
  uniform_refine = 0
  #second_order=true
 []

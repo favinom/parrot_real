@@ -36,7 +36,7 @@ _K[_qp]=RealTensorValue(1.0,0.0,0.0,
                         0.0,1.0,0.0,
                         0.0,0.0,1.0);
 
-    _K[_qp]=_cond*_K[_qp];
+    _K[_qp]=_cond *_K[_qp];
     
     _U[_qp] =  -1.0 * _K[_qp] * _gradP[_qp];
 

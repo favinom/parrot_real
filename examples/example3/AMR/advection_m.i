@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
-file = test_3_blocchi.e
+file = test_3_blocchi_c.e
 uniform_refine = 0
 #second_order=true
 []

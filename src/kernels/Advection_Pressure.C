@@ -29,7 +29,6 @@ validParams<Advection_Pressure>()
 
 Advection_Pressure::Advection_Pressure(const InputParameters & parameters)
 : Kernel(parameters),
-_poro(getMaterialProperty<Real>("Porosity")),
 _vel(coupledGradient("p")),
 _k(getParam<Real>("coef"))
 

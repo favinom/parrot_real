@@ -75,7 +75,7 @@ protected:
     bool _impact;
 
     // userobject to store our operators
-    const StoreTransferOperators & _operator_storage;
+    // const StoreTransferOperators & _operator_storage;
 
     std::string _operator_type;
     
@@ -131,7 +131,7 @@ protected:
     
     void bundary_volume_permulation_matrix(EquationSystems &_b_es, unsigned int _b_var_num, MooseVariable & _v_var, std::shared_ptr<SparseMatT> P_matrix);
 
-    void stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &S_matrix);
+    void stabilize_A_matrix(FEProblemBase & _problem, utopia::USparseMatrix &A_0, utopia::USparseMatrix &S_matrix);
 
     void stabilize_coeffiecient(FEProblemBase & _problem, utopia::UVector &_u, utopia::UVector &_u_dot, utopia::USparseMatrix &_D, utopia::USparseMatrix &_M, utopia::UVector &_rhs);
     
@@ -142,6 +142,17 @@ protected:
     void unconstraint_concentration_vec(utopia::UVector &boundary, utopia::UVector &vec, bool has_constaints);
 
     void one_constraint_concentration_vec(utopia::UVector &boundary, utopia::UVector &vec, bool has_constaints);
+
+    std::string _userobject_name_1 = "Matrix_A";
+
+    std::string _userobject_name_2 = "Matrix_S";
+
+    std::string _userobject_name_3 = "Matrix_AM";
+
+    std::string _userobject_name_4 = "Op";
+
+
+
 
 };
 

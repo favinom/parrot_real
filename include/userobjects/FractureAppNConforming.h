@@ -56,17 +56,9 @@ public:
 
 protected:
 
-    // std::string _name_mesh;
 
-    // std::vector<BoundaryID> _slave_id, _master_id;
-
-    const MaterialProperty<Real> &_poro;
 
     VariableName _f_var_name, _m_var_name;
-    
-    //AuxVariableName _l_var_name;
-  
-    //VariableName _from_var_name;
     
     bool ok = false;
 
@@ -100,6 +92,10 @@ protected:
     void constraint_concentration_mat(utopia::UVector &boundary, utopia::USparseMatrix &mat, bool has_constaints);
     
     bool _solve_cg, _solve_mg, _pressure, _transport, _boundary, _biorth, _stabilize, _constraint_m, _constraint_f;
+
+    std::vector<int> _vector_p;
+
+    std::vector<Real> _vector_value;
 
     double _porosity_m, _porosity_f;
 
@@ -153,6 +149,7 @@ protected:
 
     void stabilize_A_matrix_cons(utopia::USparseMatrix &A_0, utopia::USparseMatrix &S_matrix);
 
+    Real ComputeMaterialProprties(const Elem *elem);
 
     std::string _userobject_name_1 = "Matrix_m";
 
@@ -167,6 +164,9 @@ protected:
     std::string _userobject_name_B = "Matrix_B";
 
     std::string _userobject_name_D = "Matrix_D";
+
+    
+    std::unique_ptr<ExodusII_IO> _ex_writer;
 
 };
 

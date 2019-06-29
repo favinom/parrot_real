@@ -35,8 +35,6 @@ protected:
 
     RealVectorValue negSpeedQp() const;
 
-    const MaterialProperty<Real> &_poro;
-
     const VariableGradient &_vel;
 
     Real _k;
