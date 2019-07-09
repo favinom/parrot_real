@@ -1,6 +1,6 @@
 [Mesh]
 type = FileMesh
-file = mesh_fracture_non_conf.e
+file = fracture.e
 []
 
 [Variables]

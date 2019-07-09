@@ -2188,11 +2188,7 @@ FractureAppNConforming::stabilize_A_matrix(FEProblemBase & _problem, utopia::USp
             {
                  double value_1 = 1.0 * value;
 
-                 //utopia::disp(value_1);
-
                  double value_2 = 1.0 * A_0_t.get(i,j);
-
-                 //utopia::disp(value_2);
 
                 if(value_1 > value_2){
 
@@ -3019,14 +3015,14 @@ FractureAppNConforming::unstabilize_coeffiecient(FEProblemBase & _problem, utopi
 
 
 
-        stabilize_A_matrix(_m_problem, S_m);
+        // stabilize_A_matrix(_m_problem, S_m);
 
-        stabilize_A_matrix(_f_problem, S_f);
+        // stabilize_A_matrix(_f_problem, S_f);
 
 
-        USparseMatrix A_m_stab = A_m_t + S_m;
+        // USparseMatrix A_m_stab = A_m_t + S_m;
 
-        USparseMatrix A_f_stab = A_f_t + S_f;
+        // USparseMatrix A_f_stab = A_f_t + S_f;
 
         c_m  = utopia::local_zeros(local_size(rhs_m_t));
 
@@ -3048,6 +3044,7 @@ FractureAppNConforming::unstabilize_coeffiecient(FEProblemBase & _problem, utopi
 
 
         USparseMatrix mass_lumped_fpc =  mass_lumped_fp;
+        
         constraint_concentration_mat(rhs_f_c,  mass_lumped_fpc, _constraint_f);
 
 
@@ -3069,13 +3066,13 @@ FractureAppNConforming::unstabilize_coeffiecient(FEProblemBase & _problem, utopi
         
         //USparseMatrix A_m_tot =  1.0 * A_stab  + mass_lumpedp * inv_dt;
 
-        USparseMatrix A_m_tot =  1.0 *  A_m_stab + mass_lumped_mp * inv_dt;
+        // USparseMatrix A_m_tot =  1.0 *  A_m_stab + mass_lumped_mp * inv_dt;
 
-        USparseMatrix A_f_tot =  1.0 *  A_f_stab + mass_lumped_fp * inv_dt;
+        // USparseMatrix A_f_tot =  1.0 *  A_f_stab + mass_lumped_fp * inv_dt;
 
-        constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
+        // constraint_concentration_mat(rhs_m_c, A_m_tot, _constraint_m);
 
-        constraint_concentration_mat(rhs_f_c, A_f_tot, _constraint_f);
+        // constraint_concentration_mat(rhs_f_c, A_f_tot, _constraint_f);
 
         _console << "solve_transport_monolithic_one:: Solve  "  << std::endl;
 

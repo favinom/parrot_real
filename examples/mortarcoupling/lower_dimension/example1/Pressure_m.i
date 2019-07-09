@@ -1,6 +1,6 @@
 [Mesh]
 type = FileMesh
-file = mesh_matrix_non_conf2.e
+file = mesh_matrix.e
 []
 
 [Variables]

@@ -1,8 +1,8 @@
 
 [Mesh]
 type = FileMesh
-file = mesh_matrix_non_conf2.e
-uniform_refine=1
+file = mesh_matrix.e
+#uniform_refine=1
 []
 
 [Variables]
@@ -150,7 +150,7 @@ transport = true
 constraint_m = true
 constraint_f = false
 block_id='1 2 3'
-value_p='0.25 0.2 0.4'
+value_p='0.25 0.2 0.004'
 boundary=false
 solve_mg=false
 stabilize=true
@@ -171,3 +171,15 @@ execute_on = 'timestep_end'
 []
 
 
+[Postprocessors]
+
+[./flux_left]
+type = SideFlux
+variable = CM
+boundary = 1
+# PER FAVORE CONTROLLARE IL COEF
+coef = 0.0
+execute_on = 'timestep_end'
+[../]
+
+[]

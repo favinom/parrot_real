@@ -1,7 +1,7 @@
 [Mesh]
 type = FileMesh
 file = mesh_matrix_3.e
-uniform_refine=2
+uniform_refine=0
 []
 
 [Variables]

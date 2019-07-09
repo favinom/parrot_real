@@ -1,7 +1,7 @@
 [Mesh]
 type = FileMesh
-file = mesh_fracture_non_conf.e
-uniform_refine=1
+file = fracture.e
+#uniform_refine=1
 []
  
  
@@ -31,7 +31,7 @@ int_by_parts=false
 [Materials]
 [./conductivity1]
  type =  HydraulicConductivity
- conductivity = 1e-1
+ conductivity = 1e-3
  pressure = p_aux
 [../]
 []
