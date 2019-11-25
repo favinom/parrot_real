@@ -3,7 +3,7 @@ type = ParrotProblem
 []
 
 [Mesh]
- file = refineMesh_0_0001_mesh.xdr #Mesh_level1.e #refineMesh_0003_mesh.xdr
+ file = refineMesh_0_0004_mesh.xdr #Mesh_level1.e #refineMesh_0003_mesh.xdr
  block_id = '2 4 5 6 7'
  boundary_id = '1 2'
  boundary_name = 'inflow outflow'
@@ -87,7 +87,7 @@ int_by_parts=false
 [./stab]
 type = AdvectionSUPG
 variable = CM
-coef=0.2  #0.17 0.13
+coef=0.6  #0.17 0.13
 use_h=true
 [../]
 

@@ -110,6 +110,7 @@ void PorosityTimeDerivative::myComputeLumpedJacobian()
         std::cout<<"Porosity is not constant over the element\n";
         exit(1);
     }
+
     if ( std::fabs(meanPoro-minPoro)>1e-10 )
     {
         std::cout<<"meanPoro is wrong\n";
